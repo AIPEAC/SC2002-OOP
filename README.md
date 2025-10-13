@@ -5,8 +5,8 @@
 - Deryl
 - Jeremy
 - Hong Xun
-  
-## Class diagram
-- [overview](class%20diagram%20overview.md)
+## Diagrams
+### Class diagram
+- [overview](Diagrams/class%20diagram%20overview.md)
 
-## Sequence diagram
+### Sequence diagram
