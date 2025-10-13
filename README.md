@@ -1,5 +1,5 @@
 # SC2002-OOP
-## Contrbutors
+## Contributors
 - Allen
 - Teja
 - Deryl
