@@ -1,5 +1,5 @@
-# Internship Placement Management System - Domain Model Draft Class Diagram
-
+# Domain Model Draft Class Diagram
+Internship Placement Management System
 ## I. Boundary Classes
 
 | Class Name          |  Core Purpose                          |
