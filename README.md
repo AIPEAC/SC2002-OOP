@@ -7,6 +7,6 @@
 - Hong Xun
   
 ## Class diagram
-- [overview](class diagram overview.md)
+- [overview](class%20diagram%20overview.md)
 
 ## Sequence diagram
