@@ -1,0 +1,5 @@
+package Control;
+
+class ApplicationControl {
+
+}
