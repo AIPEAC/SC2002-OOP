@@ -11,11 +11,12 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Please choose domain to login: 1. CareerStaff 2. Student 3. CompanyRepresentative");
         String domain=sc.next();
-        System.out.println("enter userID");
-        String userID=sc.next();
-        System.out.println("enter password");
-        String password=sc.next();
+        
         domainChoose: while (true) {
+            System.out.println("enter userID");
+            String userID=sc.next();
+            System.out.println("enter password");
+            String password=sc.next();
             switch (domain) {
                 case "1":
                     CareerStaffCLI careerStaffCLI = new CareerStaffCLI();
