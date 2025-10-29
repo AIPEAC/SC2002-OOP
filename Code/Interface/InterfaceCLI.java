@@ -11,7 +11,7 @@ public interface InterfaceCLI {
     }
 
     default void viewFilteredInternshipApplication(String filterOrder="alphabet",boolean ascendance=True,String[] filterOut){
-        filterInternshipApplications(filterOrder,ascendance,filterOut)
+        filterInternshipApplications(filterOrder,ascendance,filterOut);
         //printOut...
     }
 }
