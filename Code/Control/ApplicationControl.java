@@ -1,5 +1,5 @@
 package Control;
 
-class ApplicationControl {
+public class ApplicationControl {
 
 }

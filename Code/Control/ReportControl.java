@@ -1,5 +1,5 @@
 package Control;
 
-class ReportControl {
+public class ReportControl {
 
 }

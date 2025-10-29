@@ -1,5 +1,5 @@
 package Control;
 
-class AuthenticationControl {
+public class AuthenticationControl {
 
 }

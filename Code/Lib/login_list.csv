@@ -1,1 +1,1 @@
-ID,password
+ID,passwordHash,salt
