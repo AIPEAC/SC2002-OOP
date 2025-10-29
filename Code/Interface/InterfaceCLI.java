@@ -10,8 +10,9 @@ public interface InterfaceCLI {
         return null;
     }
 
-    default void viewFilteredInternshipApplication(String filterOrder="alphabet",boolean ascendance=True,String[] filterOut){
-        filterInternshipApplications(filterOrder,ascendance,filterOut);
+    default void viewFilteredInternshipApplication(String filterOrder,boolean ascendance,String[] filterOut){
+        //default filter would be filterOrder="alphabet", ascending=true, filterOut={}
+        List<Application> filteredApplications=filterInternshipApplications(filterOrder,ascendance,filterOut);
         //printOut...
     }
 }

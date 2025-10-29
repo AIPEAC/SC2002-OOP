@@ -8,5 +8,5 @@ public class CareerStaffCLI implements Interface.InterfaceCLI{
     public void changePassowrd(String originalPassword, String newPassword){
         //
     }
-)
+
 }
