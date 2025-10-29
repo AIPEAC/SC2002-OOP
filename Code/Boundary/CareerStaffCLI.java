@@ -5,4 +5,8 @@ public class CareerStaffCLI implements Interface.InterfaceCLI{
     public void login(String userID, String password) {
         //
     }
+    public void changePassowrd(String originalPassword, String newPassword){
+        //
+    }
+)
 }
