@@ -2,6 +2,10 @@ package Boundary;
 
 
 public class StudentCLI implements Interface.InterfaceCLI{
+    @Override
+    public void login(String userID, String password) {
+        //
+    }
 
 }
 
