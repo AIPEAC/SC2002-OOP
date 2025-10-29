@@ -1,7 +1,7 @@
 package Boundary;
 
 
-public class StudentCLI implements Interface.FilterInternshipOpportunities{
+public class StudentCLI implements Interface.InterfaceCLI{
 
 }
 
