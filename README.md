@@ -5,6 +5,11 @@
 - Deryl
 - Jeremy
 - Hong Xun
+
 ## Diagrams
 - Class Diagram
 - Sequence Diagram for CompanyRepresentative
+
+
+## Coding
+- Langauage: Java.
