@@ -12,7 +12,7 @@ public class Main {
         LoginControl loginCtrl = new LoginControl();
         AuthenticationControl authCtrl = new AuthenticationControl();
         ApplicationControl appCtrl = new ApplicationControl();
-        IntershipOpportunityControl oppCtrl = new IntershipOpportunityControl();
+        IntershipControl intCtrl = new IntershipOpportunityControl();
     }
 
     public static void main(String[] args) {
