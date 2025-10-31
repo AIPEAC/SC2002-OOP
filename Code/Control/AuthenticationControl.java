@@ -3,12 +3,19 @@ import Entity.Users.*;
 
 public class AuthenticationControl {
     private User currentUser=null;
-    public AuthenticationControl(){
-
+    public AuthenticationControl(User user){
+        currentUser=user;
     }
     public void setLoggedin(User user){
         currentUser=user;
     }
+    public boolean isLoggedIn(){
+        if (currentUser==null){
+            return false;
+        }else{
+            return true;
+        }
+    }    
     public User getUser(){
         return currentUser;
     }

@@ -14,6 +14,10 @@ public class LoginControl {
     }
 
     public void handleLogin(String userID, String password){
+        /* 
+         * to do: UserDirectory
+        */
+
         User user=userDir.verifyUser(userID, password);
         if (user==null){
             System.out.println("Login failed. Please check your ID and password input.");
@@ -21,5 +25,14 @@ public class LoginControl {
         }
         authCtrl.setLoggedin(user);
         System.out.println("Login successful.");
+    }
+    public String handleRegister(String name,String companyName,String department,String postion,String email){
+        if (name==null || companyName==null || department==null || postion==null || email==null){
+            System.out.println("Please fill in the essential information")
+            return null;
+        }else{
+            
+        }
+        return null;
     }
 }
