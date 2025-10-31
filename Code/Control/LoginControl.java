@@ -3,7 +3,7 @@ package Control;
 
 import Entity.UserDirectory;
 import Entity.Users.User;
-import Entity.Users.CompanyRepresentative;
+
 
 public class LoginControl {
     private AuthenticationControl authCtrl;
@@ -29,12 +29,41 @@ public class LoginControl {
         System.out.println("Login successful.");
     }
     public String handleRegister(String name,String companyName,String department,String postion,String email){
+        /*
+         * assign id after register. 
+         * password is default to "password" and will only be changed if requested. 
+         * when registering, no choice to set password
+         */
+        
         if (name==null || companyName==null || department==null || postion==null || email==null){
-            System.out.println("Please fill in the essential information");
+            System.out.println("Please fill in the essential information.");
             return null;
         }else{
-            
+            String userID=userDir.requestRegisterCompanyRep(name, companyName, department, postion, email);
+            try{
+                if (userID!=null){
+                    System.out.println("successfully created")
+                    return userID;
+                }else{
+                    throw new Exception("bug: LoginControl.java : handleRegister: no UserID is created. possibly fail to create a User");
+                }
+            }catch (Exception e){
+                System.out.println(e.getMessage());
+            }
         }
         return null;
+    }
+    public boolean changePassword(String originalPassword, String newPassword){
+        if (authCtrl.isLoggedIn()){
+            User user=authCtrl.getUser();
+            if (user.verify(originalPassword)){
+                user.setPasswordHash(newPassword);
+                System.out.println("Password changed successfully.");
+                return true;
+            }else{
+                System.out.println("Original password is incorrect.");
+                return false;
+            }
+        }
     }
 }
