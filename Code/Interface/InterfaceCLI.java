@@ -3,7 +3,9 @@ package Interface;
 import Entity.Application;
 import java.util.List;
 public interface InterfaceCLI {
-    void login(String userID, String password);
+    default void login(String userID, String password){
+        //should I pass the logincontrol class as the attr list?
+    }
     void changePassowrd(String originalPassword, String newPassword);
     default List<Application> filterInternshipApplications(String filterOrder,boolean ascendance,String[] filterOut){
         //Logic...

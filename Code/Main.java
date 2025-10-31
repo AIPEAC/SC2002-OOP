@@ -1,14 +1,24 @@
 
 import java.util.Scanner;
 import Boundary.*;
+import Control.*;
 import Interface.*;
 import Entity.*;
 import Entity.User.*;
 
 
 public class Main {
-    static Scanner sc = new Scanner(System.in);
+    private static void initialization(){
+        LoginControl loginCtrl = new LoginControl();
+        AuthenticationControl authCtrl = new AuthenticationControl();
+        ApplicationControl appCtrl = new ApplicationControl();
+        IntershipOpportunityControl oppCtrl = new IntershipOpportunityControl();
+    }
+
     public static void main(String[] args) {
+        initialization();
+        
+        Scanner sc = new Scanner(System.in);
         System.out.println("Please choose domain to login: 1. CareerStaff 2. Student 3. CompanyRepresentative");
         String domain=sc.next();
         
@@ -19,6 +29,8 @@ public class Main {
             String password=sc.next();
             switch (domain) {
                 case "1":
+                    UserControl userCtrl = new UserControl();
+                    ReportControl reportCtrl = new ReportControl();
                     CareerStaffCLI careerStaffCLI = new CareerStaffCLI();
                     careerStaffCLI.login(userID, password);
                     break domainChoose;
@@ -34,7 +46,7 @@ public class Main {
                     System.out.println("Invalid domain. Please choose again: 1. CareerStaff 2. Student 3. CompanyRepresentative");
                     domain = sc.next();
             }
-            
+            sc.close();
         }
         
     }
