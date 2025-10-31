@@ -1,6 +1,7 @@
 package Boundary;
 import Control.*;
-
+import Control.*;
+import Interface.*;
 
 public class StudentCLI implements Interface.InterfaceCLI{
     StudentCLI(LoginControl loginCtrl, AuthenticationControl authCtrl, ApplicationControl appCtrl){
