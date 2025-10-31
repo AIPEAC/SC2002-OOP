@@ -2,10 +2,9 @@ package Boundary;
 
 import Control.*;
 import Interface.*;
-import java.io.IOException;
-import java.util.Scanner;
 
-public class CareerStaffCLI implements Interface.InterfaceCLI {
+
+public class CareerStaffCLI implements InterfaceCLI {
     private UserLoginDirectoryControl userLoginDirectoryControl;
     private LoginControl loginCtrl;
     private AuthenticationControl authCtrl;
