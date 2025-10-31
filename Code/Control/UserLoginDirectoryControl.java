@@ -12,13 +12,13 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserLoginDirectory{
+public class UserLoginDirectoryControl{
     private List<String[]> loginList;
     private List<String[]> StudentList;
     private List<String[]> StaffList;
     private List<String[]> CompanyRepList;
     
-    public UserLoginDirectory() {
+    public UserLoginDirectoryControl() {
         loadLoginListFromDB();
     }
 

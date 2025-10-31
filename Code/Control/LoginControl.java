@@ -6,12 +6,12 @@ import Entity.Users.User;
 
 public class LoginControl {
     private AuthenticationControl authCtrl;
-    private UserLoginDirectory userDir;
+    private UserLoginDirectoryControl userLoginDirCtrl;
     
 
-    public LoginControl(AuthenticationControl authCtrl, UserLoginDirectory userDir) {
+    public LoginControl(AuthenticationControl authCtrl, UserLoginDirectoryControl userLoginDirCtrl) {
         this.authCtrl = authCtrl;
-        this.userDir = userDir;
+        this.userLoginDirCtrl = userLoginDirCtrl;
     }
 
     public void handleLogin(String userID, String password){
@@ -19,12 +19,12 @@ public class LoginControl {
          * to do: UserDirectory
         */
 
-        boolean verifySuccess=userDir.verifyUser(userID, password);
+        boolean verifySuccess=userLoginDirCtrl.verifyUser(userID, password);
         if (!verifySuccess){
             System.out.println("Login failed. Please check your ID and password input.");
             return;
         }
-        User user=userDir.createUser(userID);
+        User user=userLoginDirCtrl.createUser(userID);
         authCtrl.setLoggedin(user);
         System.out.println("Login successful.");
     }
@@ -39,7 +39,7 @@ public class LoginControl {
             System.out.println("Please fill in the essential information.");
             return null;
         }else{
-            String userID=userDir.requestRegisterCompanyRep(name, companyName, department, postion, email);
+            String userID=userLoginDirCtrl.requestRegisterCompanyRep(name, companyName, department, postion, email);
             try{
                 if (userID!=null){
                     System.out.println("successfully created")
