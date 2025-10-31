@@ -16,8 +16,14 @@ public class LoginControl {
 
     public void handleLogin(String userID, String password){
         String identity=userLoginDirCtrl.verifyUser(userID, password);
-        if (identity==null){
+        if (identity == null){
             System.out.println("Login failed. Please check your ID and password input.");
+            return;
+        } else if (identity.equals("ACCOUNT_PENDING")) {
+            System.out.println("Your account is pending approval. Please contact the administrator.");
+            return;
+        } else if (identity.equals("ACCOUNT_REJECTED")) {
+            System.out.println("Your account has been rejected. Please contact the administrator.");
             return;
         }
         User user=userLoginDirCtrl.createUser(userID,identity);
@@ -38,9 +44,10 @@ public class LoginControl {
             String userID=userLoginDirCtrl.requestRegisterCompanyRep(name, companyName, department, postion, email);
             try{
                 if (userID!=null){
-                    System.out.println("successfully created")
+                    System.out.println("successfully created");
                     return userID;
-                }else{
+                }
+                else{
                     throw new Exception("bug: LoginControl.java : handleRegister: no UserID is created. possibly fail to create a User");
                 }
             }catch (Exception e){
@@ -61,6 +68,9 @@ public class LoginControl {
                 System.out.println("Original password is incorrect.");
                 return false;
             }
+        }else{
+            System.out.println("You are not logged in.");
+            return false;
         }
     }
 }

@@ -6,3 +6,5 @@ public class CareerStaff extends User {
         // Additional fields for CareerStaff
     }
 }
+
+//the staff shall be able

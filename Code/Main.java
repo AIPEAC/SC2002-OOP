@@ -9,8 +9,7 @@ import Entity.Users.*;
 
 public class Main {
     private static void initialization(){
-        LoginControl loginCtrl = new LoginControl();
-        AuthenticationControl authCtrl = new AuthenticationControl();
+        
         ApplicationControl appCtrl = new ApplicationControl();
         IntershipControl intCtrl = new IntershipControl();
     }

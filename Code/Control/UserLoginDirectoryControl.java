@@ -162,7 +162,23 @@ public class UserLoginDirectoryControl{
         for (String[] loginData : loginList) {
             if (loginData[1].equals(userID) && loginData[2].equals(hashPassword(password))) {
                 String identity=loginData[0];
-                //System.out.println("login successfully"); //the display message is in the logincontrol.java
+                if (identity.equals("CompanyRepresentative")) {
+                    loadCompanyRep(userID);
+                    if (CompanyRepInfoList != null) {
+                        String status = CompanyRepInfoList[4];
+                        CompanyRepInfoList = null;
+                        switch (status) {
+                            case "approved":
+                                return identity;
+                            case "pending":
+                                return "ACCOUNT_PENDING";
+                            case "rejected":
+                                return "ACCOUNT_REJECTED";
+                            default:
+                                return null; // Or some other error status
+                        }
+                    }
+                }
                 return identity;
             }
         }
@@ -239,10 +255,28 @@ public class UserLoginDirectoryControl{
     
     public String requestRegisterCompanyRep(String name,String companyName,String department,String postion,String email){
         
-        String assignedID=null;
+        String assignedID=assignIDToCompanyRep();
+
+        try (FileWriter writer = new FileWriter("Code/Lib/company_representative.csv", true)) {
+            writer.append(String.join(",", assignedID, name, email, postion, "pending", companyName, department));
+            writer.append("\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        try (FileWriter writer = new FileWriter("Code/Lib/login_list.csv", true)) {
+            writer.append(String.join(",", "CompanyRepresentative", assignedID, hashPassword("password"), ""));
+            writer.append("\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        loadLoginListFromDB();
+
         return assignedID;
     }
-
     private String assignIDToCompanyRep(){
         List<String> allUserIDs = new ArrayList<>();
         String[] csvFiles = {"Code/Lib/company_representative.csv", "Code/Lib/student.csv", "Code/Lib/staff.csv"};
@@ -294,10 +328,13 @@ public class UserLoginDirectoryControl{
                     }
                 } catch (NumberFormatException e) {
                     // Ignore IDs that don't have a valid number format
+                    continue;
                 }
             }
         }
 
         return String.format("comprep%04d", maxID + 1);
     }
+
+    
 }
