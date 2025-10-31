@@ -24,22 +24,6 @@ public class UserLoginDirectoryControl{
         loadLoginListFromDB();
     }
 
-    private static String hashPassword(String password) {
-        if (password == null) return null;
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hashedBytes) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Hashing algorithm not found", e);
-        }
-    }
     private void loadLoginListFromDB(){
         String csvFile = "Code/Lib/login_list.csv";
         File file = new File(csvFile);
@@ -184,8 +168,22 @@ public class UserLoginDirectoryControl{
         }
         return null;
     }
-
-    
+    private static String hashPassword(String password) {
+        if (password == null) return null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedBytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashedBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Hashing algorithm not found", e);
+        }
+    }  
     public User createUser(String userID, String identity){
         switch(identity){
             case "Student":
@@ -336,65 +334,9 @@ public class UserLoginDirectoryControl{
         return String.format("comprep%04d", maxID + 1);
     }
 
-    public void approveCompanyRep(String userID) throws IOException {
-        updateCompanyRepStatus(userID, "approved");
+    public void approveCompanyRep(String userID){
     }
-    public void rejectCompanyRep(String userID) throws IOException {
-        updateCompanyRepStatus(userID, "rejected");
-    }
-
-    private void updateCompanyRepStatus(String userID, String newStatus) throws IOException {
-        String csvFile = "Code/Lib/company_representative.csv";
-        File inputFile = new File(csvFile);
-        if (!inputFile.exists()) {
-            throw new IOException("Error: company_representative.csv not found.");
-        }
-
-        File tempFile = new File(inputFile.getAbsolutePath() + ".tmp");
-        List<String> lines = new ArrayList<>();
-        boolean userFound = false;
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile))) {
-            String header = reader.readLine();
-            lines.add(header);
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length > 0 && data[0].equals(userID)) {
-                    userFound = true;
-                    if (data.length > 4) {
-                        data[4] = newStatus;
-                        lines.add(String.join(",", data));
-                    } else {
-                        lines.add(line);
-                    }
-                } else {
-                    lines.add(line);
-                }
-            }
-        }
-
-        if (!userFound) {
-            System.out.println("User with ID " + userID + " not found.");
-            return;
-        }
-
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            for (int i = 0; i < lines.size(); i++) {
-                writer.write(lines.get(i));
-                if (i < lines.size() - 1) {
-                    writer.write(System.lineSeparator());
-                }
-            }
-        }
-
-        if (!inputFile.delete()) {
-            System.out.println("Could not delete the original file.");
-            return;
-        }
-        if (!tempFile.renameTo(inputFile)) {
-            System.out.println("Could not rename the temp file.");
-        }
+    public void rejectCompanyRep(String userID){
     }
 
 }
