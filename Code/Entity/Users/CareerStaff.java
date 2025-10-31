@@ -1,4 +1,4 @@
-package Entity.User;
+package Entity.Users;
 
 public class CareerStaff extends User {
     

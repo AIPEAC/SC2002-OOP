@@ -1,4 +1,4 @@
-package Entity.User;
+package Entity.Users;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

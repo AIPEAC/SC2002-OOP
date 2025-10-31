@@ -4,7 +4,7 @@ import Boundary.*;
 import Control.*;
 import Interface.*;
 import Entity.*;
-import Entity.User.*;
+import Entity.Users.*;
 
 
 public class Main {
