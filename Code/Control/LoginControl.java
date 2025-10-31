@@ -3,10 +3,12 @@ package Control;
 
 import Entity.UserDirectory;
 import Entity.Users.User;
+import Entity.Users.CompanyRepresentative;
 
 public class LoginControl {
     private AuthenticationControl authCtrl;
     private UserDirectory userDir;
+    
 
     public LoginControl(AuthenticationControl authCtrl, UserDirectory userDir) {
         this.authCtrl = authCtrl;
@@ -28,7 +30,7 @@ public class LoginControl {
     }
     public String handleRegister(String name,String companyName,String department,String postion,String email){
         if (name==null || companyName==null || department==null || postion==null || email==null){
-            System.out.println("Please fill in the essential information")
+            System.out.println("Please fill in the essential information");
             return null;
         }else{
             
