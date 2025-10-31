@@ -19,12 +19,12 @@ public class LoginControl {
          * to do: UserDirectory
         */
 
-        boolean verifySuccess=userLoginDirCtrl.verifyUser(userID, password);
-        if (!verifySuccess){
+        String identity=userLoginDirCtrl.verifyUser(userID, password);
+        if (identity==null){
             System.out.println("Login failed. Please check your ID and password input.");
             return;
         }
-        User user=userLoginDirCtrl.createUser(userID);
+        User user=userLoginDirCtrl.createUser(userID,identity);
         authCtrl.setLoggedin(user);
         System.out.println("Login successful.");
     }
