@@ -4,7 +4,7 @@ import Control.*;
 
 
 public class CareerStaffCLI implements Interface.InterfaceCLI{
-    CareerStaffCLI(LoginControl loginCtrl, IntershipOpportunityControl oppCtrl){
+    CareerStaffCLI(LoginControl loginCtrl, AuthenticationControl authCtrl, Intership oppCtrl){
         
     }
     @Override
