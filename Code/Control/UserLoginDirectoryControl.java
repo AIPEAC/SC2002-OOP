@@ -162,11 +162,10 @@ public class UserLoginDirectoryControl{
         for (String[] loginData : loginList) {
             if (loginData[1].equals(userID) && loginData[2].equals(hashPassword(password))) {
                 String identity=loginData[0];
-                //System.out.println("login successfully");
+                //System.out.println("login successfully"); //the display message is in the logincontrol.java
                 return identity;
             }
         }
-        //System.out.println("userID or password incorrect."); //this is already in LoginControl.java
         return null;
     }
 
@@ -181,6 +180,7 @@ public class UserLoginDirectoryControl{
                     StudentInfoList[3],
                     Integer.parseInt(StudentInfoList[4]),
                     Boolean.parseBoolean(StudentInfoList[5]));
+                StudentInfoList=null;
                 return student;
             case "Staff":
                 loadStaff(userID);
@@ -189,7 +189,7 @@ public class UserLoginDirectoryControl{
                     StaffInfoList[2],
                     StaffInfoList[3],
                     StaffInfoList[4]);
-
+                StaffInfoList=null;
                 return staff;
             case "CompanyRepresentative":
                 loadCompanyRep(userID);
@@ -200,6 +200,7 @@ public class UserLoginDirectoryControl{
                     CompanyRepInfoList[4],
                     CompanyRepInfoList[5],
                     CompanyRepInfoList[6]);
+                CompanyRepInfoList=null;
                 return companyRep;
             default:
                 System.out.println("bug: UserLoginDirectory.createUser(): wrong indentity, possibly wrongly writen into login_list.csv");
@@ -207,6 +208,96 @@ public class UserLoginDirectoryControl{
         }
     }
                 
- 
+    public void changePassword(String userID, String newPassword){
+        for (String[] loginData : loginList) {
+            if (loginData[1].equals(userID)) {
+                loginData[2] = hashPassword(newPassword);
+                break;
+            }
+        }
+
+        String csvFile = "Code/Lib/login_list.csv";
+        File inputFile = new File(csvFile);
+        File tempFile = new File("Code/Lib/login_list.tmp");
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+             FileWriter writer = new FileWriter(tempFile)) {
+
+            writer.append("identity,userID,passwordHash,salt\n");
+            for (String[] loginData : loginList) {
+                writer.append(String.join(",", loginData));
+                writer.append("\n");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        inputFile.delete();
+        tempFile.renameTo(inputFile);
+    }
     
+    public String requestRegisterCompanyRep(String name,String companyName,String department,String postion,String email){
+        
+        String assignedID=null;
+        return assignedID;
+    }
+
+    private String assignIDToCompanyRep(){
+        List<String> allUserIDs = new ArrayList<>();
+        String[] csvFiles = {"Code/Lib/company_representative.csv", "Code/Lib/student.csv", "Code/Lib/staff.csv"};
+
+        for (String csvFile : csvFiles) {
+            File file = new File(csvFile);
+            if (!file.exists()) {
+                try {
+                    file.getParentFile().mkdirs();
+                    file.createNewFile();
+                    try (FileWriter writer = new FileWriter(file)) {
+                        String header = "";
+                        if (csvFile.equals("Code/Lib/company_representative.csv")) {
+                            header = "userID,name,email,position,accountStatus,companyName,department";
+                        } else if (csvFile.equals("Code/Lib/student.csv")) {
+                            header = "userID,name,email,major,year,hasAcceptedInternshipOpportunity";
+                        } else if (csvFile.equals("Code/Lib/staff.csv")) {
+                            header = "userID,name,email,department,role";
+                        }
+                        writer.append(header);
+                        writer.append("\n");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                br.readLine(); // Skip header
+                while ((line = br.readLine()) != null) {
+                    String[] data = line.split(",");
+                    if (data.length > 0) {
+                        allUserIDs.add(data[0]);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        int maxID = 0;
+        for (String userID : allUserIDs) {
+            if (userID.startsWith("comprep")) {
+                try {
+                    int idNum = Integer.parseInt(userID.substring(7));
+                    if (idNum > maxID) {
+                        maxID = idNum;
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignore IDs that don't have a valid number format
+                }
+            }
+        }
+
+        return String.format("comprep%04d", maxID + 1);
+    }
 }

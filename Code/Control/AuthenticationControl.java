@@ -41,4 +41,8 @@ public class AuthenticationControl {
         
         
     }
+
+    public String getUserID(){
+        return currentUser.getUserID();
+    }
 }

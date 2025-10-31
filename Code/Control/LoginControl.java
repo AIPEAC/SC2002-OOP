@@ -15,10 +15,6 @@ public class LoginControl {
     }
 
     public void handleLogin(String userID, String password){
-        /* 
-         * to do: UserDirectory
-        */
-
         String identity=userLoginDirCtrl.verifyUser(userID, password);
         if (identity==null){
             System.out.println("Login failed. Please check your ID and password input.");
@@ -55,9 +51,10 @@ public class LoginControl {
     }
     public boolean changePassword(String originalPassword, String newPassword){
         if (authCtrl.isLoggedIn()){
-            User user=authCtrl.getUser();
-            if (......){
-                ;
+            String userID=authCtrl.getUserID();
+            
+            if (userLoginDirCtrl.verifyUser(userID, originalPassword)!=null){
+                userLoginDirCtrl.changePassword(userID, newPassword);
                 System.out.println("Password changed successfully.");
                 return true;
             }else{
