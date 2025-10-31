@@ -1,16 +1,16 @@
 package Control;
 //when registered, the password is set to "password". Remind them to change.
 
-import Entity.UserDirectory;
+import Entity.UserLoginDirectory;
 import Entity.Users.User;
 
 
 public class LoginControl {
     private AuthenticationControl authCtrl;
-    private UserDirectory userDir;
+    private UserLoginDirectory userDir;
     
 
-    public LoginControl(AuthenticationControl authCtrl, UserDirectory userDir) {
+    public LoginControl(AuthenticationControl authCtrl, UserLoginDirectory userDir) {
         this.authCtrl = authCtrl;
         this.userDir = userDir;
     }

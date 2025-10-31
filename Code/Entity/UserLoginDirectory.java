@@ -6,14 +6,16 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserDirectory {
-    
+public class UserLoginDirectory{
     private List<String[]> loginList;
     
-    public UserDirectory() {
+    public UserLoginDirectory() {
         loadLoginListFromDB();
     }
 
@@ -65,8 +67,34 @@ public class UserDirectory {
     
     
     public User verifyUser(String userID, String password){
-        
+        for (String[] loginData : loginList) {
+            if (loginData[0].equals(userID) ) {
+                
+            }
+        }
+            
+
+
+        System.out.println("userID or password incorrect.");
         return null;
         
+           
+    }
+
+    private static String hashPassword(String password) {
+        if (password == null) return null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedBytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashedBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Hashing algorithm not found", e);
+        }
     }
 }
