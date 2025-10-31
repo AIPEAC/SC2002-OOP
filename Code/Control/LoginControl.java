@@ -1,7 +1,6 @@
 package Control;
 //when registered, the password is set to "password". Remind them to change.
 
-import Entity.UserLoginDirectory;
 import Entity.Users.User;
 
 
@@ -57,8 +56,8 @@ public class LoginControl {
     public boolean changePassword(String originalPassword, String newPassword){
         if (authCtrl.isLoggedIn()){
             User user=authCtrl.getUser();
-            if (user.verify(originalPassword)){
-                user.setPasswordHash(newPassword);
+            if (......){
+                ;
                 System.out.println("Password changed successfully.");
                 return true;
             }else{

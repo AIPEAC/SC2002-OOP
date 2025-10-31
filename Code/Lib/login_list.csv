@@ -1,1 +1,1 @@
-userID,passwordHash,salt
+identity,userID,passwordHash,salt

@@ -1,8 +1,6 @@
 package Entity.Users;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+
 
 public abstract class User {
     private String userID;
@@ -21,13 +19,6 @@ public abstract class User {
     public String getUserID() { return userID; }
     public String getName() { return name; }
     public String getEmail() { return email; }
-    //public String getPasswordHash() { return passwordHash; }
-
-
-
-    
-
-    // Private helper to perform the hashing
     
 }
 
