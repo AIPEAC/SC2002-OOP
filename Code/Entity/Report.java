@@ -1,9 +1,6 @@
 package Entity;
 import java.util.List;
 
-import Entity.InternshipOpportunity;
-
-
 public class Report {
     private int reportIndex;
     private List<InternshipOpportunity> internshipOpportunities;
