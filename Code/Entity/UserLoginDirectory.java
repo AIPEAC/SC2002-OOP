@@ -66,7 +66,7 @@ public class UserLoginDirectory{
     }
     
     
-    public User verifyUser(String userID, String password){
+    public boolean verifyUser(String userID, String password){
         for (String[] loginData : loginList) {
             if (loginData[0].equals(userID) ) {
                 
@@ -76,11 +76,12 @@ public class UserLoginDirectory{
 
 
         System.out.println("userID or password incorrect.");
-        return null;
-        
-           
+        return false;        
     }
-
+    public User createUser(String userID){
+    }
+                
+ 
     private static String hashPassword(String password) {
         if (password == null) return null;
         try {
