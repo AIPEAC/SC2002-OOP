@@ -4,17 +4,32 @@ import java.util.List;
 public class Report {
     private int reportIndex;
     private List<InternshipOpportunity> internshipOpportunities;
+    private boolean filtered;
 
-    public Report(int reportIndex,List<InternshipOpportunity> internshipOpportunities) {
+    public Report(int reportIndex,List<InternshipOpportunity> internshipOpportunities,boolean filtered) {
         this.reportIndex = reportIndex;
         this.internshipOpportunities = internshipOpportunities;
+        this.filtered=filtered;
     }
     public void formatOutput(){
-        List<String> comprehensiveDataList=comprehensiveDataList(internshipOpportunities);
+        if (filtered){
+            if (internshipOpportunities.size()==0){
+                System.out.println("No internship opportunities found after filtering, try another filter.");
+            }else{
+                //
+            }
+        }else{
+            if (internshipOpportunities.size()==0){
+                System.out.println("No internship opportunities found.");
+            }else{
+                //
+            }
+        }
+    }
 
+    public void saveToLocal(){
+        //
     }
-    private List<String> comprehensiveDataList(List<InternshipOpportunity> internshipOpportunities){
-        return null;
-    }
+    
 }
 

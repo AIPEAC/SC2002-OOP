@@ -1,18 +1,23 @@
 package Boundary;
 
 import Control.*;
+import Entity.Report;
 import Interface.*;
 
 
 public class CareerStaffCLI implements InterfaceCLI {
-    private UserLoginDirectoryControl userLoginDirectoryControl;
+    
     private LoginControl loginCtrl;
     private AuthenticationControl authCtrl;
+    private InternshipControl intCtrl;
+    private ReportControl reportCtrl;
 
-    public CareerStaffCLI() {
-        this.userLoginDirectoryControl = new UserLoginDirectoryControl();
-        this.authCtrl = new AuthenticationControl();
-        this.loginCtrl = new LoginControl(authCtrl, userLoginDirectoryControl);
+
+    public CareerStaffCLI(LoginControl loginCtrl, AuthenticationControl authCtrl, InternshipControl intCtrl, ReportControl reportCtrl) {
+        this.loginCtrl = loginCtrl;
+        this.authCtrl = authCtrl;
+        this.intCtrl = intCtrl;
+        this.reportCtrl = reportCtrl;
     }
 
     public CareerStaffCLI(LoginControl loginCtrl, AuthenticationControl authCtrl, InternshipControl intCtrl){
@@ -27,6 +32,10 @@ public class CareerStaffCLI implements InterfaceCLI {
         //
     }
     
-
-    
+    public void generateReportOverview(boolean optToSaveReport){
+        reportCtrl.generateReportOverview(true);
+    }
+    public void genereteReportSpecific(boolean optToSaveReport,String filterOrder,boolean ascending,String[] filterOut){
+        reportCtrl.generateReportSpecific(filterOrder,ascending,filterOut);
+    }
 }
