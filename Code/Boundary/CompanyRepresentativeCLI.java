@@ -14,14 +14,6 @@ public class CompanyRepresentativeCLI implements InterfaceCLI{
         this.intCtrl = intCtrl;
     }
 
-    @Override
-    public void login(String userID, String password) {
-        //
-    }
-    public void changePassword(String originalPassword, String newPassword){
-        //
-    }
-
     public void register(String name, String companyName, String department, String position, String email) {
         //
     }
