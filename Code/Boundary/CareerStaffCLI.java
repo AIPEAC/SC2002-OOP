@@ -33,9 +33,9 @@ public class CareerStaffCLI implements InterfaceCLI {
     }
     
     public void generateReportOverview(boolean optToSaveReport){
-        reportCtrl.generateReportOverview(true);
+        reportCtrl.generateReportOverview(optToSaveReport);
     }
     public void genereteReportSpecific(boolean optToSaveReport,String filterOrder,boolean ascending,String[] filterOut){
-        reportCtrl.generateReportSpecific(filterOrder,ascending,filterOut);
+        reportCtrl.generateReportSpecific(optToSaveReport,filterOrder,ascending,filterOut);
     }
 }
