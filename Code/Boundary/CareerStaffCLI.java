@@ -19,18 +19,8 @@ public class CareerStaffCLI implements InterfaceCLI {
         this.appCtrl = appCtrl;
         this.intCtrl = intCtrl;
         this.reportCtrl = reportCtrl;
-    }
-
-
-
+    }    
     
-    public void generateReportOverview(boolean optToSaveReport){
-        reportCtrl.generateReportOverview(optToSaveReport);
-    }
-    public void genereteReportSpecific(boolean optToSaveReport,String filterOrder,boolean ascending,String[] filterOut){
-        reportCtrl.generateReportSpecific(optToSaveReport, filterOrder, ascending, filterOut);
-    }
-
     public void viewCompanyRepRegisterList() {
         // implementation
     }
@@ -66,4 +56,11 @@ public class CareerStaffCLI implements InterfaceCLI {
     public void rejectWithdrawal(Application app) {
         // implementation
     }
+    public void generateReportOverview(boolean optToSaveReport){
+        reportCtrl.generateReportOverview(optToSaveReport);
+    }
+    public void genereteReportSpecific(boolean optToSaveReport,String filterOrder,boolean ascending,String[] filterOut){
+        reportCtrl.generateReportSpecific(optToSaveReport, filterOrder, ascending, filterOut);
+    }
+
 }
