@@ -12,15 +12,15 @@ public class Report {
         this.filtered=filtered;
     }
     public void formatOutput(){
-        if (filtered){
+        if (!filtered){
             if (internshipOpportunities.size()==0){
-                System.out.println("No internship opportunities found after filtering, try another filter.");
+                System.out.println("No internship opportunities found.");
             }else{
                 //
             }
         }else{
             if (internshipOpportunities.size()==0){
-                System.out.println("No internship opportunities found.");
+                System.out.println("No internship opportunities found after filtering, try another filter.");
             }else{
                 //
             }
