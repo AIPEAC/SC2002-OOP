@@ -2,7 +2,6 @@ package Boundary;
 
 import Control.*;
 import Entity.Application;
-import Entity.Report;
 import Interface.*;
 import Entity.InternshipOpportunity;
 
