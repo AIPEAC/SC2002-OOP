@@ -1,17 +1,38 @@
 package Boundary;
 import Control.*;
 import Interface.*;
+import Entity.Application;
 
 public class StudentCLI implements InterfaceCLI{
+    private LoginControl loginCtrl;
+    private ApplicationControl appCtrl;
+
     StudentCLI(LoginControl loginCtrl, AuthenticationControl authCtrl, ApplicationControl appCtrl){
         
     }
-    @Override
-    public void login(String userID, String password) {
+
+    public StudentCLI(LoginControl logCtrl, ApplicationControl appCtrl) {
+        this.loginCtrl = logCtrl;
+        this.appCtrl = appCtrl;
+    }
+
+    public void submitApplication() {
         //
     }
-    public void changePassowrd(String originalPassword, String newPassword){
+
+    public void withdrawApplication(Application app) {
+        //
+    }
+
+    public void checkMyApplicationStatus() {
+        //
+    }
+
+    public void acceptInternshipOpportunity(Application app) {
+        //
+    }
+
+    public void rejectInternshipOpportunity(Application app) {
         //
     }
 }
-

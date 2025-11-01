@@ -2,9 +2,9 @@ package Entity.Users;
 
 public class CompanyRepresentative extends User {
     private String position;
-    private String accountStatus;
+    private String accountStatus = "Pending";
     private String companyName;
-    private String department;
+    private String department = null;
 
     public CompanyRepresentative(String userID, String name, String email, String position, String accountStatus, String companyName, String department) {
         super(userID, name, email);
@@ -14,12 +14,19 @@ public class CompanyRepresentative extends User {
         this.department = department;
     }
 
-    public String getPosition() {
-        return position;
+
+
+    public void setStatusToAuthorized() {
+        //
     }
 
-    public String getAccountStatus() {
-        return accountStatus;
+    public void setStatusToRejected() {
+        //
+    }
+
+    public String getStatus() {
+        //
+        return null;
     }
 
     public String getCompanyName() {

@@ -27,10 +27,6 @@ public class CareerStaffCLI implements InterfaceCLI {
     public void login(String userID, String password) {
         //
     }
-    @Override
-    public void changePassowrd(String originalPassword, String newPassword){
-        //
-    }
     
     public void generateReportOverview(boolean optToSaveReport){
         reportCtrl.generateReportOverview(optToSaveReport);

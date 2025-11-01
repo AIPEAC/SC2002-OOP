@@ -4,7 +4,6 @@ package Entity.Users;
 
 public abstract class User {
     private String userID;
-    //private String passwordHash;
     private String name;
     private String email;
 
@@ -12,7 +11,6 @@ public abstract class User {
         this.userID = userID;
         this.name = name;
         this.email = email;
-        //this.passwordHash = hashPassword("password"); // Hash the password
     }
 
     // Getters for public info
