@@ -11,7 +11,7 @@ public class Main {
     private static void initialization(){
         
         ApplicationControl appCtrl = new ApplicationControl();
-        IntershipControl intCtrl = new IntershipControl();
+        InternshipControl intCtrl = new InternshipControl();
     }
 
     public static void main(String[] args) {

@@ -15,7 +15,7 @@ public class CareerStaffCLI implements InterfaceCLI {
         this.loginCtrl = new LoginControl(authCtrl, userLoginDirectoryControl);
     }
 
-    public CareerStaffCLI(LoginControl loginCtrl, AuthenticationControl authCtrl, IntershipControl intCtrl){
+    public CareerStaffCLI(LoginControl loginCtrl, AuthenticationControl authCtrl, InternshipControl intCtrl){
         
     }
     @Override
