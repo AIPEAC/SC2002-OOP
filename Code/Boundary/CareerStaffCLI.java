@@ -4,7 +4,7 @@ import Control.*;
 import Entity.Application;
 import Entity.Report;
 import Interface.*;
-
+import Entity.InternshipOpportunity;
 
 public class CareerStaffCLI implements InterfaceCLI {
     
@@ -28,7 +28,7 @@ public class CareerStaffCLI implements InterfaceCLI {
         reportCtrl.generateReportOverview(optToSaveReport);
     }
     public void genereteReportSpecific(boolean optToSaveReport,String filterOrder,boolean ascending,String[] filterOut){
-        // ...existing code...
+        reportCtrl.generateReportSpecific(optToSaveReport, filterOrder, ascending, filterOut);
     }
 
     public void viewCompanyRepRegisterList() {
@@ -47,11 +47,11 @@ public class CareerStaffCLI implements InterfaceCLI {
         // implementation
     }
 
-    public void approveInternshipCreated(Entity.InternshipOpportunity opp) {
+    public void approveInternshipCreated(InternshipOpportunity opp) {
         // implementation
     }
 
-    public void rejectInternshipCreated(Entity.InternshipOpportunity opp) {
+    public void rejectInternshipCreated(InternshipOpportunity opp) {
         // implementation
     }
 
@@ -59,11 +59,11 @@ public class CareerStaffCLI implements InterfaceCLI {
         // implementation
     }
 
-    public void approveWithdrawal(Entity.Application app) {
-        // implementation
+    public void approveWithdrawal(Application app) {
+        
     }
 
-    public void rejectWithdrawal(Entity.Application app) {
+    public void rejectWithdrawal(Application app) {
         // implementation
     }
 }
