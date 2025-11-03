@@ -1,5 +1,6 @@
 package Entity;
 import java.util.List;
+import java.util.Map;
 
 public class Report {
     private int reportIndex;
@@ -16,7 +17,18 @@ public class Report {
             if (internshipOpportunities.size()==0){
                 System.out.println("No internship opportunities found.");
             }else{
-                //
+                int numOfInternships=internshipOpportunities.size();
+                int numOfVisibleInternships=0;
+                int numOfFullInternships=0;
+                int numOfAdvancedInternships=0;
+                int numOfIntermediateInternships=0;
+                int numOfBasicInternships=0;
+                Map<String,int> companyAnd=new Map<>
+
+
+                for (int i=0;i<internshipOpportunities.size();i++){
+                    List<Object> details=internshipOpportunities.get(i).getDetails();
+                }
             }
         }else{
             if (internshipOpportunities.size()==0){
