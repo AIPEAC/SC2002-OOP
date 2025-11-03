@@ -41,14 +41,11 @@ public class InternshipOpportunity {
     public List<Object> getDetails() {
         List<Object> details=new ArrayList<Object>();
         details.add(internshipID);
-        details.add(internshipTitle);
-        details.add(description);
         details.add(internshipLevel);
         details.add(preferredMajors);
         details.add(openingDate);
         details.add(closeDate);
         details.add(companyName);
-        details.add(companyRepInCharge);
         details.add(numOfSlots);
         details.add(visiblity);
         return details;

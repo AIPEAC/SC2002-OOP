@@ -24,11 +24,14 @@ public class Report {
                 int numOfAdvancedInternships=0;
                 int numOfIntermediateInternships=0;
                 int numOfBasicInternships=0;
-                Map<String,Integer> companyAnd=new HashMap<String,Integer>();
+                Map<String,Integer> majorsAndInternship=new HashMap<String,Integer>();
+                Map<String,Integer> companyAndTheirNumOfInternships=new HashMap<String,Integer>();
 
 
                 for (int i=0;i<internshipOpportunities.size();i++){
                     List<Object> details=internshipOpportunities.get(i).getDetails();
+                    
+                        
                 }
             }
         }else{
