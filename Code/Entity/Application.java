@@ -15,38 +15,34 @@ public class Application {
     }
 
     public String getStudentID() {
-        //
-        return null;
+        return studentID;
     }
 
     public String getInternshipID() {
-        //
-        return null;
+        return internshipID;
     }
 
     public String getApplicationStatus() {
-        //
-        return null;
+        return status;
     }
 
     public String getWithdrawStatus() {
-        //
-        return null;
+        return withdrawStatus;
     }
 
     public void setApplicationStatusSuccess() {
-        //
+        status = "approved";
     }
 
     public void setApplicationStatusFail() {
-        //
+        status = "rejected";
     }
 
     public void setApplicationWithdrawn() {
-        //
+        withdrawStatus = "approved";
     }
 
     public void setApplicationWithdrawnStatus() {
-        //
+        withdrawStatus = "rejected";
     }
 }

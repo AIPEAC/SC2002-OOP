@@ -2,7 +2,7 @@ package Entity.Users;
 
 public class CompanyRepresentative extends User {
     private String position;
-    private String accountStatus = "Pending";
+    private String accountStatus = "pending";
     private String companyName;
     private String department = null;
 
@@ -17,16 +17,15 @@ public class CompanyRepresentative extends User {
 
 
     public void setStatusToAuthorized() {
-        //
+        accountStatus = "approved";
     }
 
     public void setStatusToRejected() {
-        //
+        accountStatus = "rejected";
     }
 
     public String getStatus() {
-        //
-        return null;
+        return accountStatus;
     }
 
     public String getCompanyName() {

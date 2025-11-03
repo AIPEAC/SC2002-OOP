@@ -24,7 +24,7 @@ public class InternshipOpportunity {
     }
 
     public String getStatus() {
-    return status;
+        return status;
     }
 
     public List<Application> getApplications() {

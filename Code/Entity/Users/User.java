@@ -13,10 +13,16 @@ public abstract class User {
         this.email = email;
     }
 
-    // Getters for public info
-    public String getUserID() { return userID; }
-    public String getName() { return name; }
-    public String getEmail() { return email; }
+    public String getUserID() { 
+        return userID; 
+    }
+    public String getName() { 
+        return name; 
+    }
+    public String getEmail() { 
+        return email; 
+    }
+
     
 }
 

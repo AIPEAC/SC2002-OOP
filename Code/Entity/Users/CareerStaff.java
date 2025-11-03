@@ -15,13 +15,11 @@ public class CareerStaff extends User {
     }
 
     public String getDepartment() {
-        //
-        return null;
+        return department;
     }
 
-    public void getRole() {
-        //
+    public String getRole() {
+        return role;
     }
 }
 
-//the staff shall be able

@@ -11,19 +11,23 @@ public class Student extends User {
     }
 
     public void setAcceptanceStatusToTrue() {
-        //
+        hasAcceptedInternshipOpportunity = true;
     }
 
     public void setAcceptanceStatusToFalse() {
-        //
+        hasAcceptedInternshipOpportunity = false;
     }
 
-    public void getMajor() {
-        //
+    public boolean getAcceptanceStatus() {
+        return hasAcceptedInternshipOpportunity;
     }
 
-    public void getYear() {
-        //
+    public String getMajor() {
+        return major;
+    }
+
+    public int getYear() {
+        return year;
     }
 
 }
