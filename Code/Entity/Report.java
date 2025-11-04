@@ -127,6 +127,7 @@ public class Report {
             numOfTotalSlots+= (int) details.get(6);
 
             //majors and their number of internships
+            @SuppressWarnings("unchecked")
             List<String> preferredMajors=(List<String>) details.get(2);
             for (int j=0;j<preferredMajors.size();j++){
                 String major=preferredMajors.get(j);
