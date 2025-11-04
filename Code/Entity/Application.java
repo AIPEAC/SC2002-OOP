@@ -1,17 +1,20 @@
 package Entity;
 
+import Entity.Enums.Status;
 import Entity.Users.Student;
 
 public class Application {
 
-    private int applicationNumber;
+    private String applicationNumber;
     private String internshipID;
     private String studentID;
-    private String status = "pending";
-    private String withdrawStatus = null;
+    private Status status = Status.PENDING;
+    private Status withdrawStatus = null;
 
-    public Application(int applicationNumber, Student student, InternshipOpportunity internshipOpportunity) {
-        //
+    public Application(String applicationNumber, Student student, InternshipOpportunity internshipOpportunity) {
+        this.applicationNumber = applicationNumber;
+        this.studentID = student.getUserID();
+        this.internshipID = (String) internshipOpportunity.getDetails().get(0);
     }
 
     public String getStudentID() {
@@ -22,27 +25,31 @@ public class Application {
         return internshipID;
     }
 
-    public String getApplicationStatus() {
+    public Status getApplicationStatus() {
         return status;
     }
 
-    public String getWithdrawStatus() {
+    public Status getWithdrawStatus() {
         return withdrawStatus;
     }
 
+    public String getApplicationNumber() {
+        return applicationNumber;
+    }
+
     public void setApplicationStatusSuccess() {
-        status = "approved";
+        status = Status.APPROVED;
     }
 
     public void setApplicationStatusFail() {
-        status = "rejected";
+        status = Status.REJECTED;
     }
 
     public void setApplicationWithdrawn() {
-        withdrawStatus = "approved";
+        withdrawStatus = Status.APPROVED;
     }
 
     public void setApplicationWithdrawnStatus() {
-        withdrawStatus = "rejected";
+        withdrawStatus = Status.REJECTED;
     }
 }

@@ -5,9 +5,11 @@ public class Student extends User {
     private int year;
     private boolean hasAcceptedInternshipOpportunity = false;
 
-    public Student(String userID, String name, String email, String major, int year, boolean hasAcceptedInternshipOpportunity) {
-        super(userID, name, email);
+    public Student(String userID, String name, String email, String major, int year) {
+        super(userID, name, email, Role.STUDENT);
         // Additional fields for Student
+        this.major = major;
+        this.year = year;
     }
 
     public void setAcceptanceStatusToTrue() {

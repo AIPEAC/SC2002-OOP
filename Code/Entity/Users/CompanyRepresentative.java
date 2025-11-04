@@ -1,30 +1,31 @@
 package Entity.Users;
 
-public class CompanyRepresentative extends User {
-    private String position;
-    private String accountStatus = "pending";
-    private String companyName;
-    private String department = null;
+import Entity.Enums.Status;
 
-    public CompanyRepresentative(String userID, String name, String email, String position, String accountStatus, String companyName, String department) {
-        super(userID, name, email);
+public class CompanyRepresentative extends User {
+
+    private String position;
+    private Status accountStatus = Status.PENDING;
+    private String companyName;
+    private String department;
+
+    public CompanyRepresentative(String userID, String name, String email, String position, String companyName, String department) {
+        super(userID, name, email, Role.COMPANY_REP);
         this.position = position;
-        this.accountStatus = accountStatus;
         this.companyName = companyName;
         this.department = department;
     }
 
 
-
     public void setStatusToAuthorized() {
-        accountStatus = "approved";
+        accountStatus = Status.APPROVED;
     }
 
     public void setStatusToRejected() {
-        accountStatus = "rejected";
+        accountStatus = Status.REJECTED;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return accountStatus;
     }
 
@@ -34,5 +35,9 @@ public class CompanyRepresentative extends User {
 
     public String getDepartment() {
         return department;
+    }
+
+    public String getPosition() {
+        return position;
     }
 }

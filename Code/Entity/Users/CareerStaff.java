@@ -2,21 +2,16 @@ package Entity.Users;
 
 public class CareerStaff extends User {
     private String department;
-    private String role;
 
-    public CareerStaff(String userID, String name, String email, String department, String role) {
-        super(userID, name, email);
+    public CareerStaff(String userID, String name, String email, String department) {
+        super(userID, name, email, Role.CAREER_STAFF);
         // Additional fields for CareerStaff
+        this.department = department;
     }
-
 
 
     public String getDepartment() {
         return department;
-    }
-
-    public String getRole() {
-        return role;
     }
 }
 
