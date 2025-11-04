@@ -30,11 +30,21 @@ public class Report {
 
                 for (int i=0;i<internshipOpportunities.size();i++){
                     List<Object> details=internshipOpportunities.get(i).getDetails();
+                    if ((details.get(1)).equals("Advanced")){
+                        numOfAdvancedInternships++;
+                    }else if((details.get(1)).equals("Intermediate")){
+                        numOfIntermediateInternships++;
+                    }else if((details.get(1)).equals("Basic")){
+                        numOfBasicInternships++;
+                    }else{
+                        System.out.println("Error in internship level, check the entity code for InternshipOpportunity.");
+                    }
+                    
                     if ((boolean)details.get(7)){
                         numOfVisibleInternships++;
                     }
-                    if ((boolean)details.get(6)){
-                        numOfFullInternships+=
+                    if ((boolean)details.get(8)){
+                        numOfFullInternships++;
                     }
 
                         
