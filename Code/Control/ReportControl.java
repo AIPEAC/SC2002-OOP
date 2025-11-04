@@ -33,11 +33,11 @@ public class ReportControl {
             System.out.println("You are not logged in.");
         }
     }
-    public void generateReportSpecific(boolean optToSaveReport,String filterOrder,boolean ascending,String[] filterOut){
+    public void generateReportSpecific(boolean optToSaveReport,String[] filterOut){
         if (authCtrl.isLoggedIn()){
             if (authCtrl.getUserIdentity().equals("Staff")){
                 int reportIndex = optToSaveReport ? getNumberOfReports()+1 : 0;
-                List<InternshipOpportunity> filteredList=comprehensive(allOpplist,filterOrder,ascending,filterOut);
+                List<InternshipOpportunity> filteredList=comprehensive(allOpplist,filterOut);
                 boolean filtered=true;
 
                 Report report=new Report(reportIndex,filteredList,filtered);
@@ -45,7 +45,8 @@ public class ReportControl {
 
                 if (optToSaveReport){
                     report.saveToLocal();
-                    System.out.printf("Report saved in Lib_example/report %4d.txt\n",reportIndex);
+                    //System.out.printf("Report saved in Lib_example/report %4d.txt\n",reportIndex);
+                    //print is done in report.saveToLocal()
                 }
             }else{
                 System.out.println("You do not have the permission to generate reports.");
@@ -56,18 +57,15 @@ public class ReportControl {
     }
     
     private List<InternshipOpportunity> comprehensive(List<InternshipOpportunity> internshipOpportunities,
-                String filterOrder,
-                boolean ascending,
-                String[] filterOut
-                ){
-        //
+                String[] filterOut){
+        // Apply filtering logic here
         return null;
     }
     
 
 
     private int getNumberOfReports(){
-        //
+        // Implement logic to count the number of reports
         return 0;
     }
     

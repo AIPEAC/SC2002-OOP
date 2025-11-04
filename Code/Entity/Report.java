@@ -35,6 +35,7 @@ public class Report {
         this.internshipOpportunities = internshipOpportunities;
         this.filtered=filtered;
     }
+    
     public void formatOutput(){
         if (!filtered){
             if (internshipOpportunities.size()==0){
