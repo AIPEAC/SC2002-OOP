@@ -30,7 +30,14 @@ public class Report {
 
                 for (int i=0;i<internshipOpportunities.size();i++){
                     List<Object> details=internshipOpportunities.get(i).getDetails();
-                    
+                    if ((boolean)details.get(7)){
+                        numOfVisibleInternships++;
+                    }
+                    if ((boolean)details.get(6)){
+                        numOfFullInternships+=
+                    }
+
+                        
                         
                 }
             }

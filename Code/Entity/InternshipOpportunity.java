@@ -40,14 +40,15 @@ public class InternshipOpportunity {
 
     public List<Object> getDetails() {
         List<Object> details=new ArrayList<Object>();
-        details.add(internshipID);
-        details.add(internshipLevel);
-        details.add(preferredMajors);
-        details.add(openingDate);
-        details.add(closeDate);
-        details.add(companyName);
-        details.add(numOfSlots);
-        details.add(visiblity);
+        details.add(internshipID); //0
+        details.add(internshipLevel); //1
+        details.add(preferredMajors); //2
+        details.add(openingDate); //3
+        details.add(closeDate); //4
+        details.add(companyName); //5
+        details.add(numOfSlots); //6
+        details.add(visiblity); //7
+        details.add(isFull); //8
         return details;
     }
 
