@@ -1,6 +1,7 @@
 package Entity.Users;
 
 public class CompanyRepresentative extends User {
+    //@SuppressWarnings("unused")
     private String position;
     private String accountStatus = "pending";
     private String companyName;
