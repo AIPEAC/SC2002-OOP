@@ -9,10 +9,7 @@ public class CareerStaff extends User {
         // Additional fields for CareerStaff
     }
 
-    public CareerStaff(String userID, String passwordHash, String name, String parameter, String department, String role) {
-        super(userID, name, parameter); // Assuming parameter is email
-        //
-    }
+
 
     public String getDepartment() {
         return department;
