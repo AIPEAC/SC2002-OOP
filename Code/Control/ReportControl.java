@@ -57,7 +57,11 @@ public class ReportControl {
     }
     
     private List<InternshipOpportunity> comprehensive(List<InternshipOpportunity> internshipOpportunities,
-                String[] filterOut){
+                String[] filterIn){
+        /*
+         * Filters in internship opportunities based on the provided criteria.
+         * for example, like filterOut = {}
+         */
         // Apply filtering logic here
         return null;
     }

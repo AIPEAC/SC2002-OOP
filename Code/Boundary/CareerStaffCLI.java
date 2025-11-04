@@ -4,6 +4,8 @@ import Control.*;
 import Entity.Application;
 import Interface.*;
 import Entity.InternshipOpportunity;
+import java.util.Map;
+import java.util.List;
 
 public class CareerStaffCLI implements InterfaceCLI {
     
@@ -58,8 +60,8 @@ public class CareerStaffCLI implements InterfaceCLI {
     public void generateReportOverview(boolean optToSaveReport){
         reportCtrl.generateReportOverview(optToSaveReport);
     }
-    public void generateReportSpecific(boolean optToSaveReport,String[] filterOut){
-        reportCtrl.generateReportSpecific(optToSaveReport, filterOut);
+    public void generateReportSpecific(boolean optToSaveReport,Map<String,List<String>> filterIn){
+        reportCtrl.generateReportSpecific(optToSaveReport, filterIn);
     }
 
 }
