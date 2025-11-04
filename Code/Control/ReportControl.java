@@ -16,15 +16,17 @@ import java.io.File;
 public class ReportControl {
     private AuthenticationControl authCtrl;
     private InternshipControl intCtrl;
-    private List<InternshipOpportunity> allOpplist=intCtrl.getAllInternshipOpportunities();
+    private List<InternshipOpportunity> allOpplist;
 
     public ReportControl(AuthenticationControl authCtrl, InternshipControl intCtrl){
         this.authCtrl=authCtrl;
         this.intCtrl=intCtrl;
+        // Initialize after intCtrl is assigned to avoid NPE
+        this.allOpplist = (this.intCtrl == null) ? new ArrayList<>() : this.intCtrl.getAllInternshipOpportunities();
     }
     public void generateReportOverview(boolean optToSaveReport){
         if (authCtrl.isLoggedIn()){
-            if (authCtrl.getUserIdentity().equals("Staff")){
+            if (authCtrl.getUserIdentity().equals("CareerStaff")){
                 int reportIndex = optToSaveReport ? getNumberOfReports()+1 : 0;
                 boolean filtered=false;
 
@@ -43,7 +45,7 @@ public class ReportControl {
     }
     public void generateReportSpecific(boolean optToSaveReport,Map<String,List<String>> filterIn){
         if (authCtrl.isLoggedIn()){
-            if (authCtrl.getUserIdentity().equals("Staff")){
+            if (authCtrl.getUserIdentity().equals("CareerStaff")){
                 int reportIndex = optToSaveReport ? getNumberOfReports()+1 : 0;
                 List<InternshipOpportunity> filteredList=comprehensive(allOpplist,filterIn);
                 boolean filtered=true;
