@@ -68,7 +68,8 @@ public class Report {
         if (!dir.exists()){
             dir.mkdirs();
         }
-        String filename = "report_"+reportIndex+".md";
+    // Use zero-padded 4-digit filename like Report0001.md
+    String filename = String.format("Report%04d.md", reportIndex);
         File out = new File(dir, filename);
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(out))){
             bw.write(md);
