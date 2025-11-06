@@ -55,6 +55,7 @@ public class InternshipOpportunity {
         return applicationList;
     }
 
+
     public List<Object> getDetails() {
         List<Object> details=new ArrayList<Object>();
         details.add(internshipID); //0
@@ -104,4 +105,5 @@ public class InternshipOpportunity {
     public boolean isFull(){
         return isFull;
     }
+    
 }
