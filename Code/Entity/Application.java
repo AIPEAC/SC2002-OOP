@@ -5,13 +5,13 @@ import Entity.Users.Student;
 
 public class Application {
 
-    private String applicationNumber;
+    private int applicationNumber;
     private String internshipID;
     private String studentID;
     private String status = "pending";
     private String withdrawStatus = null;
 
-    public Application(String applicationNumber, Student student, InternshipOpportunity internshipOpportunity) {
+    public Application(int applicationNumber, Student student, InternshipOpportunity internshipOpportunity) {
         this.applicationNumber = applicationNumber;
         this.studentID = student.getUserID();
         this.internshipID = (String) internshipOpportunity.getDetails().get(0);
@@ -33,7 +33,7 @@ public class Application {
         return withdrawStatus;
     }
 
-    public String getApplicationNumber() {
+    public int getApplicationNumber() {
         return applicationNumber;
     }
 
