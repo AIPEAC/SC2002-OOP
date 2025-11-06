@@ -150,7 +150,7 @@ public class Report {
     private void printStatistics(){
         // Punchy header
         System.out.println("========================================");
-        System.out.println("🔥 PRECEDENT INTERNSHIP REPORT - #"+reportIndex);
+        System.out.println("🔥 PREVALENT INTERNSHIP REPORT - #"+reportIndex);
         System.out.println("(Showing "+numOfInternships+" internships"+(filtered?" after filters":"")+")");
         System.out.println("========================================");
 
@@ -239,7 +239,7 @@ public class Report {
     private String buildMarkdownReport(){
         StringBuilder sb = new StringBuilder();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        sb.append("# 🔥 PRECEDENT INTERNSHIP REPORT - #"+reportIndex+"\n\n");
+        sb.append("# 🔥 PREVALENT INTERNSHIP REPORT - #"+reportIndex+"\n\n");
         sb.append("_Generated: "+LocalDateTime.now().format(dtf)+"_\n\n");
         sb.append("**Total internships:** "+numOfInternships+(filtered?" (filtered)":"")+"\n\n");
 
