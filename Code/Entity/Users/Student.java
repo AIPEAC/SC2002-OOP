@@ -8,6 +8,9 @@ public class Student extends User {
     public Student(String userID, String name, String email, String major, int year, boolean hasAcceptedInternshipOpportunity) {
         super(userID, name, email);
         // Additional fields for Student
+        this.major = major;
+        this.year = year;
+        this.hasAcceptedInternshipOpportunity = hasAcceptedInternshipOpportunity;
     }
 
     public void setAcceptanceStatusToTrue() {

@@ -3,6 +3,7 @@ package Entity.Users;
 
 
 public abstract class User {
+
     private String userID;
     private String name;
     private String email;
@@ -22,8 +23,6 @@ public abstract class User {
     public String getEmail() { 
         return email; 
     }
-
-    
 }
 
 

@@ -1,5 +1,6 @@
 package Entity;
 
+
 import Entity.Users.Student;
 
 public class Application {
@@ -11,7 +12,9 @@ public class Application {
     private String withdrawStatus = null;
 
     public Application(int applicationNumber, Student student, InternshipOpportunity internshipOpportunity) {
-        //
+        this.applicationNumber = applicationNumber;
+        this.studentID = student.getUserID();
+        this.internshipID = (String) internshipOpportunity.getDetails().get(0);
     }
 
     public String getStudentID() {
@@ -28,6 +31,10 @@ public class Application {
 
     public String getWithdrawStatus() {
         return withdrawStatus;
+    }
+
+    public int getApplicationNumber() {
+        return applicationNumber;
     }
 
     public void setApplicationStatusSuccess() {
