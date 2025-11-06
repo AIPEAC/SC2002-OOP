@@ -3,7 +3,6 @@ package Entity;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
-import Entity.Users.CompanyRepresentative;
 
 
 public class InternshipOpportunity {
@@ -16,17 +15,35 @@ public class InternshipOpportunity {
     private Date closeDate;
     private String status = "pending";
     private String companyName;
-    private CompanyRepresentative companyRepInCharge;
+    private String companyRepInChargeID;
     private int numOfSlots = 1;
-    private List<Application> applicationList;
+    private List<Application> applicationList= new ArrayList<Application>();
     private List<String> selectedApplicantsID = new ArrayList<String>();
     private boolean isFull=false;
     private boolean visiblity=true;
 
 
 
-    public InternshipOpportunity(int internshipID, String internshipTitle, String description, List<String> preferredMajors, String internshipLevel, Date openingDate, Date closeDate, String companyName, String companyRepInCharge, int numOfSlots) {
+    public InternshipOpportunity(String internshipID, 
+        String internshipTitle, 
+        String description, 
+        List<String> preferredMajors, 
+        String internshipLevel, 
+        Date openingDate, 
+        Date closeDate, 
+        String companyName, 
+        String companyRepInChargeID, 
+        int numOfSlots) {
         //implement
+        this.internshipID = internshipID;
+        this.internshipTitle = internshipTitle;
+        this.description = description;
+        this.preferredMajors = preferredMajors;
+        this.internshipLevel = internshipLevel;
+        this.openingDate = openingDate;
+        this.closeDate = closeDate;
+        this.companyName = companyName;
+        this.numOfSlots = numOfSlots;
     }
 
     public String getStatus() {
@@ -35,7 +52,7 @@ public class InternshipOpportunity {
 
     public List<Application> getApplications() {
         //implement
-        return null;
+        return applicationList;
     }
 
     public List<Object> getDetails() {
@@ -71,12 +88,15 @@ public class InternshipOpportunity {
     public void addSelectedApplicant(String StudentID) {
         if (isFull()){
             return;
+        }else if(selectedApplicantsID.size() + 1 >= numOfSlots){
+            isFull = true;
         }
-        //implementation
+        selectedApplicantsID.add(StudentID);
     }
 
     public void removeSelectedApplicant(String StudentID) {
-        //implementation
+        selectedApplicantsID.remove(StudentID);
+        isFull = false;
     }
     
 

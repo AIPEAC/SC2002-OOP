@@ -19,7 +19,8 @@ public class CompanyRepresentativeCLI implements InterfaceCLI{
     }
 
     public void createInternshipOpportunity(String internshipTitle, String title, String internshipLevel, List<String> preferredMajors, Date openDate, Date closeDate, String companyName, int numberOfSlots) {
-        //
+        //remember to get self name passed to control
+        //as companyRepInCharge is required for InternshipOpportunity Control
     }
 
     public void checkMyInternshipOppStatus() {
