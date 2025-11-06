@@ -100,7 +100,7 @@ public class Report {
 
         //calculate number of internships by level and visibility/fullness
         for (int i=0;i<internshipOpportunities.size();i++){
-            List<Object> details=internshipOpportunities.get(i).getDetails();
+            List<Object> details=internshipOpportunities.get(i).getDetailsForReport();
 
             //numbers for each level
             if ((details.get(1)).equals("Advanced")){

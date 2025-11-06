@@ -38,7 +38,7 @@ public class InternshipControl {
     public List<Object> getInternshipDetails(InternshipOpportunity opp) {
         if (authCtrl.isLoggedIn()){
             //implementation
-            return opp.getDetails();
+            return opp.getDetailsForViewing();
         }
         System.out.println("Please login to view internship details.");
         return null;

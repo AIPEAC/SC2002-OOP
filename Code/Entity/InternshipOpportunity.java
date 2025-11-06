@@ -22,7 +22,7 @@ public class InternshipOpportunity {
     private boolean isFull=false;
     private boolean visiblity=true;
 
-
+    
 
     public InternshipOpportunity(String internshipID, 
         String internshipTitle, 
@@ -34,7 +34,7 @@ public class InternshipOpportunity {
         String companyName, 
         String companyRepInChargeID, 
         int numOfSlots) {
-        //implement
+        
         this.internshipID = internshipID;
         this.internshipTitle = internshipTitle;
         this.description = description;
@@ -43,8 +43,11 @@ public class InternshipOpportunity {
         this.openingDate = openingDate;
         this.closeDate = closeDate;
         this.companyName = companyName;
+        this.companyRepInChargeID = companyRepInChargeID;
         this.numOfSlots = numOfSlots;
     }
+    
+
 
     public String getStatus() {
         return status;
@@ -54,9 +57,27 @@ public class InternshipOpportunity {
         //implement
         return applicationList;
     }
+    
+    public List<Object> getDetailsForViewing() {
+        if (!visiblity){
+            System.out.println("This internship opportunity is not visible.");
+            return null;
+        }
+        List<Object> details=new ArrayList<Object>();
+        details.add(internshipID); //0
+        details.add(internshipTitle); //1
+        details.add(description); //2
+        details.add(internshipLevel); //3
+        details.add(preferredMajors); //4
+        details.add(openingDate); //5
+        details.add(closeDate); //6
+        details.add(companyName); //7
+        details.add(numOfSlots); //8
+        details.add(isFull); //10
+        return details;
+    }
 
-
-    public List<Object> getDetails() {
+    public List<Object> getDetailsForReport() {
         List<Object> details=new ArrayList<Object>();
         details.add(internshipID); //0
         details.add(internshipLevel); //1

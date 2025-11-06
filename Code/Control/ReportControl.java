@@ -90,7 +90,7 @@ public class ReportControl {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         for (InternshipOpportunity opp : internshipOpportunities) {
-            List<Object> details = opp.getDetails();
+            List<Object> details = opp.getDetailsForReport();
 
             // details indices as documented in InternshipOpportunity.getDetails():
             // 0 - internshipID, 1 - internshipLevel, 2 - preferredMajors (List<String>),

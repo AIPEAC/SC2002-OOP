@@ -11,10 +11,10 @@ public class Application {
     private String status = "pending";
     private String withdrawStatus = null;
 
-    public Application(int applicationNumber, Student student, InternshipOpportunity internshipOpportunity) {
+    public Application(int applicationNumber, Student student, String internshipOpportunityID) {
         this.applicationNumber = applicationNumber;
         this.studentID = student.getUserID();
-        this.internshipID = (String) internshipOpportunity.getDetails().get(0);
+        this.internshipID = internshipOpportunityID;
     }
 
     public String getStudentID() {
