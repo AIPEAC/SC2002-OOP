@@ -15,7 +15,10 @@ public class InternshipOpportunity {
     private Date closeDate;
     private String status = "pending";
     private String companyName;
+    
+    @SuppressWarnings("unused")
     private String companyRepInChargeID;
+
     private int numOfSlots = 1;
     private List<Application> applicationList= new ArrayList<Application>();
     private List<String> selectedApplicantsID = new ArrayList<String>();
