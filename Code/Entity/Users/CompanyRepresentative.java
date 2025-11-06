@@ -1,16 +1,16 @@
 package Entity.Users;
 
-import Entity.Enums.Status;
+
 
 public class CompanyRepresentative extends User {
 
     private String position;
-    private Status accountStatus = Status.PENDING;
+    private String accountStatus = "pending";
     private String companyName;
     private String department;
 
     public CompanyRepresentative(String userID, String name, String email, String position, String companyName, String department) {
-        super(userID, name, email, Role.COMPANY_REP);
+        super(userID, name, email);
         this.position = position;
         this.companyName = companyName;
         this.department = department;
@@ -18,14 +18,14 @@ public class CompanyRepresentative extends User {
 
 
     public void setStatusToAuthorized() {
-        accountStatus = Status.APPROVED;
+        accountStatus = "accepted";
     }
 
     public void setStatusToRejected() {
-        accountStatus = Status.REJECTED;
+        accountStatus = "rejected";
     }
 
-    public Status getStatus() {
+    public String getStatus() {
         return accountStatus;
     }
 
