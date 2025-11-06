@@ -17,7 +17,7 @@ public class InternshipControl {
         //
     }
 
-    public void requestCreateInternshipOpportunity(int internshipID, String internshipTitle, String description, String internshipLevel, List<String> preferredMajors, Date openDate, Date closeDate, String companyName, CompanyRepresentative companyRepInCharge, int numberOfSlots) {
+    public void requestCreateInternshipOpportunity(int internshipID, String internshipTitle, String description, String internshipLevel, List<String> preferredMajors, Date openDate, Date closeDate, String companyName, String companyRepInChargeID, int numberOfSlots) {
         //
     }
 

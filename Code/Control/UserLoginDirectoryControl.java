@@ -335,8 +335,116 @@ public class UserLoginDirectoryControl{
     }
 
     public void approveCompanyRep(String userID){
+        updateCompanyRepStatusInLogin(userID, "approved");
+        updateCompanyRepStatusInCompanyRepCSV(userID, "approved");
     }
     public void rejectCompanyRep(String userID){
+        updateCompanyRepStatusInLogin(userID, "rejected");
+        updateCompanyRepStatusInCompanyRepCSV(userID, "rejected");
+    }
+    // Update the status field (stored in the 4th column) for a CompanyRepresentative in login_list.csv
+    private void updateCompanyRepStatusInLogin(String userID, String status) {
+        boolean updated = false;
+
+        // Ensure in-memory list is present
+        if (loginList == null) {
+            loadLoginListFromDB();
+        }
+
+        // Update the in-memory row first
+        for (int i = 0; i < loginList.size(); i++) {
+            String[] row = loginList.get(i);
+            if (row.length >= 2
+                && "CompanyRepresentative".equals(row[0])
+                && userID.equals(row[1])) {
+                // Ensure row has at least 4 columns
+                if (row.length < 4) {
+                    String[] expanded = new String[4];
+                    for (int j = 0; j < row.length; j++) expanded[j] = row[j];
+                    for (int j = row.length; j < 4; j++) expanded[j] = "";
+                    row = expanded;
+                }
+                row[3] = status; // store status in the 4th column
+                loginList.set(i, row);
+                updated = true;
+                break;
+            }
+        }
+
+        // Persist changes back to CSV if updated
+        if (updated) {
+            String csvFile = "Code/Lib/login_list.csv";
+            File inputFile = new File(csvFile);
+            File tempFile = new File("Code/Lib/login_list.tmp");
+
+            try (FileWriter writer = new FileWriter(tempFile)) {
+                // Write header
+                writer.append("identity,userID,passwordHash,salt\n");
+                // Write rows
+                for (String[] data : loginList) {
+                    // Normalize to 4 columns when writing
+                    String[] out = new String[] {"", "", "", ""};
+                    for (int k = 0; k < data.length && k < 4; k++) {
+                        out[k] = (data[k] == null) ? "" : data[k];
+                    }
+                    writer.append(String.join(",", out)).append("\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+
+            // Replace original with temp
+            if (inputFile.exists()) inputFile.delete();
+            tempFile.renameTo(inputFile);
+
+            // Reload in-memory state
+            loadLoginListFromDB();
+        } else {
+            System.out.println("UserLoginDirectoryControl.updateCompanyRepStatusInLogin(): CompanyRepresentative not found for userID=" + userID);
+        }
+    }
+    private void updateCompanyRepStatusInCompanyRepCSV(String userID, String status) {
+        String csvFile = "Code/Lib/company_representative.csv";
+        File inputFile = new File(csvFile);
+        File tempFile = new File("Code/Lib/company_representative.tmp");
+        boolean updated = false;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+             FileWriter writer = new FileWriter(tempFile)) {
+
+            String header = reader.readLine();
+            writer.append(header).append("\n");
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length > 0 && data[0].equals(userID)) {
+                    // Update status (5th column)
+                    if (data.length < 5) {
+                        String[] expanded = new String[5];
+                        for (int j = 0; j < data.length; j++) expanded[j] = data[j];
+                        for (int j = data.length; j < 5; j++) expanded[j] = "";
+                        data = expanded;
+                    }
+                    data[4] = status;
+                    updated = true;
+                }
+                writer.append(String.join(",", data)).append("\n");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        if (updated) {
+            inputFile.delete();
+            tempFile.renameTo(inputFile);
+        } else {
+            tempFile.delete();
+            System.out.println("UserLoginDirectoryControl.updateCompanyRepStatusInLogin(): CompanyRepresentative not found for userID=" + userID);
+        }
     }
 
 }
