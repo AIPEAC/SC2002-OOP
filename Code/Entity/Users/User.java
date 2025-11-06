@@ -3,7 +3,6 @@ package Entity.Users;
 
 
 public abstract class User {
-    public enum Role { STUDENT, COMPANY_REP, CAREER_STAFF }
 
     private String userID;
     private String name;
