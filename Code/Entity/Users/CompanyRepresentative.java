@@ -1,10 +1,14 @@
 package Entity.Users;
 
+
+
 public class CompanyRepresentative extends User {
+    @SuppressWarnings("unused")
     private String position;
     private String accountStatus = "pending";
     private String companyName;
     private String department = null;
+
 
     public CompanyRepresentative(String userID, String name, String email, String position, String accountStatus, String companyName, String department) {
         super(userID, name, email);
@@ -15,9 +19,8 @@ public class CompanyRepresentative extends User {
     }
 
 
-
     public void setStatusToAuthorized() {
-        accountStatus = "approved";
+        accountStatus = "accepted";
     }
 
     public void setStatusToRejected() {
@@ -35,4 +38,9 @@ public class CompanyRepresentative extends User {
     public String getDepartment() {
         return department;
     }
+    /* 
+    public String getPosition() {
+        return position;
+    }
+    */
 }

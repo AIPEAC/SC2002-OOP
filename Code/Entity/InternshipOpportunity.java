@@ -3,7 +3,6 @@ package Entity;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
-import Entity.Users.CompanyRepresentative;
 
 
 public class InternshipOpportunity {
@@ -16,18 +15,42 @@ public class InternshipOpportunity {
     private Date closeDate;
     private String status = "pending";
     private String companyName;
-    private CompanyRepresentative companyRepInCharge;
+    
+    @SuppressWarnings("unused")
+    private String companyRepInChargeID;
+
     private int numOfSlots = 1;
-    private List<Application> applicationList;
+    private List<Application> applicationList= new ArrayList<Application>();
     private List<String> selectedApplicantsID = new ArrayList<String>();
     private boolean isFull=false;
     private boolean visiblity=true;
 
+    
 
-
-    public InternshipOpportunity(int internshipID, String internshipTitle, String description, List<String> preferredMajors, String internshipLevel, Date openingDate, Date closeDate, String companyName, String companyRepInCharge, int numOfSlots) {
-        //implement
+    public InternshipOpportunity(String internshipID, 
+        String internshipTitle, 
+        String description, 
+        List<String> preferredMajors, 
+        String internshipLevel, 
+        Date openingDate, 
+        Date closeDate, 
+        String companyName, 
+        String companyRepInChargeID, 
+        int numOfSlots) {
+        
+        this.internshipID = internshipID;
+        this.internshipTitle = internshipTitle;
+        this.description = description;
+        this.preferredMajors = preferredMajors;
+        this.internshipLevel = internshipLevel;
+        this.openingDate = openingDate;
+        this.closeDate = closeDate;
+        this.companyName = companyName;
+        this.companyRepInChargeID = companyRepInChargeID;
+        this.numOfSlots = numOfSlots;
     }
+    
+
 
     public String getStatus() {
         return status;
@@ -35,19 +58,39 @@ public class InternshipOpportunity {
 
     public List<Application> getApplications() {
         //implement
-        return null;
+        return applicationList;
+    }
+    
+    public List<Object> getDetailsForViewing() {
+        if (!visiblity){
+            System.out.println("This internship opportunity is not visible.");
+            return null;
+        }
+        List<Object> details=new ArrayList<Object>();
+        details.add(internshipID); //0
+        details.add(internshipTitle); //1
+        details.add(description); //2
+        details.add(internshipLevel); //3
+        details.add(preferredMajors); //4
+        details.add(openingDate); //5
+        details.add(closeDate); //6
+        details.add(companyName); //7
+        details.add(numOfSlots); //8
+        details.add(isFull); //10
+        return details;
     }
 
-    public List<Object> getDetails() {
+    public List<Object> getDetailsForReport() {
         List<Object> details=new ArrayList<Object>();
-        details.add(internshipID);
-        details.add(internshipLevel);
-        details.add(preferredMajors);
-        details.add(openingDate);
-        details.add(closeDate);
-        details.add(companyName);
-        details.add(numOfSlots);
-        details.add(visiblity);
+        details.add(internshipID); //0
+        details.add(internshipLevel); //1
+        details.add(preferredMajors); //2
+        details.add(openingDate); //3
+        details.add(closeDate); //4
+        details.add(companyName); //5
+        details.add(numOfSlots); //6
+        details.add(visiblity); //7
+        details.add(isFull); //8
         return details;
     }
 
@@ -70,12 +113,15 @@ public class InternshipOpportunity {
     public void addSelectedApplicant(String StudentID) {
         if (isFull()){
             return;
+        }else if(selectedApplicantsID.size() + 1 >= numOfSlots){
+            isFull = true;
         }
-        //implementation
+        selectedApplicantsID.add(StudentID);
     }
 
     public void removeSelectedApplicant(String StudentID) {
-        //implementation
+        selectedApplicantsID.remove(StudentID);
+        isFull = false;
     }
     
 
@@ -83,4 +129,5 @@ public class InternshipOpportunity {
     public boolean isFull(){
         return isFull;
     }
+    
 }
