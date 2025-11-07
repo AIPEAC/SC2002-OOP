@@ -6,15 +6,12 @@ import Interface.*;
 import java.util.*;
 public class StudentCLI extends InterfaceCLI{
     private Scanner sc;
-    private LoginControl loginCtrl;
-    private AuthenticationControl authCtrl;
     private InternshipControl intCtrl;
-
     private ApplicationControl appCtrl;
 
 
-    public StudentCLI(Scanner sc, LoginControl logCtrl, ApplicationControl appCtrl, AuthenticationControl authCtrl, InternshipControl intCtrl) {
-        super(sc, authCtrl, intCtrl);
+    public StudentCLI(Scanner sc, ApplicationControl appCtrl, InternshipControl intCtrl) {
+        super(sc, intCtrl);
         this.appCtrl = appCtrl;
     }
     public void displayStudentMenu() {

@@ -8,13 +8,10 @@ import Entity.InternshipOpportunity;
 
 public class CompanyRepresentativeCLI extends InterfaceCLI{
     private Scanner sc;
-    private LoginControl loginCtrl;
-    private AuthenticationControl authCtrl;
     private InternshipControl intCtrl;
 
-    public CompanyRepresentativeCLI(Scanner sc, AuthenticationControl authCtrl, InternshipControl intCtrl) {
-        super(sc, authCtrl, intCtrl);
-        this.authCtrl = authCtrl;
+    public CompanyRepresentativeCLI(Scanner sc, InternshipControl intCtrl) {
+        super(sc, intCtrl);
         this.intCtrl = intCtrl;
     }
 

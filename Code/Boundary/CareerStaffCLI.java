@@ -16,8 +16,8 @@ public class CareerStaffCLI extends InterfaceCLI {
     private ReportControl reportCtrl;
 
 
-    public CareerStaffCLI(Scanner sc, AuthenticationControl authCtrl, ApplicationControl appCtrl, InternshipControl intCtrl, ReportControl reportCtrl) {
-        super(sc, authCtrl, intCtrl);
+    public CareerStaffCLI(Scanner sc, ApplicationControl appCtrl, InternshipControl intCtrl, ReportControl reportCtrl) {
+        super(sc, intCtrl);
         this.appCtrl = appCtrl;
         this.intCtrl = intCtrl;
         this.reportCtrl = reportCtrl;

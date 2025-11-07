@@ -12,13 +12,10 @@ import java.util.Scanner;
 
 public abstract class InterfaceCLI {
     Scanner sc;
-    LoginControl loginCtrl;
-    AuthenticationControl authCtrl;
     InternshipControl intCtrl;
 
-    public InterfaceCLI(Scanner sc, AuthenticationControl authCtrl, InternshipControl intCtrl) {
+    public InterfaceCLI(Scanner sc, InternshipControl intCtrl) {
         this.sc = sc;
-        this.authCtrl = authCtrl;
         this.intCtrl = intCtrl;
     }
 

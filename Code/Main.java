@@ -31,18 +31,18 @@ public class Main {
                 case "CareerStaff": {
                     System.out.println("Launching Career Staff console...");
                     // Placeholder: instantiate and immediately enter (future) staff menu loop
-                    new CareerStaffCLI(sc, authCtrl, appCtrl, intCtrl, reportCtrl); // instance retained only if needed later
+                    new CareerStaffCLI(sc, appCtrl, intCtrl, reportCtrl); // instance retained only if needed later
                     break;
                 }
                 case "Student": {
                     System.out.println("Launching Student console...");
-                    new StudentCLI(sc, loginCtrl, appCtrl, authCtrl, intCtrl);
-                    
+                    new StudentCLI(sc, appCtrl, intCtrl);
+
                     break;
                 }
                 case "CompanyRepresentative": {
                     System.out.println("Launching Company Representative console...");
-                    new CompanyRepresentativeCLI(sc, authCtrl, intCtrl);
+                    new CompanyRepresentativeCLI(sc, intCtrl);
                     break;
                 }
                 default:
