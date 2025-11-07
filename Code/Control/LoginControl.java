@@ -1,7 +1,9 @@
 package Control;
 //when registered, the password is set to "password". Remind them to change.
-
+import java.io.BufferedReader;
+import java.io.FileReader;
 import Entity.Users.User;
+
 
 
 public class LoginControl {
@@ -74,4 +76,5 @@ public class LoginControl {
             return false;
         }
     }
+
 }

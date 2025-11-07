@@ -19,6 +19,7 @@ public class UserLoginDirectoryControl{
     private String[] StudentInfoList;
     private String[] StaffInfoList;
     private String[] CompanyRepInfoList;
+    private boolean haveInitialized=false;
     
     public UserLoginDirectoryControl() {
         loadLoginListFromDB();
@@ -447,5 +448,124 @@ public class UserLoginDirectoryControl{
         }
     }
 
+
+
+    //intialization related methods
+    private void checkHaveInitialized() {
+        String csvFile = "Code/Lib/have_initialized.csv";
+        File file = new File(csvFile);
+        String line = "";
+        String csvSplitBy = ",";
+
+        try {
+            if (!file.exists()) {
+                file.getParentFile().mkdirs(); 
+                file.createNewFile();
+                try (FileWriter writer = new FileWriter(file)) {
+                    writer.append("have_initialized\n");
+                    writer.append("false\n");
+                }
+            }
+
+            try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+                br.readLine(); // Skip header
+                if ((line = br.readLine()) != null) {
+                    String[] data = line.split(csvSplitBy);
+                    haveInitialized = Boolean.parseBoolean(data[0]);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private void setHaveInitialized(boolean status) {
+        String csvFile = "Code/Lib/have_initialized.csv";
+        File inputFile = new File(csvFile);
+        File tempFile = new File("Code/Lib/have_initialized.tmp");
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+             FileWriter writer = new FileWriter(tempFile)) {
+
+            String header = reader.readLine();
+            writer.append(header).append("\n");
+            writer.append(Boolean.toString(status)).append("\n");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        inputFile.delete();
+        tempFile.renameTo(inputFile);
+        haveInitialized = status;
+    }
+    private void loadUsersFromExamplesToDB(){
+        checkHaveInitialized();
+        if (haveInitialized) {
+            return;
+        }
+        String filePathExampleStaff = "Code/Lib_examples/staff_list.csv";
+        String filePathExampleStudent = "Code/Lib_examples/student_list.csv";
+        String filePathExampleCompanyRep = "Code/Lib_examples/company_representative.csv";
+        String filePathDBLogin = "Code/Lib/login_list.csv";
+        String filePathDBStaffString = "Code/Lib/staff_list.csv";
+        String filePathDBStudentString = "Code/Lib/student_list.csv";
+        
+        BufferedReader br = null;
+        String line;
+        try {
+            // Load Staff
+            br = new BufferedReader(new FileReader(filePathExampleStaff));
+            br.readLine(); // Skip header
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                try (FileWriter writer = new FileWriter(filePathDBStaffString, true)) {
+                    writer.append(String.join(",", values));
+                    writer.append("\n");
+                }
+                try (FileWriter writer = new FileWriter(filePathDBLogin, true)) {
+                    writer.append(String.join(",", "Staff", values[0], hashPassword("password"), ""));
+                    writer.append("\n");
+                }
+            }
+            br.close();
+
+            // Load Students
+            br = new BufferedReader(new FileReader(filePathExampleStudent));
+            br.readLine(); // Skip header
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                try (FileWriter writer = new FileWriter(filePathDBStudentString, true)) {
+                    writer.append(String.join(",", values));
+                    writer.append("\n");
+                }
+                try (FileWriter writer = new FileWriter(filePathDBLogin, true)) {
+                    writer.append(String.join(",", "Student", values[0], hashPassword("password"), ""));
+                    writer.append("\n");
+                }
+            }
+            br.close();
+
+            // Load Company Representatives
+            br = new BufferedReader(new FileReader(filePathExampleCompanyRep));
+            br.readLine(); // Skip header
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                try (FileWriter writer = new FileWriter("Code/Lib/company_representative.csv", true)) {
+                    writer.append(String.join(",", values));
+                    writer.append("\n");
+                }
+                try (FileWriter writer = new FileWriter(filePathDBLogin, true)) {
+                    writer.append(String.join(",", "CompanyRepresentative", values[0], hashPassword("password"), ""));
+                    writer.append("\n");
+                }
+            }
+            br.close();
+
+            setHaveInitialized(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
 
