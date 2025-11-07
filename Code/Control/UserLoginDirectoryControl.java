@@ -22,6 +22,7 @@ public class UserLoginDirectoryControl{
     private boolean haveInitialized=false;
     
     public UserLoginDirectoryControl() {
+        loadUsersFromExamplesToDB();
         loadLoginListFromDB();
     }
 
