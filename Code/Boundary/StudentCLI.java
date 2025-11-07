@@ -4,9 +4,8 @@ import Control.*;
 import Entity.Application;
 import Interface.*;
 import java.util.*;
+
 public class StudentCLI extends InterfaceCLI{
-    private Scanner sc;
-    private InternshipControl intCtrl;
     private ApplicationControl appCtrl;
 
 

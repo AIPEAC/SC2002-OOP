@@ -7,12 +7,9 @@ import java.util.Date;
 import Entity.InternshipOpportunity;
 
 public class CompanyRepresentativeCLI extends InterfaceCLI{
-    private Scanner sc;
-    private InternshipControl intCtrl;
 
     public CompanyRepresentativeCLI(Scanner sc, InternshipControl intCtrl) {
         super(sc, intCtrl);
-        this.intCtrl = intCtrl;
     }
 
     public void register(String name, String companyName, String department, String position, String email) {

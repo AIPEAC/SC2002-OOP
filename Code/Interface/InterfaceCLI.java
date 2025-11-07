@@ -1,7 +1,5 @@
 package Interface;
 
-import Control.LoginControl;
-import Control.AuthenticationControl;
 import Control.InternshipControl;
 
 import Entity.InternshipOpportunity;
@@ -11,8 +9,8 @@ import java.util.List;
 import java.util.Scanner;
 
 public abstract class InterfaceCLI {
-    Scanner sc;
-    InternshipControl intCtrl;
+    protected Scanner sc;
+    protected InternshipControl intCtrl;
 
     public InterfaceCLI(Scanner sc, InternshipControl intCtrl) {
         this.sc = sc;

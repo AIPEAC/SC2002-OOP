@@ -9,17 +9,13 @@ import java.util.List;
 import java.util.Scanner;
 
 public class CareerStaffCLI extends InterfaceCLI {
-    
-    private AuthenticationControl authCtrl;
     private ApplicationControl appCtrl;
-    private InternshipControl intCtrl;
     private ReportControl reportCtrl;
 
 
     public CareerStaffCLI(Scanner sc, ApplicationControl appCtrl, InternshipControl intCtrl, ReportControl reportCtrl) {
         super(sc, intCtrl);
         this.appCtrl = appCtrl;
-        this.intCtrl = intCtrl;
         this.reportCtrl = reportCtrl;
     }    
     
