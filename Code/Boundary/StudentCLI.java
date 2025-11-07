@@ -78,7 +78,11 @@ public class StudentCLI extends InterfaceCLI{
         appCtrl.loadStudentApplicationFromDB();
         appCtrl.checkApplications();
     }
-
+    private void viewInternshipIAppliedTo() {
+        System.out.println("\n=== Internship Applications Submitted ===");
+        appCtrl.loadStudentApplicationFromDB();
+        appCtrl.viewInternshipsAppliedTo();
+    }
     private void withdrawApplication() {
         System.out.println("\n=== Withdrawing Intership Application ===");
         System.out.println("Please note that this is irreversible once submitted.");

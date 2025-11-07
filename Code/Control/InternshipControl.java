@@ -210,6 +210,14 @@ public class InternshipControl{
         }
         return null;
     }
+    public void getInternshipByAppID(String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp != null) {
+            System.out.println(opp.toString());
+        } else {
+            System.out.println("Internship not found.");
+        }
+    }
     // =========================================================
     // Career Staff methods
 
@@ -279,5 +287,8 @@ public class InternshipControl{
                 writer.write(line);
                 writer.newLine();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

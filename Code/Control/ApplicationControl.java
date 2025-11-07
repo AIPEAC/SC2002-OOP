@@ -155,6 +155,11 @@ public class ApplicationControl {
 			System.out.println("Application not found.");
 		}
 	}
+	public void viewInternshipsAppliedTo() {
+		for (Application app : applications) {
+			intCtrl.getInternshipByAppID(app.getInternshipID());
+		}
+	}
 
 	//=========================================================
 	// Career Staff methods
@@ -207,7 +212,6 @@ public class ApplicationControl {
 		}
 		return null;
 	}
-	
 	private void saveApplicationsToDB() {
 		final String CSV_FILE = "Database/Applications.csv";
 		try (FileWriter writer = new FileWriter(CSV_FILE)) {

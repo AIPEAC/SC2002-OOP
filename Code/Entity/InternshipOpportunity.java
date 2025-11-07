@@ -137,11 +137,27 @@ public class InternshipOpportunity {
         details.add(status); //7
         details.add(companyName); //8
         details.add(numOfSlots); //9
-        details.add(visibility); //10
-        details.add(isFull()); //11
+        details.add(isFull()); //10
         return details;
     }
 
+    @Override
+    public String toString() {
+        return "internshipID" + internshipID + 
+               ", internshipTitle=" + internshipTitle + 
+               ", description=" + description + 
+               ", internshipLevel=" + internshipLevel + 
+               ", preferredMajors=" + preferredMajors + 
+               ", openingDate=" + openingDate + 
+               ", closeDate=" + closeDate + 
+               ", status=" + status + 
+               ", companyName=" + companyName + 
+               ", companyRepInChargeID=" + companyRepInChargeID + 
+               ", numOfSlots=" + numOfSlots + 
+               ", applicationNumberList=" + applicationNumberList + 
+               ", acceptedApplicationNumbers=" + acceptedApplicationNumbers + 
+               ", visibility=" + visibility;
+    }
     public List<Object> getDetailsForReport() {
         List<Object> details=new ArrayList<Object>();
         details.add(internshipID); //0
