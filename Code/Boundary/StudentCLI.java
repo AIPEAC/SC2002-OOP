@@ -1,15 +1,13 @@
-//i am here, I am also here
+
 package Boundary;
 import Control.*;
 import Entity.Application;
-import Entity.Users.Student;
 import Interface.*;
-import java.util.Scanner;
+import java.util.*;
 public class StudentCLI implements InterfaceCLI{
     private LoginControl loginCtrl;
     private ApplicationControl appCtrl;
     private Scanner sc = new Scanner(System.in);
-    private Student currentStudent;
 
     StudentCLI(LoginControl loginCtrl, AuthenticationControl authCtrl, ApplicationControl appCtrl){
         
@@ -34,15 +32,44 @@ public class StudentCLI implements InterfaceCLI{
     }
 
     public void checkMyApplicationStatus() {
+        System.out.println("\n=== Check Application Status ===");
 
+        System.out.println("Enter Application ID: ");
+        String id = sc.nextLine();
+
+        appCtrl.loadApplicationFromDB();
+
+        Application dummyApp = new Application(0, null, id);
+        String status = dummyApp.getApplicationStatus();
+
+        if (status != null) {
+            System.out.println("Application " + id + " Status: " + status);
+        } else {
+            System.out.print("Application " + id + " does not exist!");
+        }
 
     }
 
     public void acceptInternshipOpportunity(Application app) {
-        //
+        System.out.println("\n=== Accept Internship Opportunity ===");
+        String status = appCtrl.getApplicationStatus(app);
+
+        if (!"Successful".equalsIgnoreCase(status)) {
+            System.out.println("You can only accept applications marked as successful");
+        }
+
+        System.out.println("Internship accepted successfully! Other pending applications will be withdrawn.");
+
     }
 
     public void rejectInternshipOpportunity(Application app) {
-        //
+        System.out.println("\n=== Reject Internship Opportunity ===");
+        String status = appCtrl.getApplicationStatus(app);
+
+        if(!"Successful".equalsIgnoreCase(status)) {
+            System.out.println("You cna only reject applications marked as successful");
+        }
+
+        System.out.println("You have rejected this internship offer.");
     }
 }
