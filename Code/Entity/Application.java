@@ -17,6 +17,15 @@ public class Application {
         this.internshipID = internshipOpportunityID;
     }
 
+    @Override
+    public String toString() {
+        return "Application Number: " + applicationNumber +
+               ", Internship ID: " + internshipID +
+               ", Student ID: " + studentID +
+               ", Status: " + status +
+               ", Withdraw Status: " + (withdrawStatus != null ? withdrawStatus : "N/A");
+    }
+
     public String getStudentID() {
         return studentID;
     }

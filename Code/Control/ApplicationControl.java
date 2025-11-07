@@ -13,7 +13,7 @@ import Entity.Application;
 public class ApplicationControl {
 	private static final String CSV_FILE = "Code/Lib/application_list.csv";
 
-	private List<String[]> applicationRows = new ArrayList<>();
+	private List<Application> application = new ArrayList<>();
 	private List<String> pendingWithdrawnApplicationID = new ArrayList<>();
 	private AuthenticationControl authCtrl;
 
@@ -23,7 +23,7 @@ public class ApplicationControl {
 	}
 
 	public void loadApplicationFromDB() {
-		applicationRows = new ArrayList<>();
+		application = new ArrayList<>();
 		File file = new File(CSV_FILE);
 		try {
 			if (!file.exists()) {
@@ -55,21 +55,7 @@ public class ApplicationControl {
 		}
 	}
 
-	public String getApplicationStatus(Application app) {
-		if (app == null) return null;
-		int idx = resolveIndex(app);
-		if (idx < 0) return null;
-
-		String[] row = rowByIndex(idx);
-		if (row == null) return null;
-
-		String status = val(row, 3);
-		String withdraw = val(row, 4);
-		if (withdraw != null && !withdraw.isEmpty()) {
-			return "withdraw-" + withdraw; // e.g., withdraw-approved / withdraw-rejected / withdraw-pending
-		}
-		return status;
-	}
+	
 
 	public void makeApplication(String internshipID) {
 		if (!authCtrl.isLoggedIn() || !"Student".equals(authCtrl.getUserIdentity())) {
@@ -92,6 +78,27 @@ public class ApplicationControl {
 		applicationRows.add(row);
 		saveAll();
 		System.out.println("Application submitted successfully. Your application ID is: " + nextIndex);
+	}
+
+	public List<Application> getApplicationStatusByStudent() {
+		if (!authCtrl.isLoggedIn() || !"Student".equals(authCtrl.getUserIdentity())) {
+			System.out.println("Only students can view their application status.");
+			return null;
+		}
+		List<Application> result = new ArrayList<>();
+		String studentID = authCtrl.getUserID();
+		for (String[] row : applicationRows) {
+			if (studentID.equals(val(row, 2))) {
+				Application app = new Application();
+				app.setApplicationIndex(Integer.parseInt(val(row, 0)));
+				app.setInternshipID(val(row, 1));
+				app.setStudentID(val(row, 2));
+				app.setStatus(val(row, 3));
+				app.setWithdrawnStatus(val(row, 4));
+				result.add(app);
+			}
+		}
+		return result;
 	}
 
 	public void requestWithdrawApplication(Application app) {
@@ -182,7 +189,7 @@ public class ApplicationControl {
 	}
 
 
-	
+
 	// Helpers
 	// Inline safe access
 	private String val(String[] arr, int idx) { 

@@ -31,8 +31,12 @@ public abstract class InterfaceCLI {
         String currentPassword = sc.nextLine();
         System.out.print("Enter your new password: ");
         String newPassword = sc.nextLine();
-        // Call the control method to change the password
-        
+        boolean success = loginCtrl.changePassword(currentPassword, newPassword);
+        if (success) {
+            System.out.println("Password changed successfully.");
+        } else {
+            System.out.println("Failed to change password.");
+        }
     }
 
     private List<InternshipOpportunity> filterInternshipOpportunities(String filterType, boolean ascending, Map<String,List<String>> filterIn) {

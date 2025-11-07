@@ -155,9 +155,9 @@ public class UserLoginDirectoryControl{
                             case "approved":
                                 return identity;
                             case "pending":
-                                return "ACCOUNT_PENDING";
+                                return "pending";
                             case "rejected":
-                                return "ACCOUNT_REJECTED";
+                                return "rejected";
                             default:
                                 return null; // Or some other error status
                         }

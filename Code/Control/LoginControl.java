@@ -19,10 +19,10 @@ public class LoginControl {
         if (identity == null){
             System.out.println("Login failed. Please check your ID and password input.");
             return;
-        } else if (identity.equals("ACCOUNT_PENDING")) {
+        } else if (identity.equals("pending")) {
             System.out.println("Your account is pending approval. Please contact the administrator.");
             return;
-        } else if (identity.equals("ACCOUNT_REJECTED")) {
+        } else if (identity.equals("rejected")) {
             System.out.println("Your account has been rejected. Please contact the administrator.");
             return;
         }
