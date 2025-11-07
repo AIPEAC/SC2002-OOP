@@ -19,6 +19,8 @@ public abstract class InterfaceCLI {
         this.intCtrl = intCtrl;
     }
 
+    public abstract void displayMenu();
+
     public void logout() {
         //
     }
