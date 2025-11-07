@@ -30,6 +30,11 @@ public class InternshipControl {
         return null;
     }
 
+    public List<InternshipOpportunity> getAllVisibleInternshipOpportunities() {
+        //implementation
+        return null;
+    }
+
     public List<InternshipOpportunity> getAllInternshipOpportunities(){
         //implementation
         return null;

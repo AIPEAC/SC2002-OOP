@@ -16,42 +16,36 @@ public class Main {
 
         Scanner sc = new Scanner(System.in);
         try {
-            String domain = null;
-            while (true) {
-                System.out.println("Please choose domain to login: 1. CareerStaff 2. Student 3. CompanyRepresentative");
-                domain = sc.nextLine().trim();
-                if (domain.equals("1") || domain.equals("2") || domain.equals("3")) break;
-                System.out.println("Invalid selection. Please enter 1, 2, or 3.");
+            // Generic login first
+            LoginCLI loginCLI = new LoginCLI(sc, loginCtrl, authCtrl);
+            loginCLI.run();
+
+            if (!authCtrl.isLoggedIn()) {
+                System.out.println("Exiting application (login failed).");
+                return;
             }
 
-            // Collect credentials (UI) and delegate authentication to the selected CLI
-            System.out.println("Enter userID:");
-            String userID = sc.nextLine().trim();
-            System.out.println("Enter password:");
-            String password = sc.nextLine();
-
-            switch (domain) {
-                case "1": {
-                    System.out.println("Welcome, Career Staff. Launching staff console (login via CLI)...");
-                    CareerStaffCLI staffCLI = new CareerStaffCLI(loginCtrl, authCtrl, appCtrl, intCtrl, reportCtrl);
-                    staffCLI.login(userID, password);
+            // Dispatch based on identity
+            String identity = authCtrl.getUserIdentity();
+            switch (identity) {
+                case "CareerStaff": {
+                    System.out.println("Launching Career Staff console...");
+                    // Placeholder: instantiate and immediately enter (future) staff menu loop
+                    new CareerStaffCLI(sc, authCtrl, appCtrl, intCtrl, reportCtrl); // instance retained only if needed later
                     break;
                 }
-                case "2": {
-                    System.out.println("Welcome, Student. Launching student console (login via CLI)...");
-                    StudentCLI studentCLI = new StudentCLI(loginCtrl, appCtrl, authCtrl, intCtrl);
-                    studentCLI.login(userID, password);
+                case "Student": {
+                    System.out.println("Launching Student console...");
+                    new StudentCLI(sc, loginCtrl, appCtrl, authCtrl, intCtrl);
                     break;
                 }
-                case "3": {
-                    System.out.println("Welcome, Company Representative. Launching company console (login via CLI)...");
-                    CompanyRepresentativeCLI compRepCLI = new CompanyRepresentativeCLI(loginCtrl, authCtrl, intCtrl);
-                    compRepCLI.login(userID, password);
+                case "CompanyRepresentative": {
+                    System.out.println("Launching Company Representative console...");
+                    new CompanyRepresentativeCLI(sc, authCtrl, intCtrl);
                     break;
                 }
                 default:
-                    // Should never happen due to earlier validation
-                    break;
+                    System.out.println("Unknown identity: " + identity + ". Exiting.");
             }
         } finally {
             sc.close();
