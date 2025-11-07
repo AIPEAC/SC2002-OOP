@@ -40,11 +40,30 @@ public class StudentCLI extends InterfaceCLI{
                     break;
                 case "4":
                     checkMyApplicationStatus();
+                    if (appCtrl.hasAcceptedOffer()) {
+                        System.out.println("You have accepted an internship offer. Do you want to view the internships you applied to? (y/n): ");
+                        String viewChoice = sc.nextLine();
+                        if ("y".equalsIgnoreCase(viewChoice)) {
+                            viewInternshipIAppliedTo();
+                        }
+                        System.out.println("Do you want to withdraw this application? (y/n): ");
+                        String withdrawChoice = sc.nextLine();
+                        if ("y".equalsIgnoreCase(withdrawChoice)) {
+                            withdrawApplication();
+                        }
+                        System.out.println("Since you have accepted an offer, you cannot perform further actions. Logging out...");
+                        break;
+                    }
                     if (appCtrl.hasApprovedApplication()) {
                         appCtrl.getApprovedApplicationInternshipCompaniesAndIDs();
+                        
                         System.out.println("You have some approved applications for Internship Companies: ");
-                        System.out.print("Enter Application Number to respond to offer: ");
+                        System.out.print("Enter Application Number to respond to offer, or press 0 to check the internships you applied to: ");
                         int appNum = Integer.parseInt(sc.nextLine());
+                        if (appNum == 0) {
+                            viewInternshipIAppliedTo();
+                            break;
+                        }
                         System.out.println("Do you want to accept (1) or reject (2) the offer?");
                         String response = sc.nextLine();   
                         if ("1".equals(response)) {
@@ -86,9 +105,14 @@ public class StudentCLI extends InterfaceCLI{
     private void withdrawApplication() {
         System.out.println("\n=== Withdrawing Intership Application ===");
         System.out.println("Please note that this is irreversible once submitted.");
-        System.out.println("Also, the previous automatic withdrawal will not be reverted.");
-        System.out.print("Enter Application Number to withdraw: ");
-        int appNumber = Integer.parseInt(sc.nextLine());
+        System.out.println("Also, the previous automatic withdrawal will NOT be reverted.");
+        System.out.print("Enter Application Number to withdraw, or <Enter> to cancel: ");
+        String input = sc.nextLine();
+        if (input.isEmpty()) {
+            System.out.println("Withdrawal cancelled.");
+            return;
+        }
+        int appNumber = Integer.parseInt(input);
         appCtrl.requestWithdrawApplication(appNumber);
     }
 

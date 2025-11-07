@@ -55,6 +55,9 @@ public class Application {
     public String getWithdrawStatus() {
         return withdrawStatus;
     }
+    public String getAcceptance() {
+        return acceptance;
+    }
 
     public int getApplicationNumber() {
         return applicationNumber;

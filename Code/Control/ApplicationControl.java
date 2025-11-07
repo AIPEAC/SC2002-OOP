@@ -110,6 +110,14 @@ public class ApplicationControl {
 		}
 		return;
 	}
+	public boolean hasAcceptedOffer() {
+		for (Application app : applications) {
+			if (app.getAcceptance() != null && app.getAcceptance().equals("yes")) {
+				return true;
+			}
+		}
+		return false;
+	}
 	public boolean hasApprovedApplication() {
 		for (Application app : applications) {
 			if (app.getApplicationStatus().equals("approved")) {
