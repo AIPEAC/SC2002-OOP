@@ -1,7 +1,6 @@
 
 package Boundary;
 import Control.*;
-import Entity.Application;
 import Interface.*;
 import java.util.*;
 
@@ -41,6 +40,23 @@ public class StudentCLI extends InterfaceCLI{
                     break;
                 case "4":
                     checkMyApplicationStatus();
+                    if (appCtrl.hasApprovedApplication()) {
+                        appCtrl.getApprovedApplicationInternshipCompaniesAndIDs();
+                        System.out.println("You have some approved applications for Internship Companies: ");
+                        System.out.print("Enter Application Number to respond to offer: ");
+                        int appNum = Integer.parseInt(sc.nextLine());
+                        System.out.println("Do you want to accept (1) or reject (2) the offer?");
+                        String response = sc.nextLine();   
+                        if ("1".equals(response)) {
+                            acceptInternshipOpportunity(appNum);
+                        } else if ("2".equals(response)) {
+                            rejectInternshipOpportunity(appNum);
+                        } else {
+                            System.out.println("Invalid option. Returning to main menu.");
+                        }
+                    } else {
+                        System.out.println("No approved applications found.");
+                    }
                     break;
                 case "5":
                     System.out.println("Logging out...");
@@ -59,46 +75,30 @@ public class StudentCLI extends InterfaceCLI{
 
     private void checkMyApplicationStatus() {
         System.out.println("\n=== Your Application Status ===");
+        appCtrl.loadStudentApplicationFromDB();
         appCtrl.checkApplications();
     }
 
     private void withdrawApplication() {
         System.out.println("\n=== Withdrawing Intership Application ===");
         System.out.println("Please note that this is irreversible once submitted.");
+        System.out.println("Also, the previous automatic withdrawal will not be reverted.");
         System.out.print("Enter Application Number to withdraw: ");
         int appNumber = Integer.parseInt(sc.nextLine());
-        Application app = appCtrl.getApplicationByNumber(appNumber);
-        if (app != null) {
-            appCtrl.requestWithdrawApplication(app);
-            appCtrl.addApplicationToPendingList(app);
-            System.out.println("Request to withdraw is submitted. Awaiting approval from Career Staff Centre");
-        } else {
-            System.out.println("Application not found.");
-        }
+        appCtrl.requestWithdrawApplication(appNumber);
     }
 
     
 
-    private void acceptInternshipOpportunity(Application app) {
+    private void acceptInternshipOpportunity(int appNum) {
         System.out.println("\n=== Accept Internship Opportunity ===");
-        String status = appCtrl.getApplicationStatus(app);
-
-        if (!"approved".equalsIgnoreCase(status)) {
-            System.out.println("You can only accept applications marked as successful");
-        }
-
+        appCtrl.acceptOffer(appNum);
         System.out.println("Internship accepted successfully! Other pending applications will be withdrawn.");
-
     }
 
-    private void rejectInternshipOpportunity(Application app) {
+    private void rejectInternshipOpportunity(int appNum) {
         System.out.println("\n=== Reject Internship Opportunity ===");
-        String status = appCtrl.getApplicationStatus(app);
-
-        if(!"approved".equalsIgnoreCase(status)) {
-            System.out.println("You can only reject applications marked as successful");
-        }
-
+        appCtrl.rejectOffer(appNum);
         System.out.println("You have rejected this internship offer.");
     }
 }

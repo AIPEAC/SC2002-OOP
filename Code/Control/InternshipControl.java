@@ -21,11 +21,18 @@ public class InternshipControl{
     private List<InternshipOpportunity> internshipOpportunities = new ArrayList<InternshipOpportunity>();
     private List<String> pendingInternshipOppID = new ArrayList<String>();
     private AuthenticationControl authCtrl;
+    private ApplicationControl appCtrl=null;
     private Student student=null;
+
+    // =========================================================
+    // Constructor and Initializer
 
     public InternshipControl(AuthenticationControl authCtrl) {
         this.authCtrl = authCtrl;
         loadInternshipOpportunityFromDB();
+    }
+    public void setApplicationControl(ApplicationControl appCtrl) {
+        this.appCtrl = appCtrl;
     }
     private void loadInternshipOpportunityFromDB() {
         String CSV_FILE = "Lib/internship_opportunity_list.csv";
@@ -122,6 +129,9 @@ public class InternshipControl{
     // =========================================================
     // Student methods
     private void loadStudentFromDB(String studentID) {
+        if (student != null && student.getUserID().equals(studentID)) {
+            return; // Already loaded
+        }
         String CSV_FILE = "Lib/student_list.csv";
         //read from csv and initialize student
         try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
@@ -156,20 +166,50 @@ public class InternshipControl{
         InternshipOpportunity opp = getInternshipByID(oppID);
         if (opp != null && student != null) {
             List<String> preferredMajors = opp.getPreferredMajors();
-            if (!preferredMajors.contains(student.getMajor())) {
-                System.out.println("Note: You do not meet the major preferences.");
+            String level = opp.getInternshipLevel();
+            boolean levelMatch = false;
+            if (level.equals("Basic")) {
+                levelMatch = true; // All students eligible
+            } else if (level.equals("Intermediate")|| level.equals("Advanced")) {
+                if (student.getYear() == 3 || student.getYear() == 4) {
+                    levelMatch = true;
+                }
             }
-            return true;
+            if (levelMatch) {
+                if (!preferredMajors.contains(student.getMajor())) {
+                System.out.println("Note: You do not meet the major preferences.");
+                }
+                return true;
+            }
+            System.out.println("level requirement:"+level+"\n");
+            System.out.println("You do not meet the level requirement.\n");
+            return false;
         }
-        return false; 
+        System.out.println("Error in retrieving student or internship details.");
+        return false;
     }
-    public void addApplicationNumberToInternshipOpportunity(InternshipOpportunity opp) {
-        //implementation
+    public void addApplicationNumberToInternshipOpportunity(int applicationNumber, String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp != null) {
+            opp.addApplicationNumberToInternship(applicationNumber);
+        }
+    }
+    public void removeApplicationNumberFromInternshipOpportunity(int applicationNumber, String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp != null) {
+            opp.removeApplicationNumberFromInternship(applicationNumber);
+        }
     }
     public void withdrawEveryOtherApplication(String studentID) {
-        //
+        appCtrl.withdrawOtherApplicationsOfApprovedStudent(studentID);
     }
-
+    public String getInternshipCompany(String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp != null) {
+            return opp.getCompanyName();
+        }
+        return null;
+    }
     // =========================================================
     // Career Staff methods
 

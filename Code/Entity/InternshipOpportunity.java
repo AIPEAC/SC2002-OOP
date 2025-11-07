@@ -15,14 +15,11 @@ public class InternshipOpportunity {
     private Date closeDate;
     private String status = "pending";
     private String companyName;
-    
-    @SuppressWarnings("unused")
     private String companyRepInChargeID;
-
     private int numOfSlots = 1;
     private List<Integer> applicationNumberList= new ArrayList<Integer>();
     private List<Integer> acceptedApplicationNumbers = new ArrayList<Integer>();
-    private boolean visiblity=true;
+    private boolean visibility=true;
 
     
     public InternshipOpportunity(String internshipID, 
@@ -38,7 +35,7 @@ public class InternshipOpportunity {
         int numOfSlots,
         List<Integer> applicationNumberList,
         List<Integer> acceptedApplicationNumbers,
-        boolean visiblity) {
+        boolean visibility) {
         
         this.internshipID = internshipID;
         this.internshipTitle = internshipTitle;
@@ -53,7 +50,7 @@ public class InternshipOpportunity {
         this.numOfSlots = numOfSlots;
         this.applicationNumberList = applicationNumberList;
         this.acceptedApplicationNumbers = acceptedApplicationNumbers;
-        this.visiblity = visiblity;
+        this.visibility = visibility;
     }
     public InternshipOpportunity(String internshipID, 
         String internshipTitle, 
@@ -125,9 +122,9 @@ public class InternshipOpportunity {
         return acceptedApplicationNumbers;
     }
     public boolean getVisibility() {
-        return visiblity;
+        return visibility;
     }
-    
+
     public List<Object> getDetailsForViewing() {
         List<Object> details=new ArrayList<Object>();
         details.add(internshipID); //0
@@ -140,7 +137,7 @@ public class InternshipOpportunity {
         details.add(status); //7
         details.add(companyName); //8
         details.add(numOfSlots); //9
-        details.add(visiblity); //10
+        details.add(visibility); //10
         details.add(isFull()); //11
         return details;
     }
@@ -154,7 +151,7 @@ public class InternshipOpportunity {
         details.add(closeDate); //4
         details.add(companyName); //5
         details.add(numOfSlots); //6
-        details.add(visiblity); //7
+        details.add(visibility); //7
         details.add(isFull()); //8
         return details;
     }
@@ -167,12 +164,20 @@ public class InternshipOpportunity {
         status = "rejected";
     }
 
-    public void approveApplication(Application application) {
-        application.setApplicationStatusSuccess();
+    public void addApplicationNumberToInternship(int applicationNumber) {
+        applicationNumberList.add(applicationNumber);
+    }
+    public void removeApplicationNumberFromInternship(int applicationNumber) {
+        applicationNumberList.remove(Integer.valueOf(applicationNumber));
     }
 
-    public void rejectApplication(Application application) {
-        application.setApplicationStatusFail();
+    public void approveApplicationNumber(int applicationNumber) {
+        removeApplicationNumberFromInternship(applicationNumber);
+        acceptedApplicationNumbers.add(applicationNumber);
+    }
+
+    public void rejectApplicationNumber(int applicationNumber) {
+        removeApplicationNumberFromInternship(applicationNumber);
     }
 
     public void addSelectedApplication(int applicationID) {

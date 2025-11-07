@@ -12,6 +12,7 @@ public class Main {
         LoginControl loginCtrl = new LoginControl(authCtrl, userLoginDirCtrl);
         InternshipControl intCtrl = new InternshipControl(authCtrl);
         ApplicationControl appCtrl = new ApplicationControl(authCtrl, intCtrl);
+        intCtrl.setApplicationControl(appCtrl);
         ReportControl reportCtrl = new ReportControl(authCtrl, intCtrl);
 
         Scanner sc = new Scanner(System.in);

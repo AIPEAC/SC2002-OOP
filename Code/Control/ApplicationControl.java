@@ -9,14 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import Entity.Application;
 
-
-
 public class ApplicationControl {
-
-
 	private List<Application> applications = new ArrayList<Application>();
 	private AuthenticationControl authCtrl;
 	private InternshipControl intCtrl;
+
+	// =========================================================
+	// Constructor and Initializer
 
 	public ApplicationControl(AuthenticationControl authCtrl, InternshipControl intCtrl) {
 		this.authCtrl = authCtrl;
@@ -53,8 +52,10 @@ public class ApplicationControl {
 					int applicationNumber = Integer.parseInt(values[0]);
 					String internshipID = values[1];
 					String status = values[3];
-					String withdrawStatus = values[4].isEmpty() ? null : values[4];
-					Application app = new Application(applicationNumber, internshipID, studentID, status, withdrawStatus);
+					String company = values[4];
+					String acceptance = values[5].isEmpty() ? null : values[5];
+					String withdrawStatus = values[6].isEmpty() ? null : values[6];
+					Application app = new Application(applicationNumber, internshipID, company, studentID, status, acceptance, withdrawStatus);
 					applications.add(app);
 				}
 			}
@@ -70,6 +71,22 @@ public class ApplicationControl {
 	}
 	public void makeApplication(String internshipID) {
 		// Create a new application for the student
+		if (!authCtrl.isLoggedIn()) {
+			System.out.println("User not logged in.");
+			return;
+		}
+		if (!authCtrl.getUserIdentity().equals("Student")) {
+			System.out.println("Only students can make applications.");
+			return;
+		}
+		if (!intCtrl.isVisibleAndNotFull(internshipID)) {
+			System.out.println("Internship is either not visible or already full.");
+			return;
+		}
+		if (!intCtrl.studentFitsRequirements(authCtrl.getUserID(), internshipID)) {
+			System.out.println("You do not meet the requirements for this internship.");
+			return;
+		}
 		if (internshipID == null || internshipID.isEmpty()) {
 			System.out.println("Invalid Internship ID.");
 			return;
@@ -80,12 +97,56 @@ public class ApplicationControl {
 			System.out.println("You have an approved application.");
 			return;
 		}
-		Application app = new Application(applications.size() + 1, internshipID, authCtrl.getUserID());
+		String companyName= intCtrl.getInternshipCompany(internshipID);
+		Application app = new Application(applications.size() + 1, internshipID, companyName, authCtrl.getUserID());
 		applications.add(app);
 		saveApplicationsToDB();
+		updateInternshipsApplicationsInDB(app.getApplicationNumber(), internshipID, "add");
 		System.out.println("Application is submitted successfully");
 	}
-	public void requestWithdrawApplication(Application app) {
+	public void getApplicationStatus() {
+		for (Application app : applications) {
+			System.out.println(app.toString());
+		}
+		return;
+	}
+	public boolean hasApprovedApplication() {
+		for (Application app : applications) {
+			if (app.getApplicationStatus().equals("approved")) {
+				return true;
+			}
+		}
+		return false;
+	}
+	public void getApprovedApplicationInternshipCompaniesAndIDs() {
+		for (Application app : applications) {
+			if (app.getApplicationStatus().equals("approved")) {
+				System.out.println(app.getCompany() + " (ID: " + app.getInternshipID() + ")");
+			}
+		}
+		return;
+	}
+	public void acceptOffer(int appNum) {
+		Application app = getApplicationByNumber(appNum);
+		if (app != null && app.getApplicationStatus().equals("approved")) {
+			System.out.println("Offer accepted for Application Number: " + appNum);
+			app.setAcceptanceYes();
+			withdrawOtherApplicationsOfApprovedStudent(app.getStudentID());
+		} else {
+			System.out.println("Application not found or not approved.");
+		}
+	}
+	public void rejectOffer(int appNum) {
+		Application app = getApplicationByNumber(appNum);
+		if (app != null && app.getApplicationStatus().equals("approved")) {
+			app.setAcceptanceNo();
+			System.out.println("Offer rejected for Application Number: " + appNum);
+		} else {
+			System.out.println("Application not found or not approved.");
+		}
+	}
+	public void requestWithdrawApplication(int appNum) {
+		Application app = getApplicationByNumber(appNum);
 		if (app != null) {
 			app.setApplicationWithdrawRequested();
 			saveApplicationsToDB();
@@ -119,12 +180,26 @@ public class ApplicationControl {
 	public void removeApplicationFromPendingList(Application app) {
 
 	}
+	// ========================================================
+	// Other methods
 
+	public void withdrawOtherApplicationsOfApprovedStudent(String studentID) {
+		for (Application app : applications) {
+			if (app.getStudentID().equals(studentID) && app.getApplicationStatus().equals("approved")) {
+				continue; // Skip the approved application
+			}
+			if (app.getStudentID().equals(studentID)) {
+				app.setApplicationWithdrawn();
+				updateInternshipsApplicationsInDB(app.getApplicationNumber(), app.getInternshipID(), "remove");
+			}
+			saveApplicationsToDB();
+		}
+	}
 	
 	//=========================================================
 	// Private Helpers
 
-	public Application getApplicationByNumber(int appNumber) {
+	private Application getApplicationByNumber(int appNumber) {
 		for (Application app : applications) {
 			if (app.getApplicationNumber() == appNumber) {
 				return app;
@@ -146,31 +221,10 @@ public class ApplicationControl {
 		}
 	}
 	private void updateInternshipsApplicationsInDB(int applicationNumber, String internshipID, String action) {
-		final String CSV_FILE = "Database/Internships.csv";
-		try (FileWriter writer = new FileWriter(CSV_FILE)) {
-			// read to see which internship to update
-			BufferedReader br = new BufferedReader(new FileReader(CSV_FILE));
-			String line;
-			List<String[]> allLines = new ArrayList<>();
-			// Read all lines
-			while ((line = br.readLine()) != null) {
-				allLines.add(line.split(","));
-			}
-			// add or remove applications from internships
-			if (action.equals("add")) {
-				//implementation
-				for (String[] fields : allLines) {
-					if (fields[0].equals(internshipID)) {
-						fields[11] = fields[11] + applicationNumber + ";";
-						
-					}
-					writer.append(String.join(",", fields) + "\n");
-				}
-			} else if (action.equals("remove")) {
-				//implementation
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (action.equals("add")) {
+			intCtrl.addApplicationNumberToInternshipOpportunity(applicationNumber, internshipID);
+		} else if (action.equals("remove")) {
+			intCtrl.removeApplicationNumberFromInternshipOpportunity(applicationNumber, internshipID);
 		}
 	}
 }
