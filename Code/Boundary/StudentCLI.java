@@ -29,7 +29,7 @@ public class StudentCLI extends InterfaceCLI{
 
             switch (choice) {
                 case "1":
-                    viewFilteredInternshipOpportunities(sc);
+                    viewFilteredInternshipOpportunities();
                     break;
                 case "2":
                     changePassword();

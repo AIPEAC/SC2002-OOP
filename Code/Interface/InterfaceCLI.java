@@ -1,7 +1,7 @@
 package Interface;
 
 import Control.InternshipControl;
-im
+import Control.LoginControl;
 
 import Entity.InternshipOpportunity;
 import java.util.Map;
@@ -50,7 +50,7 @@ public abstract class InterfaceCLI {
         return null;
     }
 
-    public void viewFilteredInternshipOpportunities(Scanner sc) {
+    public void viewFilteredInternshipOpportunities() {
         System.out.print("Enter filter type (e.g., title, companyName, openDate, numberOfSlots): ");
         String filterType = sc.nextLine();
         System.out.print("Enter sorting order (asc/desc): ");
