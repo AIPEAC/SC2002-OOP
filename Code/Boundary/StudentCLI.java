@@ -5,16 +5,16 @@ import Entity.Application;
 import Interface.*;
 import java.util.*;
 public class StudentCLI extends InterfaceCLI{
+    private Scanner sc;
     private LoginControl loginCtrl;
     private AuthenticationControl authCtrl;
     private InternshipControl intCtrl;
 
     private ApplicationControl appCtrl;
-    private Scanner sc = new Scanner(System.in);
 
 
-    public StudentCLI(LoginControl logCtrl, ApplicationControl appCtrl, AuthenticationControl authCtrl, InternshipControl intCtrl) {
-        super(logCtrl, authCtrl, intCtrl);
+    public StudentCLI(Scanner sc, LoginControl logCtrl, ApplicationControl appCtrl, AuthenticationControl authCtrl, InternshipControl intCtrl) {
+        super(sc, authCtrl, intCtrl);
         this.appCtrl = appCtrl;
     }
 

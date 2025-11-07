@@ -33,19 +33,19 @@ public class Main {
             switch (domain) {
                 case "1": {
                     System.out.println("Welcome, Career Staff. Launching staff console (login via CLI)...");
-                    CareerStaffCLI staffCLI = new CareerStaffCLI(loginCtrl, appCtrl, intCtrl, reportCtrl);
+                    CareerStaffCLI staffCLI = new CareerStaffCLI(loginCtrl, authCtrl, appCtrl, intCtrl, reportCtrl);
                     staffCLI.login(userID, password);
                     break;
                 }
                 case "2": {
                     System.out.println("Welcome, Student. Launching student console (login via CLI)...");
-                    StudentCLI studentCLI = new StudentCLI(loginCtrl, appCtrl);
+                    StudentCLI studentCLI = new StudentCLI(loginCtrl, appCtrl, authCtrl, intCtrl);
                     studentCLI.login(userID, password);
                     break;
                 }
                 case "3": {
                     System.out.println("Welcome, Company Representative. Launching company console (login via CLI)...");
-                    CompanyRepresentativeCLI compRepCLI = new CompanyRepresentativeCLI(loginCtrl, intCtrl);
+                    CompanyRepresentativeCLI compRepCLI = new CompanyRepresentativeCLI(loginCtrl, authCtrl, intCtrl);
                     compRepCLI.login(userID, password);
                     break;
                 }

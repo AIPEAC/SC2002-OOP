@@ -7,20 +7,18 @@ import Control.InternshipControl;
 
 import Entity.InternshipOpportunity;
 import java.util.List;
+import java.util.Scanner;
 
 public abstract class InterfaceCLI {
+    Scanner sc;
     LoginControl loginCtrl;
     AuthenticationControl authCtrl;
     InternshipControl intCtrl;
 
-    public InterfaceCLI(LoginControl loginCtrl, AuthenticationControl authCtrl, InternshipControl intCtrl) {
-        this.loginCtrl = loginCtrl;
+    public InterfaceCLI(Scanner sc, AuthenticationControl authCtrl, InternshipControl intCtrl) {
+        this.sc = sc;
         this.authCtrl = authCtrl;
         this.intCtrl = intCtrl;
-    }
-
-    public void login(String userID, String password){
-        //should I pass the logincontrol class as the attr list?
     }
 
     public void logout() {

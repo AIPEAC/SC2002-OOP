@@ -1,18 +1,19 @@
 package Boundary;
 import Control.*;
 import Interface.*;
+import java.util.Scanner;
 import java.util.List;
 import java.util.Date;
 import Entity.InternshipOpportunity;
 
 public class CompanyRepresentativeCLI extends InterfaceCLI{
+    private Scanner sc;
     private LoginControl loginCtrl;
     private AuthenticationControl authCtrl;
     private InternshipControl intCtrl;
 
-    public CompanyRepresentativeCLI(LoginControl logCtrl, AuthenticationControl authCtrl, InternshipControl intCtrl) {
-        super(logCtrl, authCtrl, intCtrl);
-        this.loginCtrl = logCtrl;
+    public CompanyRepresentativeCLI(Scanner sc, AuthenticationControl authCtrl, InternshipControl intCtrl) {
+        super(sc, authCtrl, intCtrl);
         this.authCtrl = authCtrl;
         this.intCtrl = intCtrl;
     }

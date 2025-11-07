@@ -6,18 +6,18 @@ import Interface.*;
 import Entity.InternshipOpportunity;
 import java.util.Map;
 import java.util.List;
+import java.util.Scanner;
 
 public class CareerStaffCLI extends InterfaceCLI {
     
-    private LoginControl loginCtrl;
     private AuthenticationControl authCtrl;
     private ApplicationControl appCtrl;
     private InternshipControl intCtrl;
     private ReportControl reportCtrl;
 
 
-    public CareerStaffCLI(LoginControl loginCtrl, AuthenticationControl authCtrl, ApplicationControl appCtrl, InternshipControl intCtrl, ReportControl reportCtrl) {
-        super(loginCtrl, authCtrl, intCtrl);
+    public CareerStaffCLI(Scanner sc, AuthenticationControl authCtrl, ApplicationControl appCtrl, InternshipControl intCtrl, ReportControl reportCtrl) {
+        super(sc, authCtrl, intCtrl);
         this.appCtrl = appCtrl;
         this.intCtrl = intCtrl;
         this.reportCtrl = reportCtrl;
