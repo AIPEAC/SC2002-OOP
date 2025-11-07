@@ -88,12 +88,47 @@ public class InternshipOpportunity {
         //implement
         return applicationNumberList;
     }
+    public String getInternshipID() {
+        return internshipID;
+    }
+    public String getInternshipTitle() {
+        return internshipTitle;
+    }
+    public String getDescription() {
+        return description;
+    }
+    public String getInternshipLevel() {
+        return internshipLevel;
+    }
+    public List<String> getPreferredMajors() {
+        return preferredMajors;
+    }
+    public Date getOpeningDate() {
+        return openingDate;
+    }
+    public Date getCloseDate() {
+        return closeDate;
+    }
+    public String getCompanyName() {
+        return companyName;
+    }
+    public String getCompanyRepInChargeID() {
+        return companyRepInChargeID;
+    }
+    public int getNumOfSlots() {
+        return numOfSlots;
+    }
+    public List<Integer> getApplicationNumberList() {
+        return applicationNumberList;
+    }
+    public List<Integer> getAcceptedApplicationNumbers() {
+        return acceptedApplicationNumbers;
+    }
+    public boolean getVisibility() {
+        return visiblity;
+    }
     
     public List<Object> getDetailsForViewing() {
-        if (!visiblity){
-            System.out.println("This internship opportunity is not visible.");
-            return null;
-        }
         List<Object> details=new ArrayList<Object>();
         details.add(internshipID); //0
         details.add(internshipTitle); //1
@@ -102,9 +137,11 @@ public class InternshipOpportunity {
         details.add(preferredMajors); //4
         details.add(openingDate); //5
         details.add(closeDate); //6
-        details.add(companyName); //7
-        details.add(numOfSlots); //8
-        details.add(isFull()); //10
+        details.add(status); //7
+        details.add(companyName); //8
+        details.add(numOfSlots); //9
+        details.add(visiblity); //10
+        details.add(isFull()); //11
         return details;
     }
 
@@ -121,7 +158,7 @@ public class InternshipOpportunity {
         details.add(isFull()); //8
         return details;
     }
-
+    
     public void setStatusToApproved() {
         status = "approved";
     }

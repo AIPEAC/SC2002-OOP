@@ -1,5 +1,4 @@
 package Control;
-import Entity.InternshipOpportunity;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,15 +10,18 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 
-public class InternshipControl {
+import Entity.InternshipOpportunity;
+import Entity.Users.Student;
+
+
+public class InternshipControl{
     private List<InternshipOpportunity> internshipOpportunities = new ArrayList<InternshipOpportunity>();
     private List<String> pendingInternshipOppID = new ArrayList<String>();
     private AuthenticationControl authCtrl;
-
-    //when initialize the internships. read from csv.
-    //the last column will be several int seperated by spaces.
-    //read those int and initialize the internships with List<application>, using the int get from the csv.
+    private Student student=null;
 
     public InternshipControl(AuthenticationControl authCtrl) {
         this.authCtrl = authCtrl;
@@ -70,11 +72,13 @@ public class InternshipControl {
 
     //=========================================================
     // All Users methods
+
     public List<InternshipOpportunity> getAllVisibleInternshipOpportunities() {
         //implementation
         return null;
     }
-    public List<Object> getInternshiDetails(InternshipOpportunity opp) {
+    public List<Object> getInternshipDetails(String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
         if (authCtrl.isLoggedIn()){
             //implementation
             return opp.getDetailsForViewing();
@@ -82,76 +86,158 @@ public class InternshipControl {
         System.out.println("Please login to view internship details.");
         return null;
     }
-
-    
-    
-    //=========================================================
-    // Career Staff methods
-
-
-    public void requestCreateInternshipOpportunity(int internshipID, String internshipTitle, String description, String internshipLevel, List<String> preferredMajors, Date openDate, Date closeDate, String companyName, String companyRepInChargeID, int numberOfSlots) {
-        //implementation
-    }
-
     public List<InternshipOpportunity> getInternshipOpportunities(String oppID) {
         //implementation
         return null;
     }
 
-    public List<InternshipOpportunity> getPendingInternshipOpportunities() {
+    // =========================================================
+    // Company Rep methods
+
+    public void requestCreateInternshipOpportunity(int internshipID, 
+        String internshipTitle, String description, 
+        String internshipLevel, List<String> preferredMajors, 
+        Date openDate, Date closeDate, String companyName, 
+        String companyRepInChargeID, int numberOfSlots) {
+        //implementation
+    }
+    public List<Application> getInternshipStatus(String internshipID) {
         //implementation
         return null;
     }
-
-    
-
-    public List<InternshipOpportunity> getAllInternshipOpportunities(){
-        //implementation
-        return null;
-    }
-    
-    
-
-    public List<Application> getInternshipStatus(InternshipOpportunity opp) {
-        //implementation
-        return null;
-    }
-
-    public void approveInternshipCreation(InternshipOpportunity opp) {
+    public void viewApplications(String internshipID) {
         //implementation
     }
-
-    public void rejectInternshipCreation(InternshipOpportunity rejectInternshipCreation) {
-        //implementation
-    }
-
     public void approve(Application app) {
         //implementation
-    }
-
-    public void withdrawEveryOtherApplication(String studentID) {
-        //
     }
 
     public void reject(Application app) {
         //
     }
 
-    public void reject(InternshipOpportunity opp) {
+    // =========================================================
+    // Student and Career Staff methods
+    
+    // =========================================================
+    // Student methods
+    private void loadStudentFromDB(String studentID) {
+        String CSV_FILE = "Lib/student_list.csv";
+        //read from csv and initialize student
+        try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
+            String line;
+            // Skip header
+            br.readLine();
+            while ((line = br.readLine()) != null) {
+                if (!line.startsWith(studentID)) continue;
+                String[] values = line.split(",");
+                String name = values[1];
+                String email = values[2];
+                String major = values[3];
+                boolean hasAcceptedInternshipOpportunity = Boolean.parseBoolean(values[5]);
+                int year = Integer.parseInt(values[4]);
+                student = new Student(studentID, name, email, major, year, hasAcceptedInternshipOpportunity);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public boolean isVisibleAndNotFull(String oppID) {
+        InternshipOpportunity opp = getInternshipByID(oppID);
+        if (opp != null) {
+            if (opp.getVisibility() && opp.getNumOfSlots() > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean studentFitsRequirements(String studentID, String oppID) {
+        loadStudentFromDB(studentID);
+        InternshipOpportunity opp = getInternshipByID(oppID);
+        if (opp != null && student != null) {
+            List<String> preferredMajors = opp.getPreferredMajors();
+            if (!preferredMajors.contains(student.getMajor())) {
+                System.out.println("Note: You do not meet the major preferences.");
+            }
+            return true;
+        }
+        return false; 
+    }
+    public void addApplicationNumberToInternshipOpportunity(InternshipOpportunity opp) {
+        //implementation
+    }
+    public void withdrawEveryOtherApplication(String studentID) {
         //
     }
 
+    // =========================================================
+    // Career Staff methods
+
+    public List<InternshipOpportunity> getPendingInternshipOpportunities() {
+        //implementation
+        return null;
+    }
+    public List<InternshipOpportunity> getAllInternshipOpportunities(){ //for report
+        //implementation
+        return null;
+    } 
+    public void approveInternshipCreation(InternshipOpportunity opp) {
+        //implementation
+    }
+    public void rejectInternshipCreation(InternshipOpportunity rejectInternshipCreation) {
+        //implementation
+    }
+    public void reject(InternshipOpportunity opp) {
+        //
+    }
     public void changeVisibility(InternshipOpportunity opp) {
         //
     }
 
-    public void addOpportunityToPendingList(InternshipOpportunity opp) {
-        //
-    }
 
-    public void removeOpportunityToPendingList(InternshipOpportunity opp) {
-        //
+    //=========================================================
+    // Private Helpers
+    private InternshipOpportunity getInternshipByID(String internshipID) {
+        for (InternshipOpportunity opp : internshipOpportunities) {
+            if (opp.getInternshipID().equals(internshipID)) {
+                return opp;
+            }
+        }
+        return null;
     }
-
     
+    private void addOpportunityToPendingList(InternshipOpportunity opp) {
+        //
+    }
+    private void removeOpportunityFromPendingList(InternshipOpportunity opp) {
+        //
+    }
+    private void updateInternshipInDB() {
+        //write the updated internshipOpportunities list back to the CSV file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("internships.csv"))) {
+            for (InternshipOpportunity opp : internshipOpportunities) {
+                String line = String.join(",",
+                    opp.getInternshipID(),
+                    opp.getInternshipTitle(),
+                    opp.getDescription(),
+                    opp.getInternshipLevel(),
+                    String.join(" ", opp.getPreferredMajors()),
+                    new SimpleDateFormat("yyyy-MM-dd").format(opp.getOpeningDate()),
+                    new SimpleDateFormat("yyyy-MM-dd").format(opp.getCloseDate()),
+                    opp.getStatus(),
+                    opp.getCompanyName(),
+                    opp.getCompanyRepInChargeID(),
+                    String.valueOf(opp.getNumOfSlots()),
+                    opp.getApplicationNumberList().stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(" ")),
+                    opp.getAcceptedApplicationNumbers().stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(" ")),
+                    String.valueOf(opp.getVisibility())
+                );
+                writer.write(line);
+                writer.newLine();
+            }
+    }
 }
