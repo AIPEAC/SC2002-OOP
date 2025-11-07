@@ -11,13 +11,15 @@ import java.util.Scanner;
 public class CareerStaffCLI extends InterfaceCLI {
     private ApplicationControl appCtrl;
     private ReportControl reportCtrl;
-
-
+    
     public CareerStaffCLI(Scanner sc, ApplicationControl appCtrl, InternshipControl intCtrl, ReportControl reportCtrl) {
         super(sc, intCtrl);
         this.appCtrl = appCtrl;
         this.reportCtrl = reportCtrl;
-    }    
+    }
+
+    @Override
+    public void displayMenu() {}
     
     public void viewCompanyRepRegisterList() {
         // implementation

@@ -11,7 +11,8 @@ public class CompanyRepresentativeCLI extends InterfaceCLI{
     public CompanyRepresentativeCLI(Scanner sc, InternshipControl intCtrl) {
         super(sc, intCtrl);
     }
-
+    @Override
+    public void displayMenu() {}
     
 
 
