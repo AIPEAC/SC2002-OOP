@@ -37,6 +37,7 @@ public class Main {
                 case "Student": {
                     System.out.println("Launching Student console...");
                     new StudentCLI(sc, loginCtrl, appCtrl, authCtrl, intCtrl);
+                    
                     break;
                 }
                 case "CompanyRepresentative": {

@@ -6,6 +6,7 @@ import Control.InternshipControl;
 
 import Entity.InternshipOpportunity;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
@@ -46,7 +47,15 @@ public abstract class InterfaceCLI {
         return null;
     }
 
-    public void viewFilteredInternshipOpportunities(String filterType, boolean ascending, Map<String,List<String>> filterIn) {
+    public void viewFilteredInternshipOpportunities(Scanner sc) {
+        System.out.print("Enter filter type (e.g., title, companyName, openDate, numberOfSlots): ");
+        String filterType = sc.nextLine();
+        System.out.print("Enter sorting order (asc/desc): ");
+        String order = sc.nextLine();
+        boolean ascending = "asc".equalsIgnoreCase(order);
+        Map<String, List<String>> filterIn = new HashMap<>();
+        // Collect additional filtering criteria from the user
+        // ...
         List<InternshipOpportunity> filteredList = filterInternshipOpportunities(filterType, ascending, filterIn);
         // Display the filtered internship opportunities
         for (InternshipOpportunity opp : filteredList) {
