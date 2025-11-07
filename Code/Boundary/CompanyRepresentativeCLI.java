@@ -5,12 +5,15 @@ import java.util.List;
 import java.util.Date;
 import Entity.InternshipOpportunity;
 
-public class CompanyRepresentativeCLI implements InterfaceCLI{
+public class CompanyRepresentativeCLI extends InterfaceCLI{
     private LoginControl loginCtrl;
+    private AuthenticationControl authCtrl;
     private InternshipControl intCtrl;
 
-    public CompanyRepresentativeCLI(LoginControl logCtrl, InternshipControl intCtrl) {
+    public CompanyRepresentativeCLI(LoginControl logCtrl, AuthenticationControl authCtrl, InternshipControl intCtrl) {
+        super(logCtrl, authCtrl, intCtrl);
         this.loginCtrl = logCtrl;
+        this.authCtrl = authCtrl;
         this.intCtrl = intCtrl;
     }
 
