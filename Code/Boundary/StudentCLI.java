@@ -16,13 +16,14 @@ public class StudentCLI extends InterfaceCLI{
     public void displayStudentMenu() {
         while (true) {
             System.out.println("\n=== Student Menu ===");
-            System.out.println("1. View Internship Opportunities");
-            System.out.println("2. Submit Internship Application");
-            System.out.println("3. Withdraw Internship Application");
-            System.out.println("4. Check My Application Status");
-            System.out.println("5. Accept Internship Opportunity");
-            System.out.println("6. Reject Internship Opportunity");
-            System.out.println("7. Logout");
+            System.out.println("1. Change Password");
+            System.out.println("2. View Internship Opportunities");
+            System.out.println("3. Submit Internship Application");
+            System.out.println("4. Withdraw Internship Application");
+            System.out.println("5. Check My Application Status");
+            System.out.println("6. Accept Internship Opportunity");
+            System.out.println("7. Reject Internship Opportunity");
+            System.out.println("8. Logout");
             System.out.print("Select an option: ");
             String choice = sc.nextLine();
 
@@ -31,27 +32,30 @@ public class StudentCLI extends InterfaceCLI{
                     viewFilteredInternshipOpportunities(sc);
                     break;
                 case "2":
-                    submitApplication();
+                    changePassword();
                     break;
                 case "3":
+                    submitApplication();
+                    break;
+                case "4":
                     // Assume we have a method to get the application to withdraw
                     Application appToWithdraw = null; // Placeholder
                     withdrawApplication(appToWithdraw);
                     break;
-                case "4":
+                case "5":
                     checkMyApplicationStatus();
                     break;
-                case "5":
+                case "6":
                     // Assume we have a method to get the application to accept
                     Application appToAccept = null; // Placeholder
                     acceptInternshipOpportunity(appToAccept);
                     break;
-                case "6":
+                case "7":
                     // Assume we have a method to get the application to reject
                     Application appToReject = null; // Placeholder
                     rejectInternshipOpportunity(appToReject);
                     break;
-                case "7":
+                case "8":
                     System.out.println("Logging out...");
                     return;
                 default:

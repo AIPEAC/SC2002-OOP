@@ -1,6 +1,7 @@
 package Interface;
 
 import Control.InternshipControl;
+im
 
 import Entity.InternshipOpportunity;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.Scanner;
 public abstract class InterfaceCLI {
     protected Scanner sc;
     protected InternshipControl intCtrl;
+    protected LoginControl loginCtrl;
 
     public InterfaceCLI(Scanner sc, InternshipControl intCtrl) {
         this.sc = sc;
@@ -21,8 +23,14 @@ public abstract class InterfaceCLI {
         //
     }
 
-    public void changePassword(String originalPassword, String newPassword){
-        //
+    public void changePassword(){
+        sc.nextLine(); //consume newline
+        System.out.print("Enter your current password: ");
+        String currentPassword = sc.nextLine();
+        System.out.print("Enter your new password: ");
+        String newPassword = sc.nextLine();
+        // Call the control method to change the password
+        
     }
 
     private List<InternshipOpportunity> filterInternshipOpportunities(String filterType, boolean ascending, Map<String,List<String>> filterIn) {
