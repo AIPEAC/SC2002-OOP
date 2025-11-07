@@ -12,6 +12,7 @@ public class StudentCLI extends InterfaceCLI{
     public StudentCLI(Scanner sc, ApplicationControl appCtrl, InternshipControl intCtrl) {
         super(sc, intCtrl);
         this.appCtrl = appCtrl;
+        appCtrl.loadStudentApplicationFromDB();
     }
     @Override
     public void displayMenu() {
@@ -43,7 +44,7 @@ public class StudentCLI extends InterfaceCLI{
                     break;
                 case "5":
                     System.out.println("Logging out...");
-                    return; // Exit the menu loop
+                    return;
                 default:
                     System.out.println("Invalid option. Please try again.");
             }
@@ -57,45 +58,23 @@ public class StudentCLI extends InterfaceCLI{
     }
 
     private void checkMyApplicationStatus() {
-        System.out.println("\n=== Check My Application Status ===");
-        List<Application> myApplications = appCtrl.getApplicationsByStudent();
-
-        if (myApplications.isEmpty()) {
-            System.out.println("You have no internship applications.");
-            return;
-        }
-
-        System.out.printf("%-15s %-20s %-15s %-20s\n", "Application ID", "Internship ID", "Status", "Withdrawn Status");
-        for (Application app : myApplications) {
-            String status = appCtrl.getApplicationStatus(app);
-            System.out.printf("%-15s %-20s %-15s\n", app.getApplicationIndex(), app.getInternshipID(), status);
-        }
-
-        System.out.println("Do you want to withdraw an application? (y to withdraw): ");
-        String withdrawChoice = sc.nextLine();
-        if ("y".equalsIgnoreCase(withdrawChoice)) {
-            System.out.println("Enter Application ID to withdraw: ");
-            String appIdStr = sc.nextLine();
-            Application appToWithdraw = null;
-            for (Application app : myApplications) {
-                if (String.valueOf(app.getApplicationIndex()).equals(appIdStr)) {
-                    appToWithdraw = app;
-                    break;
-                }
-            }
-            if (appToWithdraw != null) {
-                withdrawApplication(appToWithdraw);
-            } else {
-                System.out.println("Invalid Application ID.");
-            }
-        }
+        System.out.println("\n=== Your Application Status ===");
+        appCtrl.checkApplications();
     }
 
-    private void withdrawApplication(Application app) {
+    private void withdrawApplication() {
         System.out.println("\n=== Withdrawing Intership Application ===");
-        appCtrl.requestWithdrawApplication(app);
-        appCtrl.addApplicationToPendingList(app);
-        System.out.println("Request to withdraw is submitted. Awaiting approval from Career Staff Centre");
+        System.out.println("Please note that this is irreversible once submitted.");
+        System.out.print("Enter Application Number to withdraw: ");
+        int appNumber = Integer.parseInt(sc.nextLine());
+        Application app = appCtrl.getApplicationByNumber(appNumber);
+        if (app != null) {
+            appCtrl.requestWithdrawApplication(app);
+            appCtrl.addApplicationToPendingList(app);
+            System.out.println("Request to withdraw is submitted. Awaiting approval from Career Staff Centre");
+        } else {
+            System.out.println("Application not found.");
+        }
     }
 
     

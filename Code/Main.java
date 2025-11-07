@@ -10,8 +10,8 @@ public class Main {
         AuthenticationControl authCtrl = new AuthenticationControl();
         UserLoginDirectoryControl userLoginDirCtrl = new UserLoginDirectoryControl();
         LoginControl loginCtrl = new LoginControl(authCtrl, userLoginDirCtrl);
-        ApplicationControl appCtrl = new ApplicationControl(authCtrl);
         InternshipControl intCtrl = new InternshipControl(authCtrl);
+        ApplicationControl appCtrl = new ApplicationControl(authCtrl, intCtrl);
         ReportControl reportCtrl = new ReportControl(authCtrl, intCtrl);
 
         Scanner sc = new Scanner(System.in);
@@ -31,18 +31,20 @@ public class Main {
                 case "CareerStaff": {
                     System.out.println("Launching Career Staff console...");
                     // Placeholder: instantiate and immediately enter (future) staff menu loop
-                    new CareerStaffCLI(sc, appCtrl, intCtrl, reportCtrl); // instance retained only if needed later
+                    CareerStaffCLI staffCLI=new CareerStaffCLI(sc, appCtrl, intCtrl, reportCtrl);
+                    staffCLI.displayMenu();
                     break;
                 }
                 case "Student": {
                     System.out.println("Launching Student console...");
-                    new StudentCLI(sc, appCtrl, intCtrl);
-
+                    StudentCLI studentCLI = new StudentCLI(sc, appCtrl, intCtrl);
+                    studentCLI.displayMenu();
                     break;
                 }
                 case "CompanyRepresentative": {
                     System.out.println("Launching Company Representative console...");
-                    new CompanyRepresentativeCLI(sc, intCtrl);
+                    CompanyRepresentativeCLI companyRepCLI = new CompanyRepresentativeCLI(sc, intCtrl);
+                    companyRepCLI.displayMenu();
                     break;
                 }
                 default:

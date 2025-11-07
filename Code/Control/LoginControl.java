@@ -37,14 +37,15 @@ public class LoginControl {
          * when registering, no choice to set password
          */
         
-        if (name==null || companyName==null || department==null || postion==null || email==null){
-            System.out.println("Please fill in the essential information.");
+        if (name==null || companyName==null || email==null){
+            System.out.println("Please fill in the essential information: name, company name, and email.");
             return null;
         }else{
             String userID=userLoginDirCtrl.requestRegisterCompanyRep(name, companyName, department, postion, email);
             try{
                 if (userID!=null){
-                    System.out.println("successfully created");
+                    System.out.println("successfully created. Please wait for account approval from staff. Your UserID is: "+userID+".d");
+                    System.out.println("Your default password is 'password'. Please change your password after logging in.");
                     return userID;
                 }
                 else{

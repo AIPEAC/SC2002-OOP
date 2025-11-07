@@ -1,1 +1,1 @@
-internshipID,title,desciption,level,preferredMajors,openingDate,closeDate,status,CompanyName,companyRepInCharge,numOfSlots,applicationIDList,
+internshipID,title,description,level,preferredMajors,openingDate,closeDate,status,CompanyName,companyRepInCharge,numOfSlots,pendingApplicationNumberList,acceptedApplicationNumberList,visibility

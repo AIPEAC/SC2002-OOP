@@ -1,27 +1,31 @@
 package Entity;
 
 
-import Entity.Users.Student;
-
 public class Application {
-
     private int applicationNumber;
     private String internshipID;
     private String studentID;
     private String status = "pending";
     private String withdrawStatus = null;
 
-    public Application(int applicationNumber, Student student, String internshipOpportunityID) {
+    public Application(int applicationNumber, String internshipID, String studentID) {
         this.applicationNumber = applicationNumber;
-        this.studentID = student.getUserID();
-        this.internshipID = internshipOpportunityID;
+        this.internshipID = internshipID;
+        this.studentID = studentID;
+    }
+
+    public Application(int applicationNumber, String internshipID, String studentID, String status, String withdrawStatus) {
+        this.applicationNumber = applicationNumber;
+        this.studentID = studentID;
+        this.internshipID = internshipID;
+        this.status = status;
+        this.withdrawStatus = withdrawStatus;
     }
 
     @Override
     public String toString() {
         return "Application Number: " + applicationNumber +
                ", Internship ID: " + internshipID +
-               ", Student ID: " + studentID +
                ", Status: " + status +
                ", Withdraw Status: " + (withdrawStatus != null ? withdrawStatus : "N/A");
     }
@@ -53,7 +57,9 @@ public class Application {
     public void setApplicationStatusFail() {
         status = "rejected";
     }
-
+    public void setApplicationWithdrawRequested() {
+        withdrawStatus = "pending";
+    }
     public void setApplicationWithdrawn() {
         withdrawStatus = "approved";
     }

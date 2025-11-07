@@ -7,222 +7,170 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import Entity.Application;
 
+
+
 public class ApplicationControl {
-	private static final String CSV_FILE = "Code/Lib/application_list.csv";
 
-	private List<Application> application = new ArrayList<>();
-	private List<String> pendingWithdrawnApplicationID = new ArrayList<>();
+
+	private List<Application> applications = new ArrayList<Application>();
 	private AuthenticationControl authCtrl;
+	private InternshipControl intCtrl;
 
-	public ApplicationControl(AuthenticationControl authCtrl) {
+	public ApplicationControl(AuthenticationControl authCtrl, InternshipControl intCtrl) {
 		this.authCtrl = authCtrl;
-		loadApplicationFromDB();
+		this.intCtrl = intCtrl;
 	}
 
-	public void loadApplicationFromDB() {
-		application = new ArrayList<>();
+	//=========================================================
+	// Both Student and Career Staff methods
+
+	public void checkApplications() {
+		for (Application app : applications) {
+			System.out.println(app.toString());
+		}
+	}
+
+
+	//=========================================================
+	// Student methods
+
+	public void loadStudentApplicationFromDB() {
+		String studentID = authCtrl.getUserID();
+		// Load applications from the database for the given studentID
+		final String CSV_FILE = "Database/Applications.csv";
 		File file = new File(CSV_FILE);
+		BufferedReader br = null;
 		try {
-			if (!file.exists()) {
-				file.getParentFile().mkdirs();
-				file.createNewFile();
-				try (FileWriter writer = new FileWriter(file)) {
-					writer.append("applicationIndex,internshipiD,studentID,status,withdrawnStatus\n");
+			br = new BufferedReader(new FileReader(file));
+			String line;
+			// Skip header
+			br.readLine();
+			while ((line = br.readLine()) != null) {
+				String[] values = line.split(",");
+				if (values[2].equals(studentID)) {
+					int applicationNumber = Integer.parseInt(values[0]);
+					String internshipID = values[1];
+					String status = values[3];
+					String withdrawStatus = values[4].isEmpty() ? null : values[4];
+					Application app = new Application(applicationNumber, internshipID, studentID, status, withdrawStatus);
+					applications.add(app);
 				}
 			}
-			try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-				String line = br.readLine(); // header
-				while ((line = br.readLine()) != null) {
-					String[] cols = line.split(",");
-					if (cols.length < 5) {
-						String[] expanded = new String[5];
-						for (int i = 0; i < cols.length; i++) expanded[i] = cols[i];
-						for (int i = cols.length; i < 5; i++) expanded[i] = "";
-						cols = expanded;
-					}
-					applicationRows.add(cols);
-					// collect pending withdraw list in-memory
-					if ("pending".equalsIgnoreCase(cols[4])) {
-						pendingWithdrawnApplicationID.add(cols[0]);
-					}
-				}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (br != null) br.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+	}
+	public void makeApplication(String internshipID) {
+		// Create a new application for the student
+		if (internshipID == null || internshipID.isEmpty()) {
+			System.out.println("Invalid Internship ID.");
+			return;
+		}else if (applications.stream().anyMatch(app -> app.getInternshipID().equals(internshipID))) {
+			System.out.println("You have already applied for this internship.");
+			return;
+		}else if(applications.stream().anyMatch(app -> app.getApplicationStatus().equals("approved"))) {
+			System.out.println("You have an approved application.");
+			return;
+		}
+		Application app = new Application(applications.size() + 1, internshipID, authCtrl.getUserID());
+		applications.add(app);
+		saveApplicationsToDB();
+		System.out.println("Application is submitted successfully");
+	}
+	public void requestWithdrawApplication(Application app) {
+		if (app != null) {
+			app.setApplicationWithdrawRequested();
+			saveApplicationsToDB();
+			System.out.println("Withdrawal request submitted for Application Number: " + app.getApplicationNumber());
+		} else {
+			System.out.println("Application not found.");
+		}
+	}
+
+	//=========================================================
+	// Career Staff methods
+
+	public void loadPendingWithdrawalApplications(Application app) {
+		
+	}	
+	public void approveWithdrawal(int appNum) {
+		Application app = getApplicationByNumber(appNum);
+		if (app != null) {
+			app.setApplicationWithdrawn();
+			System.out.println("Withdrawal approved for Application Number: " + appNum);
+		} else {
+			System.out.println("Application not found.");
+		}
+	}
+	public void rejectWithdrawal(Application app) {
+		
+	}
+	public void addApplicationToPendingList(Application app) {
+		
+	}
+	public void removeApplicationFromPendingList(Application app) {
+
+	}
+
+	
+	//=========================================================
+	// Private Helpers
+
+	public Application getApplicationByNumber(int appNumber) {
+		for (Application app : applications) {
+			if (app.getApplicationNumber() == appNumber) {
+				return app;
+			}
+		}
+		return null;
+	}
+	
+	private void saveApplicationsToDB() {
+		final String CSV_FILE = "Database/Applications.csv";
+		try (FileWriter writer = new FileWriter(CSV_FILE)) {
+			// Write header
+			writer.append("ApplicationNumber,InternshipID,StudentID,Status,WithdrawStatus\n");
+			for (Application app : applications) {
+				writer.append(app.getApplicationNumber() + "," + app.getInternshipID() + "," + app.getStudentID() + "," + app.getApplicationStatus() + "," + (app.getWithdrawStatus() != null ? app.getWithdrawStatus() : "") + "\n");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
-	
-
-	public void makeApplication(String internshipID) {
-		if (!authCtrl.isLoggedIn() || !"Student".equals(authCtrl.getUserIdentity())) {
-			System.out.println("Only students can submit applications.");
-			return;
-		}
-		if (internshipID == null || internshipID.trim().isEmpty()) {
-			System.out.println("No internship ID provided. Aborting.");
-			return;
-		}
-		String studentID = authCtrl.getUserID();
-		int nextIndex = nextIndex();
-		String[] row = new String[] {
-			String.valueOf(nextIndex),
-			internshipID.trim(),
-			studentID,
-			"pending",
-			""
-		};
-		applicationRows.add(row);
-		saveAll();
-		System.out.println("Application submitted successfully. Your application ID is: " + nextIndex);
-	}
-
-	public List<Application> getApplicationStatusByStudent() {
-		if (!authCtrl.isLoggedIn() || !"Student".equals(authCtrl.getUserIdentity())) {
-			System.out.println("Only students can view their application status.");
-			return null;
-		}
-		List<Application> result = new ArrayList<>();
-		String studentID = authCtrl.getUserID();
-		for (String[] row : applicationRows) {
-			if (studentID.equals(val(row, 2))) {
-				Application app = new Application();
-				app.setApplicationIndex(Integer.parseInt(val(row, 0)));
-				app.setInternshipID(val(row, 1));
-				app.setStudentID(val(row, 2));
-				app.setStatus(val(row, 3));
-				app.setWithdrawnStatus(val(row, 4));
-				result.add(app);
+	private void updateInternshipsApplicationsInDB(int applicationNumber, String internshipID, String action) {
+		final String CSV_FILE = "Database/Internships.csv";
+		try (FileWriter writer = new FileWriter(CSV_FILE)) {
+			// read to see which internship to update
+			BufferedReader br = new BufferedReader(new FileReader(CSV_FILE));
+			String line;
+			List<String[]> allLines = new ArrayList<>();
+			// Read all lines
+			while ((line = br.readLine()) != null) {
+				allLines.add(line.split(","));
 			}
-		}
-		return result;
-	}
-
-	public void requestWithdrawApplication(Application app) {
-		if (!authCtrl.isLoggedIn()) {
-			System.out.println("You are not logged in.");
-			return;
-		}
-		int idx = resolveIndex(app);
-		if (idx < 0) {
-			System.out.println("Application not found.");
-			return;
-		}
-		String[] row = rowByIndex(idx);
-		if (row == null) {
-			System.out.println("Application not found.");
-			return;
-		}
-		// Only the owner (student) can request withdrawal
-		String owner = val(row, 2);
-		if (!owner.equals(authCtrl.getUserID())) {
-			System.out.println("You can only withdraw your own application.");
-			return;
-		}
-		row[4] = "pending"; // mark withdrawal pending review
-		if (!pendingWithdrawnApplicationID.contains(row[0])) pendingWithdrawnApplicationID.add(row[0]);
-		saveAll();
-		System.out.println("Withdrawal request submitted and pending approval.");
-	}
-
-	public List<Application> tendingWithdrawal(Application app) {
-		// Not yet wired into UI: return empty list placeholder
-		return new ArrayList<>();
-	}
-
-	public void approveWithdrawal(Application app) {
-		if (!authCtrl.isLoggedIn() || !"CareerStaff".equals(authCtrl.getUserIdentity())) {
-			System.out.println("Only Career Staff can approve withdrawals.");
-			return;
-		}
-		int idx = resolveIndex(app);
-		if (idx < 0) {
-			System.out.println("Application not found.");
-			return;
-		}
-		String[] row = rowByIndex(idx);
-		if (row == null) {
-			System.out.println("Application not found.");
-			return;
-		}
-		row[4] = "approved";
-		pendingWithdrawnApplicationID.remove(row[0]);
-		saveAll();
-		System.out.println("Withdrawal approved.");
-	}
-
-	public void rejectWithdrawal(Application app) {
-		if (!authCtrl.isLoggedIn() || !"CareerStaff".equals(authCtrl.getUserIdentity())) {
-			System.out.println("Only Career Staff can reject withdrawals.");
-			return;
-		}
-		int idx = resolveIndex(app);
-		if (idx < 0) {
-			System.out.println("Application not found.");
-			return;
-		}
-		String[] row = rowByIndex(idx);
-		if (row == null) {
-			System.out.println("Application not found.");
-			return;
-		}
-		row[4] = "rejected";
-		pendingWithdrawnApplicationID.remove(row[0]);
-		saveAll();
-		System.out.println("Withdrawal rejected.");
-	}
-
-	public void addApplicationToPendingList(Application app) {
-		int idx = resolveIndex(app);
-		if (idx < 0) return;
-		String key = String.valueOf(idx);
-		if (!pendingWithdrawnApplicationID.contains(key)) pendingWithdrawnApplicationID.add(key);
-	}
-
-	public void removeApplicationToPendingList(Application app) {
-		int idx = resolveIndex(app);
-		if (idx < 0) return;
-		pendingWithdrawnApplicationID.remove(String.valueOf(idx));
-	}
-
-
-
-	// Helpers
-	// Inline safe access
-	private String val(String[] arr, int idx) { 
-		return (arr == null || idx < 0 || idx >= arr.length || arr[idx] == null) ? "" : arr[idx];
-	}
-
-	// Resolve or fallback parse of application index
-	private int resolveIndex(Application app) {
-		if (app.getApplicationNumber() > 0) return app.getApplicationNumber();
-		try { return Integer.parseInt(app.getInternshipID()); } catch (Exception e) { return -1; }
-	}
-
-	// Find row by index directly
-	private String[] rowByIndex(int appIndex) {
-		String key = String.valueOf(appIndex);
-		for (String[] r : applicationRows) if (val(r,0).equals(key)) return r;
-		return null;
-	}
-
-	// Compute next index without separate helper
-	private int nextIndex() {
-		int max=0; for (String[] r: applicationRows) { try { int v=Integer.parseInt(val(r,0)); if (v>max) max=v; } catch(Exception ignore){} }
-		return max+1;
-	}
-
-	// Persist entire list
-	private void saveAll() {
-		File file=new File(CSV_FILE);
-		try(FileWriter writer=new FileWriter(file)){
-			writer.append("applicationIndex,internshipiD,studentID,status,withdrawnStatus\n");
-			for(String[] r: applicationRows){
-				writer.append(String.join(",", new String[]{val(r,0),val(r,1),val(r,2),val(r,3),val(r,4)})).append("\n");
+			// add or remove applications from internships
+			if (action.equals("add")) {
+				//implementation
+				for (String[] fields : allLines) {
+					if (fields[0].equals(internshipID)) {
+						fields[11] = fields[11] + applicationNumber + ";";
+						
+					}
+					writer.append(String.join(",", fields) + "\n");
+				}
+			} else if (action.equals("remove")) {
+				//implementation
 			}
-		}catch(IOException e){e.printStackTrace();}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

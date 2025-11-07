@@ -20,13 +20,41 @@ public class InternshipOpportunity {
     private String companyRepInChargeID;
 
     private int numOfSlots = 1;
-    private List<Application> applicationList= new ArrayList<Application>();
-    private List<String> selectedApplicantsID = new ArrayList<String>();
-    private boolean isFull=false;
+    private List<Integer> applicationNumberList= new ArrayList<Integer>();
+    private List<Integer> acceptedApplicationNumbers = new ArrayList<Integer>();
     private boolean visiblity=true;
 
     
-
+    public InternshipOpportunity(String internshipID, 
+        String internshipTitle, 
+        String description, 
+        String internshipLevel, 
+        List<String> preferredMajors, 
+        Date openingDate, 
+        Date closeDate, 
+        String status,
+        String companyName, 
+        String companyRepInChargeID, 
+        int numOfSlots,
+        List<Integer> applicationNumberList,
+        List<Integer> acceptedApplicationNumbers,
+        boolean visiblity) {
+        
+        this.internshipID = internshipID;
+        this.internshipTitle = internshipTitle;
+        this.description = description;
+        this.preferredMajors = preferredMajors;
+        this.internshipLevel = internshipLevel;
+        this.openingDate = openingDate;
+        this.closeDate = closeDate;
+        this.status = status;
+        this.companyName = companyName;
+        this.companyRepInChargeID = companyRepInChargeID;
+        this.numOfSlots = numOfSlots;
+        this.applicationNumberList = applicationNumberList;
+        this.acceptedApplicationNumbers = acceptedApplicationNumbers;
+        this.visiblity = visiblity;
+    }
     public InternshipOpportunity(String internshipID, 
         String internshipTitle, 
         String description, 
@@ -56,9 +84,9 @@ public class InternshipOpportunity {
         return status;
     }
 
-    public List<Application> getApplications() {
+    public List<Integer> getApplications() {
         //implement
-        return applicationList;
+        return applicationNumberList;
     }
     
     public List<Object> getDetailsForViewing() {
@@ -76,7 +104,7 @@ public class InternshipOpportunity {
         details.add(closeDate); //6
         details.add(companyName); //7
         details.add(numOfSlots); //8
-        details.add(isFull); //10
+        details.add(isFull()); //10
         return details;
     }
 
@@ -90,7 +118,7 @@ public class InternshipOpportunity {
         details.add(companyName); //5
         details.add(numOfSlots); //6
         details.add(visiblity); //7
-        details.add(isFull); //8
+        details.add(isFull()); //8
         return details;
     }
 
@@ -110,24 +138,20 @@ public class InternshipOpportunity {
         application.setApplicationStatusFail();
     }
 
-    public void addSelectedApplicant(String StudentID) {
+    public void addSelectedApplication(int applicationID) {
         if (isFull()){
             return;
-        }else if(selectedApplicantsID.size() + 1 >= numOfSlots){
-            isFull = true;
         }
-        selectedApplicantsID.add(StudentID);
+        acceptedApplicationNumbers.add(applicationID);
     }
 
-    public void removeSelectedApplicant(String StudentID) {
-        selectedApplicantsID.remove(StudentID);
-        isFull = false;
+    public void removeSelectedApplication(int applicationID) {
+        acceptedApplicationNumbers.remove(applicationID);
     }
     
 
     
     public boolean isFull(){
-        return isFull;
-    }
-    
+        return acceptedApplicationNumbers.size() == numOfSlots;
+    } 
 }
