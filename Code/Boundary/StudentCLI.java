@@ -54,7 +54,7 @@ public class StudentCLI implements InterfaceCLI{
         System.out.println("\n=== Accept Internship Opportunity ===");
         String status = appCtrl.getApplicationStatus(app);
 
-        if (!"Successful".equalsIgnoreCase(status)) {
+        if (!"approved".equalsIgnoreCase(status)) {
             System.out.println("You can only accept applications marked as successful");
         }
 
@@ -66,7 +66,7 @@ public class StudentCLI implements InterfaceCLI{
         System.out.println("\n=== Reject Internship Opportunity ===");
         String status = appCtrl.getApplicationStatus(app);
 
-        if(!"Successful".equalsIgnoreCase(status)) {
+        if(!"approved".equalsIgnoreCase(status)) {
             System.out.println("You cna only reject applications marked as successful");
         }
 
