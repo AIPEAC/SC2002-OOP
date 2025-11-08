@@ -125,7 +125,7 @@ public class InternshipControl{
             return;
         }
         String companyRepID = authCtrl.getUserID();
-        List<InternshipOpportunity> companyRepsInternshipOpps = getInternshipsByCompanyRepID(companyRepID);
+        companyRepsInternshipOpps = getInternshipsByCompanyRepID(companyRepID);
         if (companyRepsInternshipOpps.isEmpty()) {
             System.out.println("No internship opportunities found for this company representative.");
             return;
@@ -140,12 +140,14 @@ public class InternshipControl{
             return;
         }
         String companyRepID = authCtrl.getUserID();
-        InternshipOpportunity opp = getInternshipByID(internshipID);
-        if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) {
-            System.out.println("Invalid internship ID or you do not have permission to view this internship.");
+        List<Integer> applicationNumbers = gatherApplication(companyRepID);
+        if (applicationNumbers.isEmpty()) {
+            System.out.println("No applications for any of your internship opportunities.");
             return;
         }
-        // implementation
+        for (Integer appNum : applicationNumbers) {
+            System.out.println("Application Number: " + appNum);
+        }
     }
     public void approve(Application app) {
         //implementation
@@ -181,10 +183,12 @@ public class InternshipControl{
             e.printStackTrace();
         }
     }
-    public boolean isVisibleAndNotFull(String oppID) {
+    public boolean isVisibleAndNotFullAndNotRejected(String oppID) {
         InternshipOpportunity opp = getInternshipByID(oppID);
         if (opp != null) {
-            if (opp.getVisibility() && opp.getNumOfSlots() > 0) {
+            if (opp.getVisibility() 
+                && opp.getNumOfSlots() > 0 
+                && !opp.getStatus().equals("rejected")) {
                 return true;
             }
         }
@@ -344,6 +348,15 @@ public class InternshipControl{
             }
         }
         return repsOpps;
+    }
+    private List<Integer> gatherApplication(String companyRepID) {
+        List<Integer> applicationNumbers = new ArrayList<>();
+        for (InternshipOpportunity opp : internshipOpportunities) {
+            if (opp.getCompanyRepInChargeID().equals(companyRepID)) {
+                applicationNumbers.addAll(opp.getApplicationNumberList());
+            }
+        }
+        return applicationNumbers;
     }
     
     //TODO: To use: for Staff

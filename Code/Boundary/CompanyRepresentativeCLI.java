@@ -40,8 +40,7 @@ public class CompanyRepresentativeCLI extends InterfaceCLI{
                 default:
                     System.out.println("Invalid option. Please try again.");
             }
-        }
-        
+        }   
     }
     
 

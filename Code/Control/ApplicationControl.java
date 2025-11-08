@@ -79,8 +79,8 @@ public class ApplicationControl {
 			System.out.println("Only students can make applications.");
 			return;
 		}
-		if (!intCtrl.isVisibleAndNotFull(internshipID)) {
-			System.out.println("Internship is either not visible or already full.");
+		if (!intCtrl.isVisibleAndNotFullAndNotRejected(internshipID)) {
+			System.out.println("Internship is either not visible or already full or is rejected by staff.");
 			return;
 		}
 		if (!intCtrl.studentFitsRequirements(authCtrl.getUserID(), internshipID)) {
