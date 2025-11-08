@@ -19,7 +19,8 @@ import Entity.Users.Student;
 
 public class InternshipControl{
     private List<InternshipOpportunity> internshipOpportunities = new ArrayList<InternshipOpportunity>();
-    private List<String> pendingInternshipOppID = new ArrayList<String>();
+    private List<String> pendingInternshipOppID = null;
+    private List<InternshipOpportunity> companyRepsInternshipOpps = null;
     private AuthenticationControl authCtrl;
     private ApplicationControl appCtrl=null;
     private Student student=null;
@@ -93,27 +94,50 @@ public class InternshipControl{
         System.out.println("Please login to view internship details.");
         return null;
     }
-    public List<InternshipOpportunity> getInternshipOpportunities(String oppID) {
-        //implementation
-        return null;
-    }
 
     // =========================================================
     // Company Rep methods
 
-    public void requestCreateInternshipOpportunity(int internshipID, 
+    public void requestCreateInternshipOpportunity(
         String internshipTitle, String description, 
         String internshipLevel, List<String> preferredMajors, 
-        Date openDate, Date closeDate, String companyName, 
-        String companyRepInChargeID, int numberOfSlots) {
-        //implementation
+        Date openDate, Date closeDate, int numberOfSlots) {
+        if (!authCtrl.isLoggedIn()) {
+            System.out.println("User not logged in.");
+            return;
+        }
+
+        String companyName = authCtrl.getCompanyName();
+        String companyRepID = authCtrl.getUserID();
+        String internshipID = autoAssignInternshipID();
+        InternshipOpportunity newOpp = new InternshipOpportunity(
+            internshipID, internshipTitle, description, 
+            preferredMajors, internshipLevel, 
+            openDate, closeDate,
+            companyName, companyRepID, numberOfSlots);
+        internshipOpportunities.add(newOpp);
+        updateInternshipInDB();
     }
-    public List<Application> getInternshipStatus(String internshipID) {
-        //implementation
-        return null;
+    public void getInternshipStatus() {
+        if (!authCtrl.isLoggedIn() || !authCtrl.getUserIdentity().equals("Company Representative")) {
+            System.out.println("User not logged in or not a company representative.");
+            return;
+        }
+        String companyRepID = authCtrl.getUserID();
+        List<InternshipOpportunity> companyRepsInternshipOpps = getInternshipsByCompanyRepID(companyRepID);
+        if (companyRepsInternshipOpps.isEmpty()) {
+            System.out.println("No internship opportunities found for this company representative.");
+            return;
+        }
+        for (InternshipOpportunity opp : companyRepsInternshipOpps) {
+            System.out.println(opp);
+        }
     }
     public void viewApplications(String internshipID) {
-        //implementation
+        if (!authCtrl.isLoggedIn()|| !authCtrl.getUserIdentity().equals("Company Representative")) {
+            System.out.println("User not logged in or not a company representative.");
+            return;
+        }
     }
     public void approve(Application app) {
         //implementation
@@ -123,9 +147,6 @@ public class InternshipControl{
         //
     }
 
-    // =========================================================
-    // Student and Career Staff methods
-    
     // =========================================================
     // Student methods
     private void loadStudentFromDB(String studentID) {
@@ -177,7 +198,9 @@ public class InternshipControl{
             }
             if (levelMatch) {
                 if (!preferredMajors.contains(student.getMajor())) {
-                System.out.println("Note: You do not meet the major preferences.");
+                System.out.println("Note: You do not meet the major preferences.\n");
+                System.out.println("preferred majors:"+preferredMajors+"\n");
+                System.out.println("You still can apply.\n");
                 }
                 return true;
             }
@@ -192,16 +215,19 @@ public class InternshipControl{
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp != null) {
             opp.addApplicationNumberToInternship(applicationNumber);
+            updateInternshipInDB();
         }
     }
     public void removeApplicationNumberFromInternshipOpportunity(int applicationNumber, String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp != null) {
             opp.removeApplicationNumberFromInternship(applicationNumber);
+            updateInternshipInDB();
         }
     }
     public void withdrawEveryOtherApplication(String studentID) {
         appCtrl.withdrawOtherApplicationsOfApprovedStudent(studentID);
+        updateInternshipInDB();
     }
     public String getInternshipCompany(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
@@ -209,14 +235,6 @@ public class InternshipControl{
             return opp.getCompanyName();
         }
         return null;
-    }
-    public void getInternshipByAppID(String internshipID) {
-        InternshipOpportunity opp = getInternshipByID(internshipID);
-        if (opp != null) {
-            System.out.println(opp.toString());
-        } else {
-            System.out.println("Internship not found.");
-        }
     }
     // =========================================================
     // Career Staff methods
@@ -226,7 +244,7 @@ public class InternshipControl{
         return null;
     }
     public List<InternshipOpportunity> getAllInternshipOpportunities(){ //for report
-        //implementation
+        //implementation, excluding rejected internships.
         return null;
     } 
     public void approveInternshipCreation(InternshipOpportunity opp) {
@@ -244,21 +262,15 @@ public class InternshipControl{
 
 
     //=========================================================
-    // Private Helpers
-    private InternshipOpportunity getInternshipByID(String internshipID) {
+    // Private Helpers / package private
+    // for all users
+    InternshipOpportunity getInternshipByID(String internshipID) {
         for (InternshipOpportunity opp : internshipOpportunities) {
             if (opp.getInternshipID().equals(internshipID)) {
                 return opp;
             }
         }
         return null;
-    }
-    
-    private void addOpportunityToPendingList(InternshipOpportunity opp) {
-        //
-    }
-    private void removeOpportunityFromPendingList(InternshipOpportunity opp) {
-        //
     }
     private void updateInternshipInDB() {
         //write the updated internshipOpportunities list back to the CSV file
@@ -291,4 +303,54 @@ public class InternshipControl{
             e.printStackTrace();
         }
     }
+    // for Company Rep
+    private String autoAssignInternshipID(){
+        // the internships will have IDs like #INT0001, #INT0002, ...
+        String prefix = "#INT";
+        String filePath = "Lib/internship_opportunity_list.csv";
+        int maxID = 0;
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            // Skip header
+            br.readLine();
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                String internshipID = values[0];
+                if (internshipID.startsWith(prefix)) {
+                    int idNum = Integer.parseInt(internshipID.substring(prefix.length()));
+                    if (idNum > maxID) {
+                        maxID = idNum;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return String.format("%s%04d", prefix, maxID + 1);
+    }
+    private List<InternshipOpportunity> getInternshipsByCompanyRepID(String companyRepID) {
+        List<InternshipOpportunity> repsOpps = new ArrayList<>();
+        for (InternshipOpportunity opp : internshipOpportunities) {
+            if (opp.getCompanyRepInChargeID().equals(companyRepID)) {
+                repsOpps.add(opp);
+            }
+        }
+        return repsOpps;
+    }
+    //for Staff
+    private void initializePendingInternshipOppList() {
+        pendingInternshipOppID = new ArrayList<>();
+        for (InternshipOpportunity opp : internshipOpportunities) {
+            if (opp.getStatus().equals("pending")) {
+                pendingInternshipOppID.add(opp.getInternshipID());
+            }
+        }
+    }
+    private void removeOpportunityFromPendingList(String oppID) {
+        if (oppID == null) {
+            System.out.println("Pending internship ID is empty.");
+            return;
+        }
+        pendingInternshipOppID.remove(oppID);
+    }  
 }

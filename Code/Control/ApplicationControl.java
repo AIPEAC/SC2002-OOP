@@ -156,6 +156,9 @@ public class ApplicationControl {
 	public void requestWithdrawApplication(int appNum) {
 		Application app = getApplicationByNumber(appNum);
 		if (app != null) {
+			if (app.getWithdrawStatus().equals("rejected")){
+				System.out.println("Previous withdrawal request was rejected. You are refrained from making changes.");
+			}
 			app.setApplicationWithdrawRequested();
 			saveApplicationsToDB();
 			System.out.println("Withdrawal request submitted for Application Number: " + app.getApplicationNumber());
@@ -165,7 +168,7 @@ public class ApplicationControl {
 	}
 	public void viewInternshipsAppliedTo() {
 		for (Application app : applications) {
-			intCtrl.getInternshipByAppID(app.getInternshipID());
+			intCtrl.getInternshipByID(app.getInternshipID());
 		}
 	}
 

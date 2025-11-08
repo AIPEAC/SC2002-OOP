@@ -65,6 +65,9 @@ public class StudentCLI extends InterfaceCLI{
                             break;
                         }
                         System.out.println("Do you want to accept (1) or reject (2) the offer?");
+                        System.out.println("Please note that accepting an offer will automatically withdraw all other pending applications.");
+                        System.out.println("You are allowed to apply for withdrawal of the application if you accept it.");
+                        System.out.println("But if the writhdrawal is rejected, you are refrained from making changes.");
                         String response = sc.nextLine();   
                         if ("1".equals(response)) {
                             acceptInternshipOpportunity(appNum);

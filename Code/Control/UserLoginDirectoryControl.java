@@ -20,8 +20,10 @@ public class UserLoginDirectoryControl{
     private String[] StaffInfoList;
     private String[] CompanyRepInfoList;
     private boolean haveInitialized=false;
+    private AuthenticationControl authCtrl;
     
-    public UserLoginDirectoryControl() {
+    public UserLoginDirectoryControl(AuthenticationControl authCtrl){
+        this.authCtrl=authCtrl;
         loadUsersFromExamplesToDB();
         loadLoginListFromDB();
     }
@@ -223,8 +225,23 @@ public class UserLoginDirectoryControl{
                 return null;
         }
     }
-                
+    public String getCompanyRepsCompany(String userID){
+        if (authCtrl.isLoggedIn()) {
+            loadCompanyRep(userID);
+            String companyName=CompanyRepInfoList[5];
+            CompanyRepInfoList=null;
+            return companyName;
+        }
+        System.out.println("bug: UserLoginDirectoryControl.getCompanyRepsCompany(): no logged in user when getting a CompanyRep's company");
+        return null;
+    }
+    
+
     public void changePassword(String userID, String newPassword){
+        if (!authCtrl.isLoggedIn()) {
+            System.out.println("bug: UserLoginDirectoryControl.changePassword(): no logged in user when changing password");
+            return;
+        }
         for (String[] loginData : loginList) {
             if (loginData[1].equals(userID)) {
                 loginData[2] = hashPassword(newPassword);
@@ -337,6 +354,14 @@ public class UserLoginDirectoryControl{
     }
 
     public void approveCompanyRep(String userID){
+        if (authCtrl.isLoggedIn()==false){
+            System.out.println("bug: UserLoginDirectoryControl.approveCompanyRep(): no logged in user when approving a CompanyRep");
+            return;
+        }
+        if (userID==null){
+            System.out.println("bug: UserLoginDirectoryControl.approveCompanyRep(): null userID");
+            return;
+        }
         updateCompanyRepStatusInLogin(userID, "approved");
         updateCompanyRepStatusInCompanyRepCSV(userID, "approved");
     }

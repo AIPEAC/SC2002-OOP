@@ -3,6 +3,7 @@ import Entity.Users.*;
 
 public class AuthenticationControl {
     private User currentUser=null;
+    private String companyName=null;
 
     public AuthenticationControl(){
         this.currentUser=null;
@@ -49,5 +50,11 @@ public class AuthenticationControl {
 
     public String getUserID(){
         return currentUser.getUserID();
+    }
+    public void setCompanyName(String companyName){
+        this.companyName=companyName;
+    }
+    public String getCompanyName(){
+        return this.companyName;
     }
 }

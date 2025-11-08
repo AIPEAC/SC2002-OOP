@@ -1,7 +1,6 @@
 package Control;
 //when registered, the password is set to "password". Remind them to change.
-import java.io.BufferedReader;
-import java.io.FileReader;
+
 import Entity.Users.User;
 
 
@@ -28,8 +27,13 @@ public class LoginControl {
             System.out.println("Your account has been rejected. Please contact the administrator.");
             return;
         }
+
         User user=userLoginDirCtrl.createUser(userID,identity);
         authCtrl.setLoggedin(user);
+        if (identity.equals("companyRepresentative")) {
+            String companyName=userLoginDirCtrl.getCompanyRepsCompany(userID);
+            authCtrl.setCompanyName(companyName);
+        }
         System.out.println("Login successful.");
     }
     public String handleRegister(String name,String companyName,String department,String postion,String email){

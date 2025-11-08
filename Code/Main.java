@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) {
         // Initialize shared controls and services (single instances for consistent state)
         AuthenticationControl authCtrl = new AuthenticationControl();
-        UserLoginDirectoryControl userLoginDirCtrl = new UserLoginDirectoryControl();
+        UserLoginDirectoryControl userLoginDirCtrl = new UserLoginDirectoryControl(authCtrl);
         LoginControl loginCtrl = new LoginControl(authCtrl, userLoginDirCtrl);
         InternshipControl intCtrl = new InternshipControl(authCtrl);
         ApplicationControl appCtrl = new ApplicationControl(authCtrl, intCtrl);
