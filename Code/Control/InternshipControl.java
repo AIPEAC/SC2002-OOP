@@ -137,6 +137,7 @@ public class InternshipControl{
     public void viewApplications(String internshipID) {
         if (!authCtrl.isLoggedIn()|| !authCtrl.getUserIdentity().equals("Company Representative")) {
             System.out.println("User not logged in or not a company representative.");
+            //comment for testing conflict
             return;
         }
         String companyRepID = authCtrl.getUserID();
