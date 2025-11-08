@@ -21,6 +21,7 @@ public class InternshipControl{
     private List<InternshipOpportunity> internshipOpportunities = new ArrayList<InternshipOpportunity>();
     private List<String> pendingInternshipOppID = null;
     private List<InternshipOpportunity> companyRepsInternshipOpps = null;
+    private List<Application> applicationForCurrentInternship = null;
     private AuthenticationControl authCtrl;
     private ApplicationControl appCtrl=null;
     private Student student=null;
@@ -138,6 +139,13 @@ public class InternshipControl{
             System.out.println("User not logged in or not a company representative.");
             return;
         }
+        String companyRepID = authCtrl.getUserID();
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) {
+            System.out.println("Invalid internship ID or you do not have permission to view this internship.");
+            return;
+        }
+        // implementation
     }
     public void approve(Application app) {
         //implementation
@@ -337,7 +345,8 @@ public class InternshipControl{
         }
         return repsOpps;
     }
-    //for Staff
+    
+    //TODO: To use: for Staff
     private void initializePendingInternshipOppList() {
         pendingInternshipOppID = new ArrayList<>();
         for (InternshipOpportunity opp : internshipOpportunities) {

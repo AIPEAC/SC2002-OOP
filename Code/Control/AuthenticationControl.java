@@ -12,7 +12,7 @@ public class AuthenticationControl {
         currentUser=user;
     }
 
-    public void setLoggedin(User user){
+    protected void setLoggedin(User user){
         currentUser=user;
     }
     public boolean isLoggedIn(){
@@ -22,7 +22,7 @@ public class AuthenticationControl {
             return true;
         }
     }    
-    public User getUser(){
+    protected User getUser(){
         return currentUser;
     }
     public String getUserIdentity(){

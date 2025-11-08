@@ -196,6 +196,11 @@ public class ApplicationControl {
 	public void removeApplicationFromPendingList(Application app) {
 
 	}
+
+	// =========================================================
+	// Company Representative methods
+	
+	
 	// ========================================================
 	// Other methods
 

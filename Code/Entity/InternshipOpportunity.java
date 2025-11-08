@@ -124,6 +124,7 @@ public class InternshipOpportunity {
     public boolean getVisibility() {
         return visibility;
     }
+    
 
     public List<Object> getDetailsForViewing() {
         List<Object> details=new ArrayList<Object>();
@@ -207,7 +208,6 @@ public class InternshipOpportunity {
         acceptedApplicationNumbers.remove(applicationID);
     }
     
-
     
     public boolean isFull(){
         return acceptedApplicationNumbers.size() == numOfSlots;

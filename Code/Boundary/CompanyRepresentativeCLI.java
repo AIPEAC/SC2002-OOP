@@ -102,7 +102,7 @@ public class CompanyRepresentativeCLI extends InterfaceCLI{
             preferredMajors, openDate, closeDate, numberOfSlots);
     }
 
-    public void checkMyInternshipOppStatus() {
+    private void checkMyInternshipOppStatus() {
         intCtrl.getInternshipStatus();
     }
 
