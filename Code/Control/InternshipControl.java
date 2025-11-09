@@ -9,20 +9,18 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.stream.Collectors;
-import java.util.Arrays; // needed for splitting majors and IDs
+import java.util.Arrays;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 
 import Entity.InternshipOpportunity;
-// removed duplicate import of Arrays
 import Entity.Users.Student;
 
 
 public class InternshipControl{
     private List<InternshipOpportunity> internshipOpportunities = new ArrayList<InternshipOpportunity>();
-    private List<String> pendingInternshipOppID = null;
+    
     private List<InternshipOpportunity> companyRepsInternshipOpps = null;
-    private List<Application> applicationForCurrentInternship = null;
     private AuthenticationControl authCtrl;
     private ApplicationControl appCtrl=null;
     private Student student=null;
@@ -221,7 +219,6 @@ public class InternshipControl{
     public void approve(Application app) {
         //implementation
     }
-
     public void reject(Application app) {
         //
     }
@@ -359,7 +356,6 @@ public class InternshipControl{
         rejectInternshipCreation.setStatusToRejected();
         updateInternshipInDB();
     }
-    /** Approve by internship ID (public wrapper for CLI) */
     public void approveInternshipCreationByID(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp == null) {
@@ -368,7 +364,6 @@ public class InternshipControl{
         }
         approveInternshipCreation(opp);
     }
-    /** Reject by internship ID (public wrapper for CLI) */
     public void rejectInternshipCreationByID(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp == null) {
@@ -449,7 +444,6 @@ public class InternshipControl{
             e.printStackTrace();
         }
     }
-    // for Company Rep
     private String autoAssignInternshipID(){
         // the internships will have IDs like #INT0001, #INT0002, ...
         String prefix = "#INT";
@@ -492,21 +486,4 @@ public class InternshipControl{
         }
         return applicationNumbers;
     }
-    
-    //TODO: To use: for Staff
-    private void initializePendingInternshipOppList() {
-        pendingInternshipOppID = new ArrayList<>();
-        for (InternshipOpportunity opp : internshipOpportunities) {
-            if (opp.getStatus().equals("pending")) {
-                pendingInternshipOppID.add(opp.getInternshipID());
-            }
-        }
-    }
-    private void removeOpportunityFromPendingList(String oppID) {
-        if (oppID == null) {
-            System.out.println("Pending internship ID is empty.");
-            return;
-        }
-        pendingInternshipOppID.remove(oppID);
-    }  
 }
