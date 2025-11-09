@@ -105,10 +105,41 @@ public class InternshipControl{
     public void requestCreateInternshipOpportunity(
         String internshipTitle, String description, 
         String internshipLevel, List<String> preferredMajors, 
-        Date openDate, Date closeDate, int numberOfSlots) {
+        String openDateStr, String closeDateStr, String numberOfSlotsStr) {
         if (!authCtrl.isLoggedIn()) {
             System.out.println("User not logged in.");
             return;
+        }
+
+        // Parse dates and slots here (backend handles conversions)
+        java.util.Date openDate = new java.util.Date();
+        java.util.Date closeDate = new java.util.Date();
+        int numberOfSlots = 1;
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+        if (openDateStr != null && !openDateStr.trim().isEmpty()) {
+            try {
+                openDate = sdf.parse(openDateStr.trim());
+            } catch (java.text.ParseException e) {
+                System.out.println("Invalid opening date format, defaulting to today.");
+                openDate = new java.util.Date();
+            }
+        }
+        if (closeDateStr != null && !closeDateStr.trim().isEmpty()) {
+            try {
+                closeDate = sdf.parse(closeDateStr.trim());
+            } catch (java.text.ParseException e) {
+                System.out.println("Invalid closing date format, defaulting to today.");
+                closeDate = new java.util.Date();
+            }
+        }
+        if (numberOfSlotsStr != null && !numberOfSlotsStr.trim().isEmpty()) {
+            try {
+                numberOfSlots = Integer.parseInt(numberOfSlotsStr.trim());
+                if (numberOfSlots <= 0) numberOfSlots = 1;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number of slots, defaulting to 1.");
+                numberOfSlots = 1;
+            }
         }
 
         String companyName = authCtrl.getCompanyName();

@@ -2,10 +2,6 @@ package Boundary;
 import Control.*;
 import java.util.Scanner;
 import java.util.List;
-import java.util.Date;
-import java.util.Calendar;
-import Entity.InternshipOpportunity;
-
 
 public class CompanyRepresentativeCLI extends AbstractCLI{
     private boolean hasCheckedMyOpps = false;
@@ -84,10 +80,11 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
         String internshipTitle;
         String description; 
         String internshipLevel; 
-        List<String> preferredMajors; 
-        Date openDate; 
-        Date closeDate; 
-        int numberOfSlots;
+    List<String> preferredMajors = new java.util.ArrayList<>(); 
+    // we collect raw strings for dates and slots; control will parse/validate
+    String openInput;
+    String closeInput;
+    String slotsInput;
 
         // Prompt for and read the above details using Scanner (sc)
         System.out.print("Enter Internship Title: ");
@@ -109,42 +106,76 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
                 internshipLevel = "Basic";
                 break;
         }
-        // TODO: we may want to choose from a predefined list of majors later
-        // for now, just accept comma separated input. since it does not reject students
-        System.out.print("Enter Preferred Majors (comma separated): ");
-        String[] majorsArray = sc.nextLine().split(",");
+        // Restrict majors to the list in Code/Lib/majors.csv
+        List<String> allMajors = new java.util.ArrayList<>();
+        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader("Code/Lib/majors.csv"))) {
+            String line = br.readLine(); // header
+            while ((line = br.readLine()) != null) {
+                if (!line.trim().isEmpty()) {
+                    // remove surrounding quotes if present
+                    String m = line.trim();
+                    if (m.startsWith("\"") && m.endsWith("\"")) {
+                        m = m.substring(1, m.length() - 1);
+                    }
+                    allMajors.add(m);
+                }
+            }
+        } catch (java.io.IOException e) {
+            // fallback: accept comma separated input
+            System.out.print("Enter Preferred Majors (comma separated): ");
+            String[] majorsArray = sc.nextLine().split(",");
+            preferredMajors = List.of(majorsArray);
+            allMajors = null;
+        }
 
-        preferredMajors = List.of(majorsArray);
-        System.out.print("Enter Opening Date (yyyy-MM-dd) (leave empty for today): ");
-        String openInput = sc.nextLine();
-        if (isValidDate(openInput)) {
-            openDate = parseDate(openInput);
-        } else {
-            System.out.println("Invalid date format. Setting to today's date.");
-            openDate = new Date();
-        }
-        System.out.print("Enter Closing Date (yyyy-MM-dd) (leave empty for today): ");
-        String closeInput = sc.nextLine();
-        if (isValidDate(closeInput)) {
-            closeDate = parseDate(closeInput);
-        } else {
-            System.out.println("Invalid date format. Setting to today's date.");
-            closeDate = new Date();
-        }
-        numberOfSlots = 1;
-        System.out.print("Enter Number of Slots (press Enter for default 1): ");
-        String slotsInput = sc.nextLine();
-        if (!slotsInput.trim().isEmpty()) {
-            try {
-                numberOfSlots = Integer.parseInt(slotsInput.trim());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid number; defaulting to 1.");
-                numberOfSlots = 1;
+        if (allMajors != null) {
+            System.out.println("Select preferred majors from the list below (enter numbers comma-separated).\n0 = Any majors (default). Max 5 selections.");
+            System.out.println("0) Any majors");
+            for (int i = 0; i < allMajors.size(); i++) {
+                System.out.println((i + 1) + ") " + allMajors.get(i));
+            }
+            System.out.print("Your selection: ");
+            String sel = sc.nextLine().trim();
+            if (sel.isEmpty() || sel.equals("0")) {
+                preferredMajors = new java.util.ArrayList<>(); // empty = any
+            } else {
+                String[] parts = sel.split(",");
+                java.util.LinkedHashSet<Integer> picks = new java.util.LinkedHashSet<>();
+                for (String p : parts) {
+                    if (p.trim().isEmpty()) continue;
+                    try {
+                        int idx = Integer.parseInt(p.trim());
+                        if (idx == 0) {
+                            picks.clear();
+                            break;
+                        }
+                        if (idx >= 1 && idx <= allMajors.size()) {
+                            picks.add(idx - 1);
+                        }
+                        if (picks.size() >= 5) break;
+                    } catch (NumberFormatException ex) {
+                        // ignore invalid entries
+                    }
+                }
+                if (picks.isEmpty()) {
+                    preferredMajors = new java.util.ArrayList<>();
+                } else {
+                    preferredMajors = new java.util.ArrayList<>();
+                    for (int i : picks) preferredMajors.add(allMajors.get(i));
+                }
             }
         }
+        System.out.print("Enter Opening Date (yyyy-MM-dd) (leave empty for today): ");
+        openInput = sc.nextLine();
+        System.out.print("Enter Closing Date (yyyy-MM-dd) (leave empty for today): ");
+        closeInput = sc.nextLine();
+        System.out.print("Enter Number of Slots (press Enter for default 1): ");
+        slotsInput = sc.nextLine();
+
+        // send raw strings to control; control will validate/parse and apply defaults
         intCtrl.requestCreateInternshipOpportunity(internshipTitle,
-            description, internshipLevel, 
-            preferredMajors, openDate, closeDate, numberOfSlots);
+            description, internshipLevel,
+            preferredMajors, openInput, closeInput, slotsInput);
     }
 
     private void checkMyInternshipOppStatus() {
@@ -187,8 +218,8 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
         }
     }
 
-    public void toggleOppVisibility(InternshipOpportunity opp) {
-        if (opp == null) {
+    public void toggleOppVisibility(String oppID) {
+        if (oppID == null || oppID.trim().isEmpty()) {
             System.out.print("Enter Internship ID to toggle visibility: ");
             String id = sc.nextLine();
             if (id.trim().isEmpty()) return;
@@ -196,30 +227,7 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
             System.out.println("Toggled visibility for " + id);
             return;
         }
-        intCtrl.changeVisibility(opp);
-        System.out.println("Toggled visibility for provided internship.");
-    }
-
-
-    // Helpers
-    private boolean isValidDate(String dateStr) {
-        // Simple validation for date format yyyy-MM-dd
-        // allow empty input to default to today's date
-        if (dateStr == null || dateStr.trim().isEmpty()) {
-            return true;
-        }
-        return dateStr.matches("\\d{4}-\\d{2}-\\d{2}");
-    }
-    private Date parseDate(String dateStr) {
-        if (dateStr == null || dateStr.trim().isEmpty()) {
-            return new Date();
-        }
-        String[] parts = dateStr.split("-");
-        int year = Integer.parseInt(parts[0]);
-        int month = Integer.parseInt(parts[1]) - 1;   // Month is 0-based
-        int day = Integer.parseInt(parts[2]);
-        Calendar cal = Calendar.getInstance();
-        cal.set(year, month, day);
-        return cal.getTime();
+        intCtrl.changeVisibilityByID(oppID);
+        System.out.println("Toggled visibility for " + oppID);
     }
 }
