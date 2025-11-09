@@ -4,7 +4,7 @@ import Backend.Control.*;
 import Frontend_UI.Boundary.*;
 import javax.swing.SwingUtilities;
 
-public class MainUI {
+public class Main {
     public static void main(String[] args) {
         // Build backend controls the same way as the console main
         AuthenticationControl authCtrl = new AuthenticationControl();
