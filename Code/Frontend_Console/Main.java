@@ -1,6 +1,8 @@
+package Frontend_Console;
 import java.util.Scanner;
-import Boundary.*;
-import Control.*;
+
+import Backend.Control.*;
+import Frontend_Console.Boundary.*;
 
 public class Main {
     public static void main(String[] args) {

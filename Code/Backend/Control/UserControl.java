@@ -1,12 +1,14 @@
-package Control;
+package Backend.Control;
 
 import java.util.List;
+
+import Backend.Entity.Users.CompanyRepresentative;
+
 import java.util.ArrayList;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import Entity.Users.CompanyRepresentative;
 
 public class UserControl {
 	private UserLoginDirectoryControl userDir;

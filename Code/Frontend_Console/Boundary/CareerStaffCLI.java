@@ -1,9 +1,10 @@
-package Boundary;
+package Frontend_Console.Boundary;
 
-import Control.*;
 import java.util.Map;
 import java.util.List;
 import java.util.Scanner;
+
+import Backend.Control.*;
 
 public class CareerStaffCLI extends AbstractCLI {
     private ApplicationControl appCtrl;

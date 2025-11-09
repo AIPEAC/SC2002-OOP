@@ -1,13 +1,13 @@
-package Boundary;
-
-import Control.InternshipControl;
-import Control.LoginControl;
-import Entity.Filter;
+package Frontend_Console.Boundary;
 
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+
+import Backend.Control.InternshipControl;
+import Backend.Control.LoginControl;
+import Backend.Entity.Filter;
 
 public abstract class AbstractCLI {
     protected Scanner sc;

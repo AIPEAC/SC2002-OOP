@@ -1,7 +1,5 @@
-package Control;
+package Backend.Control;
 
-import Entity.Report;
-import Entity.InternshipOpportunity;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -13,6 +11,9 @@ import java.util.Date;
 import java.io.File;
 import java.io.IOException;
 import java.util.function.Function;
+
+import Backend.Entity.InternshipOpportunity;
+import Backend.Entity.Report;
 
 
 public class ReportControl {

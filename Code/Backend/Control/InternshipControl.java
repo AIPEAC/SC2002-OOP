@@ -1,23 +1,24 @@
-package Control;
+package Backend.Control;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Comparator;
-import Entity.Application;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.stream.Collectors;
+
+import Backend.Entity.Application;
+import Backend.Entity.Filter;
+import Backend.Entity.InternshipOpportunity;
+import Backend.Entity.Users.Student;
+
 import java.util.Arrays;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
-
-import Entity.InternshipOpportunity;
-import Entity.Users.Student;
-import Entity.Filter;
 
 
 public class InternshipControl{

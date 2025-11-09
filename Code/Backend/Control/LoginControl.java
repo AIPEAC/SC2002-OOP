@@ -1,7 +1,7 @@
-package Control;
+package Backend.Control;
 //when registered, the password is set to "password". Remind them to change.
 
-import Entity.Users.User;
+import Backend.Entity.Users.User;
 
 
 

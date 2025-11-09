@@ -1,5 +1,5 @@
-package Control;
-import Entity.Users.*;
+package Backend.Control;
+import Backend.Entity.Users.*;
 
 public class AuthenticationControl {
     private User currentUser=null;

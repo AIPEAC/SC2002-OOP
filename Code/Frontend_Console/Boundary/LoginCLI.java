@@ -1,9 +1,9 @@
-package Boundary;
+package Frontend_Console.Boundary;
 
 import java.util.Scanner;
 
-import Control.LoginControl;
-import Control.AuthenticationControl;
+import Backend.Control.AuthenticationControl;
+import Backend.Control.LoginControl;
 
 public class LoginCLI {
     private final Scanner sc;

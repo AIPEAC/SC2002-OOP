@@ -1,6 +1,7 @@
-package Boundary;
-import Control.*;
+package Frontend_Console.Boundary;
 import java.util.*;
+
+import Backend.Control.*;
 
 public class StudentCLI extends AbstractCLI{
     private ApplicationControl appCtrl;

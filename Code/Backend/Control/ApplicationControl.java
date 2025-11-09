@@ -1,4 +1,4 @@
-package Control;
+package Backend.Control;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,7 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import Entity.Application;
+
+import Backend.Entity.Application;
 
 public class ApplicationControl {
 	private List<Application> applications = new ArrayList<Application>();
