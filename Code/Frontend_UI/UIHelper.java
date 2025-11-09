@@ -2,7 +2,6 @@ package Frontend_UI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 import java.util.ArrayList;
 
 public class UIHelper {

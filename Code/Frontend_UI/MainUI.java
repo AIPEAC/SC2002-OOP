@@ -42,7 +42,7 @@ public class MainUI {
                     break;
                 case "CompanyRepresentative":
                 case "Company Representative":
-                    CompanyRepresentativeCLI compUI = new CompanyRepresentativeCLI(intCtrl, loginCtrl, authCtrl);
+                    CompanyRepresentativeCLI compUI = new CompanyRepresentativeCLI(intCtrl, loginCtrl);
                     compUI.show();
                     break;
                 default:

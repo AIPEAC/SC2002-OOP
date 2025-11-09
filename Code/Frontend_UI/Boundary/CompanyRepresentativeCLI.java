@@ -14,13 +14,11 @@ import Frontend_UI.UIHelper;
 public class CompanyRepresentativeCLI {
     private InternshipControl intCtrl;
     private LoginControl loginCtrl;
-    private AuthenticationControl authCtrl;
     private JFrame frame;
 
-    public CompanyRepresentativeCLI(InternshipControl intCtrl, LoginControl loginCtrl, AuthenticationControl authCtrl) {
+    public CompanyRepresentativeCLI(InternshipControl intCtrl, LoginControl loginCtrl) {
         this.intCtrl = intCtrl;
         this.loginCtrl = loginCtrl;
-        this.authCtrl = authCtrl;
     }
 
     public void show() {
