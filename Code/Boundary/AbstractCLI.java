@@ -24,16 +24,20 @@ public abstract class AbstractCLI {
     public abstract void displayMenu();
 
     public void logout() {
-        //
+        System.out.println("Logged out (frontend).\n");
     }
 
     public void changePassword(){
-        sc.nextLine(); //consume newline
+        if (loginCtrl == null) {
+            System.out.println("Password change is not available in this context.");
+            return;
+        }
         System.out.print("Enter your current password: ");
         String currentPassword = sc.nextLine();
         System.out.print("Enter your new password: ");
         String newPassword = sc.nextLine();
         boolean success = loginCtrl.changePassword(currentPassword, newPassword);
+        // LoginControl already prints messages; echo concise result here
         if (success) {
             System.out.println("Password changed successfully.");
         } else {
@@ -42,23 +46,79 @@ public abstract class AbstractCLI {
     }
 
     private List<InternshipOpportunity> filterInternshipOpportunities(Filter filter) {
+        // Basic filtering and sorting implementation.
+        List<InternshipOpportunity> Opplist = intCtrl.getAllVisibleInternshipOpportunities();
+        if (Opplist == null) return new java.util.ArrayList<>();
+
+        Map<String, List<String>> criteria = filter.getFilterIn();
+        if (criteria != null && !criteria.isEmpty()) {
+            Opplist = Opplist.stream().filter(opp -> {
+                for (Map.Entry<String, List<String>> e : criteria.entrySet()) {
+                    String key = e.getKey();
+                    List<String> vals = e.getValue();
+                    if (vals == null || vals.isEmpty()) continue;
+                    boolean matches = false;
+                    switch (key) {
+                        case "companyName":
+                            for (String v : vals) if (opp.getCompanyName() != null && opp.getCompanyName().equalsIgnoreCase(v)) matches = true;
+                            break;
+                        case "internshipLevel":
+                            for (String v : vals) if (opp.getInternshipLevel() != null && opp.getInternshipLevel().equalsIgnoreCase(v)) matches = true;
+                            break;
+                        case "preferredMajors":
+                            if (opp.getPreferredMajors() != null) {
+                                for (String v : vals) if (opp.getPreferredMajors().contains(v)) { matches = true; break; }
+                            }
+                            break;
+                        case "internshipID":
+                            for (String v : vals) if (opp.getInternshipID() != null && opp.getInternshipID().equalsIgnoreCase(v)) matches = true;
+                            break;
+                        case "internshipTitle":
+                            for (String v : vals) if (opp.getInternshipTitle() != null && opp.getInternshipTitle().equalsIgnoreCase(v)) matches = true;
+                            break;
+                        default:
+                            // unknown filter key, ignore
+                            matches = true;
+                    }
+                    if (!matches) return false; // must satisfy all provided criteria
+                }
+                return true;
+            }).collect(java.util.stream.Collectors.toList());
+        }
+
+        // Sorting
         String filterType = filter.getFilterType();
         boolean ascending = filter.isAscending();
-        Map<String, List<String>> filterIn = filter.getFilterIn();
-        // Implementation for filtering internship opportunities based on the criteria
-        // can refer to reportControl.comprehensive()
-        // filterType: the attribute sequence to sort by
-        // e.g., "title"/ "companyName"/ "openDate"/ "numberOfSlots"
-        // ascending: true for ascending order, false for descending order
-        // filterIn: the filtering criteria, so that only internships matching these criteria are included
-        // e.g., {"companyName": ["Company A", "Company B"], "internshipLevel": ["Internship", "Placement"]}
-        // first, get all visible internship opportunities, which is done below
-        // then, filter according to filterIn
-        // finally, sort according to filterType and ascending
+        if (filterType != null && !filterType.isEmpty()) {
+            java.util.Comparator<InternshipOpportunity> cmp = null;
+            switch (filterType) {
+                case "title":
+                    cmp = java.util.Comparator.comparing(InternshipOpportunity::getInternshipTitle, java.util.Comparator.nullsLast(String::compareToIgnoreCase));
+                    break;
+                case "companyName":
+                    cmp = java.util.Comparator.comparing(InternshipOpportunity::getCompanyName, java.util.Comparator.nullsLast(String::compareToIgnoreCase));
+                    break;
+                case "openDate":
+                    cmp = java.util.Comparator.comparing(InternshipOpportunity::getOpeningDate, java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()));
+                    break;
+                case "numberOfSlots":
+                    cmp = java.util.Comparator.comparingInt(InternshipOpportunity::getNumOfSlots);
+                    break;
+                default:
+                    // no sorting
+            }
+            if (cmp != null) {
+                if (!ascending) cmp = cmp.reversed();
+                Opplist.sort(cmp);
+            }
+        }
 
-        List<InternshipOpportunity> Opplist = intCtrl.getAllVisibleInternshipOpportunities();
-        // TODO: implement filtering and sorting logic here
-        return null;
+        return Opplist;
+    }
+
+    /** Allow injection of LoginControl after construction (Main can set it). */
+    public void setLoginControl(LoginControl loginCtrl) {
+        this.loginCtrl = loginCtrl;
     }
 
     public void viewFilteredInternshipOpportunities() {

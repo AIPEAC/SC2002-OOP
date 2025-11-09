@@ -412,15 +412,8 @@ public class InternshipControl{
         if (opp == null) return;
         // toggle
         boolean cur = opp.getVisibility();
-        // there's no setter exposed; use reflection-like workaround by toggling via a small helper
-        try {
-            java.lang.reflect.Field f = InternshipOpportunity.class.getDeclaredField("visibility");
-            f.setAccessible(true);
-            f.setBoolean(opp, !cur);
-            updateInternshipInDB();
-        } catch (Exception e) {
-            System.out.println("Unable to change visibility: " + e.getMessage());
-        }
+        opp.setVisibility(!cur);
+        updateInternshipInDB();
     }
 
     /** Toggle visibility by internship ID (public wrapper for CLIs) */
@@ -448,16 +441,9 @@ public class InternshipControl{
             System.out.println("Invalid visibility value: '" + visibleStr + "'. Use y/n or approve/reject.");
             return;
         }
-        // set visibility using reflection (entity currently lacks setter)
-        try {
-            java.lang.reflect.Field f = InternshipOpportunity.class.getDeclaredField("visibility");
-            f.setAccessible(true);
-            f.setBoolean(opp, desired.booleanValue());
-            updateInternshipInDB();
-            System.out.println("Visibility for " + internshipID + " set to " + desired);
-        } catch (Exception e) {
-            System.out.println("Unable to change visibility: " + e.getMessage());
-        }
+        opp.setVisibility(desired.booleanValue());
+        updateInternshipInDB();
+        System.out.println("Visibility for " + internshipID + " set to " + desired);
     }
 
     //=========================================================

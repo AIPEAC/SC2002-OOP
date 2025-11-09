@@ -275,7 +275,6 @@ public class ApplicationControl {
 		}
 		System.out.println("Application " + appNum + " approved.");
 	}
-
 	public void rejectApplicationByNumber(int appNum) {
 		Application app = getApplicationByNumber(appNum);
 		if (app == null) {
@@ -292,7 +291,6 @@ public class ApplicationControl {
 
 	// =========================================================
 	// Career Staff methods
-
 	public void loadPendingWithdrawalApplications(Application app) {
 		
 	}	

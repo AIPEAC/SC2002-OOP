@@ -3,19 +3,16 @@ import Boundary.*;
 import Control.*;
 
 public class Main {
-
     public static void main(String[] args) {
-        // Initialize shared controls and services (single instances for consistent state)
         AuthenticationControl authCtrl = new AuthenticationControl();
         UserLoginDirectoryControl userLoginDirCtrl = new UserLoginDirectoryControl(authCtrl);
         LoginControl loginCtrl = new LoginControl(authCtrl, userLoginDirCtrl);
-    InternshipControl intCtrl = new InternshipControl(authCtrl);
-    ApplicationControl appCtrl = new ApplicationControl(authCtrl, intCtrl);
-    intCtrl.setApplicationControl(appCtrl);
-    ReportControl reportCtrl = new ReportControl(authCtrl, intCtrl);
-    // user control for company rep registrations
-    UserControl userCtrl = new UserControl(userLoginDirCtrl, authCtrl);
-
+        InternshipControl intCtrl = new InternshipControl(authCtrl);
+        ApplicationControl appCtrl = new ApplicationControl(authCtrl, intCtrl);
+        intCtrl.setApplicationControl(appCtrl);
+        ReportControl reportCtrl = new ReportControl(authCtrl, intCtrl);
+        UserControl userCtrl = new UserControl(userLoginDirCtrl, authCtrl);
+        
         Scanner sc = new Scanner(System.in);
         try {
             // Generic login first
@@ -34,18 +31,21 @@ public class Main {
                     System.out.println("Launching Career Staff console...");
                     // Placeholder: instantiate and immediately enter (future) staff menu loop
                     CareerStaffCLI staffCLI=new CareerStaffCLI(sc, appCtrl, intCtrl, reportCtrl, userCtrl);
+                    staffCLI.setLoginControl(loginCtrl);
                     staffCLI.displayMenu();
                     break;
                 }
                 case "Student": {
                     System.out.println("Launching Student console...");
                     StudentCLI studentCLI = new StudentCLI(sc, appCtrl, intCtrl);
+                    studentCLI.setLoginControl(loginCtrl);
                     studentCLI.displayMenu();
                     break;
                 }
                 case "CompanyRepresentative": {
                     System.out.println("Launching Company Representative console...");
                     CompanyRepresentativeCLI companyRepCLI = new CompanyRepresentativeCLI(sc, intCtrl);
+                    companyRepCLI.setLoginControl(loginCtrl);
                     companyRepCLI.displayMenu();
                     break;
                 }

@@ -124,6 +124,10 @@ public class InternshipOpportunity {
     public boolean getVisibility() {
         return visibility;
     }
+
+    public void setVisibility(boolean visibility) {
+        this.visibility = visibility;
+    }
     
 
     public List<Object> getDetailsForViewing() {
