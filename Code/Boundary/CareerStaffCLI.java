@@ -41,7 +41,7 @@ public class CareerStaffCLI extends InterfaceCLI {
         // implementation
     }
 
-    public void rejectInternshipCreated(InternshipOpportunity opp) {
+    public void rejectInternshipCreated(String oppID) {
         // implementation
     }
 

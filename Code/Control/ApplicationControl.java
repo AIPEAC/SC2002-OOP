@@ -172,7 +172,7 @@ public class ApplicationControl {
 		}
 	}
 
-	//=========================================================
+	// =========================================================
 	// Career Staff methods
 
 	public void loadPendingWithdrawalApplications(Application app) {
