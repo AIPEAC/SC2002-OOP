@@ -8,11 +8,13 @@ import java.util.Scanner;
 public class CareerStaffCLI extends AbstractCLI {
     private ApplicationControl appCtrl;
     private ReportControl reportCtrl;
+    private UserControl userCtrl;
     
-    public CareerStaffCLI(Scanner sc, ApplicationControl appCtrl, InternshipControl intCtrl, ReportControl reportCtrl) {
+    public CareerStaffCLI(Scanner sc, ApplicationControl appCtrl, InternshipControl intCtrl, ReportControl reportCtrl, UserControl userCtrl) {
         super(sc, intCtrl);
         this.appCtrl = appCtrl;
         this.reportCtrl = reportCtrl;
+        this.userCtrl = userCtrl;
     }
     @Override
     public void displayMenu() {
@@ -100,40 +102,69 @@ public class CareerStaffCLI extends AbstractCLI {
     }
     
     public void viewCompanyRepRegisterList() {
-        // implementation
+        java.util.List<Entity.Users.CompanyRepresentative> pending = userCtrl.getPendingCompanyRepList();
+        if (pending == null || pending.isEmpty()) {
+            System.out.println("No pending company representative registrations.");
+            return;
+        }
+        System.out.println("Pending Company Representative Registrations:");
+        for (Entity.Users.CompanyRepresentative rep : pending) {
+            System.out.println("ID: " + rep.getUserID() + " | Name: " + rep.getName() + " | Company: " + rep.getCompanyName() + " | Dept: " + rep.getDepartment());
+        }
     }
 
     public void approveRegister(String id) {
-        // implementation
+        userCtrl.approveRegister(id);
+        System.out.println("Approved company representative registration: " + id);
     }
 
     public void rejectRegister(String id) {
-        // implementation
+        userCtrl.rejectRegister(id);
+        System.out.println("Rejected company representative registration: " + id);
     }
 
     public void viewPendingInternshipOpp() {
-        // implementation
+        java.util.List<Entity.InternshipOpportunity> pending = intCtrl.getPendingInternshipOpportunities();
+        if (pending == null || pending.isEmpty()) {
+            System.out.println("No pending internship opportunities.");
+            return;
+        }
+        System.out.println("Pending Internship Opportunities:");
+        for (Entity.InternshipOpportunity opp : pending) {
+            System.out.println(opp.getInternshipID() + " | " + opp.getInternshipTitle() + " | Company: " + opp.getCompanyName() + " | Status: " + opp.getStatus());
+        }
     }
 
     public void approveInternshipCreated(String oppID) {
-        // implementation
+        intCtrl.approveInternshipCreationByID(oppID);
+        System.out.println("Approved internship creation: " + oppID);
     }
 
     public void rejectInternshipCreated(String oppID) {
-        // implementation
+        intCtrl.rejectInternshipCreationByID(oppID);
+        System.out.println("Rejected internship creation: " + oppID);
     }
 
     public void viewPendingWithdrawal() {
-        // implementation
+        java.util.List<Entity.Application> pending = appCtrl.getPendingWithdrawals();
+        if (pending == null || pending.isEmpty()) {
+            System.out.println("No pending withdrawal requests.");
+            return;
+        }
+        System.out.println("Pending Withdrawal Requests:");
+        for (Entity.Application app : pending) {
+            System.out.println("Application No: " + app.getApplicationNumber() + " | Internship ID: " + app.getInternshipID() + " | Student: " + app.getStudentID());
+        }
     }
 
     public void approveWithdrawal(int appID) {
-        // implementation
-        
+        appCtrl.approveWithdrawal(appID);
+        System.out.println("Approved withdrawal for application: " + appID);
     }
 
     public void rejectWithdrawal(int appID) {
-        // implementation
+        appCtrl.rejectWithdrawalByNumber(appID);
+        System.out.println("Rejected withdrawal for application: " + appID);
     }
     public void generateReportOverview(boolean optToSaveReport){
         reportCtrl.generateReportOverview(optToSaveReport);

@@ -359,6 +359,24 @@ public class InternshipControl{
         rejectInternshipCreation.setStatusToRejected();
         updateInternshipInDB();
     }
+    /** Approve by internship ID (public wrapper for CLI) */
+    public void approveInternshipCreationByID(String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp == null) {
+            System.out.println("Internship not found: " + internshipID);
+            return;
+        }
+        approveInternshipCreation(opp);
+    }
+    /** Reject by internship ID (public wrapper for CLI) */
+    public void rejectInternshipCreationByID(String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp == null) {
+            System.out.println("Internship not found: " + internshipID);
+            return;
+        }
+        rejectInternshipCreation(opp);
+    }
     public void reject(InternshipOpportunity opp) {
         if (opp == null) return;
         opp.setStatusToRejected();

@@ -185,6 +185,28 @@ public class ApplicationControl {
 		}
 	}
 
+	/** Return applications which have a pending withdrawal request */
+	public java.util.List<Application> getPendingWithdrawals() {
+		java.util.List<Application> pending = new java.util.ArrayList<>();
+		for (Application app : applications) {
+			if (app.getWithdrawStatus() != null && app.getWithdrawStatus().equals("pending")) {
+				pending.add(app);
+			}
+		}
+		return pending;
+	}
+
+	public void rejectWithdrawalByNumber(int appNum) {
+		Application app = getApplicationByNumber(appNum);
+		if (app != null) {
+			app.setApplicationWithdrawnStatus(); // mark as rejected
+			saveApplicationsToDB();
+			System.out.println("Withdrawal rejected for Application Number: " + appNum);
+		} else {
+			System.out.println("Application not found.");
+		}
+	}
+
 	// =========================================================
 	// Company Representative / Staff helpers
 
@@ -230,6 +252,12 @@ public class ApplicationControl {
 		Application app = getApplicationByNumber(appNum);
 		if (app != null) {
 			app.setApplicationWithdrawn();
+			// persist change
+			saveApplicationsToDB();
+			// remove application number from associated internship
+			if (intCtrl != null) {
+				intCtrl.removeApplicationNumberFromInternshipOpportunity(appNum, app.getInternshipID());
+			}
 			System.out.println("Withdrawal approved for Application Number: " + appNum);
 		} else {
 			System.out.println("Application not found.");

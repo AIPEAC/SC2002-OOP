@@ -10,10 +10,12 @@ public class Main {
         AuthenticationControl authCtrl = new AuthenticationControl();
         UserLoginDirectoryControl userLoginDirCtrl = new UserLoginDirectoryControl(authCtrl);
         LoginControl loginCtrl = new LoginControl(authCtrl, userLoginDirCtrl);
-        InternshipControl intCtrl = new InternshipControl(authCtrl);
-        ApplicationControl appCtrl = new ApplicationControl(authCtrl, intCtrl);
-        intCtrl.setApplicationControl(appCtrl);
-        ReportControl reportCtrl = new ReportControl(authCtrl, intCtrl);
+    InternshipControl intCtrl = new InternshipControl(authCtrl);
+    ApplicationControl appCtrl = new ApplicationControl(authCtrl, intCtrl);
+    intCtrl.setApplicationControl(appCtrl);
+    ReportControl reportCtrl = new ReportControl(authCtrl, intCtrl);
+    // user control for company rep registrations
+    UserControl userCtrl = new UserControl(userLoginDirCtrl, authCtrl);
 
         Scanner sc = new Scanner(System.in);
         try {
@@ -32,7 +34,7 @@ public class Main {
                 case "CareerStaff": {
                     System.out.println("Launching Career Staff console...");
                     // Placeholder: instantiate and immediately enter (future) staff menu loop
-                    CareerStaffCLI staffCLI=new CareerStaffCLI(sc, appCtrl, intCtrl, reportCtrl);
+                    CareerStaffCLI staffCLI=new CareerStaffCLI(sc, appCtrl, intCtrl, reportCtrl, userCtrl);
                     staffCLI.displayMenu();
                     break;
                 }

@@ -18,8 +18,33 @@ public class UserControl {
 	}
 
 	public List<CompanyRepresentative> getPendingCompanyRepList() {
-		// implementation
-		return null;
+		java.util.List<CompanyRepresentative> pending = new java.util.ArrayList<>();
+		String csvFile = "Code/Lib/company_representative.csv";
+		java.io.File file = new java.io.File(csvFile);
+		if (!file.exists()) return pending;
+		try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(file))) {
+			String line;
+			br.readLine(); // skip header
+			while ((line = br.readLine()) != null) {
+				String[] parts = line.split(",");
+				if (parts.length >= 5) {
+					String userID = parts[0];
+					String name = parts.length > 1 ? parts[1] : "";
+					String email = parts.length > 2 ? parts[2] : "";
+					String position = parts.length > 3 ? parts[3] : "";
+					String status = parts.length > 4 ? parts[4] : "";
+					String companyName = parts.length > 5 ? parts[5] : "";
+					String department = parts.length > 6 ? parts[6] : "";
+					if ("pending".equalsIgnoreCase(status)) {
+						CompanyRepresentative rep = new CompanyRepresentative(userID, name, email, position, status, companyName, department);
+						pending.add(rep);
+					}
+				}
+			}
+		} catch (java.io.IOException e) {
+			e.printStackTrace();
+		}
+		return pending;
 	}
 
 	public void approveRegister(String companyID) {
@@ -51,7 +76,6 @@ public class UserControl {
 	}
 
 	public List<CompanyRepresentative> getPendingCompanyRep() {
-		// implementation
-		return null;
+		return getPendingCompanyRepList();
 	}
 }
