@@ -147,7 +147,7 @@ public class UserLoginDirectoryControl{
         }
     }  
     
-    public String verifyUser(String userID, String password){
+    String verifyUser(String userID, String password){
         for (String[] loginData : loginList) {
             if (loginData[1].equals(userID) && loginData[2].equals(hashPassword(password))) {
                 String identity=loginData[0];
@@ -189,7 +189,7 @@ public class UserLoginDirectoryControl{
             throw new RuntimeException("Hashing algorithm not found", e);
         }
     }  
-    public User createUser(String userID, String identity){
+    User createUser(String userID, String identity){
         switch(identity){
             case "Student":
                 loadStudent(userID);
@@ -229,7 +229,7 @@ public class UserLoginDirectoryControl{
                 throw new IllegalArgumentException("bug: UserLoginDirectory.createUser(): wrong identity, possibly wrongly written into login_list.csv");
         }
     }
-    public String getCompanyRepsCompany(String userID){
+    String getCompanyRepsCompany(String userID){
         if (authCtrl.isLoggedIn()) {
             loadCompanyRep(userID);
             String companyName=CompanyRepInfoList[5];
@@ -240,7 +240,7 @@ public class UserLoginDirectoryControl{
     }
     
 
-    public void changePassword(String userID, String newPassword){
+    void changePassword(String userID, String newPassword){
         if (!authCtrl.isLoggedIn()) {
             throw new IllegalStateException("UserLoginDirectoryControl.changePassword(): no logged in user when changing password");
         }
@@ -272,7 +272,7 @@ public class UserLoginDirectoryControl{
         tempFile.renameTo(inputFile);
     }
     
-    public String requestRegisterCompanyRep(String name,String companyName,String department,String postion,String email){
+    String requestRegisterCompanyRep(String name,String companyName,String department,String postion,String email){
         
         String assignedID=assignIDToCompanyRep();
 
@@ -355,13 +355,13 @@ public class UserLoginDirectoryControl{
         return String.format("comprep%04d", maxID + 1);
     }
 
-    public void approveCompanyRep(String userID){
+    void approveCompanyRep(String userID){
         if (!authCtrl.isLoggedIn()) throw new IllegalStateException("UserLoginDirectoryControl.approveCompanyRep(): no logged in user when approving a CompanyRep");
         if (userID == null) throw new IllegalArgumentException("UserLoginDirectoryControl.approveCompanyRep(): null userID");
         updateCompanyRepStatusInLogin(userID, "approved");
         updateCompanyRepStatusInCompanyRepCSV(userID, "approved");
     }
-    public void rejectCompanyRep(String userID){
+    void rejectCompanyRep(String userID){
         updateCompanyRepStatusInLogin(userID, "rejected");
         updateCompanyRepStatusInCompanyRepCSV(userID, "rejected");
     }

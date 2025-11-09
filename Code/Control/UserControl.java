@@ -18,7 +18,7 @@ public class UserControl {
 		this.authCtrl = authCtrl;
 	}
 
-	public void loadUserDataFromDB() {
+	void loadUserDataFromDB() {
 		// implementation
 	}
 
@@ -72,15 +72,15 @@ public class UserControl {
 		}
 	}
 
-	public void addCompanyRepFromPending(CompanyRepresentative rep) {
+	void addCompanyRepFromPending(CompanyRepresentative rep) {
 		pendingCompanyRepID.add(rep.getUserID());
 	}
 
-	public void removeCompanyRepFromPending(CompanyRepresentative rep) {
+	void removeCompanyRepFromPending(CompanyRepresentative rep) {
 		pendingCompanyRepID.remove(rep.getUserID());
 	}
 
-	public List<String> getPendingCompanyRep() {
+	List<String> getPendingCompanyRep() {
 		return getPendingCompanyRepList();
 	}
 }

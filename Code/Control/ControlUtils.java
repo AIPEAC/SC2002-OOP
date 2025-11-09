@@ -5,7 +5,7 @@ class ControlUtils {
      * Parse common boolean-like strings into Boolean.
      * Returns Boolean.TRUE / Boolean.FALSE, or null if unable to parse.
      */
-    public static Boolean parseBooleanLike(String s) {
+    static Boolean parseBooleanLike(String s) {
         if (s == null) return null;
         String v = s.trim().toLowerCase();
         if (v.isEmpty()) return null;

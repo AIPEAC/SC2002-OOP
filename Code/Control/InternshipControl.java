@@ -83,7 +83,7 @@ public class InternshipControl{
 
     //=========================================================
     // All Users methods
-    public List<InternshipOpportunity> getAllVisibleInternshipOpportunities() {
+    List<InternshipOpportunity> getAllVisibleInternshipOpportunities() {
         List<InternshipOpportunity> visible = new ArrayList<>();
         for (InternshipOpportunity opp : internshipOpportunities) {
             if (opp.getVisibility() && !"rejected".equalsIgnoreCase(opp.getStatus())) {
@@ -93,7 +93,7 @@ public class InternshipControl{
         return visible;
     }
     /** Return details for display (labelled strings) for a given internship ID. */
-    public List<String> getInternshipDetails(String internshipID) {
+    List<String> getInternshipDetails(String internshipID) {
         if (!authCtrl.isLoggedIn()) throw new IllegalStateException("Please login to view internship details.");
         InternshipOpportunity opp = getInternshipByID(internshipID);
         List<String> out = new ArrayList<>();
@@ -212,7 +212,7 @@ public class InternshipControl{
     }
     
     /** Approve an application: mark application approved and add to internship accepted list. */
-    public void approveApplicationNumberForInternship(int applicationNumber, String internshipID) {
+    void approveApplicationNumberForInternship(int applicationNumber, String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         if (opp.isFull()) throw new IllegalStateException("Cannot approve; internship is already full.");
@@ -222,7 +222,7 @@ public class InternshipControl{
     }
 
     /** Reject an application for an internship. */
-    public void rejectApplicationNumberForInternship(int applicationNumber, String internshipID) {
+    void rejectApplicationNumberForInternship(int applicationNumber, String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         opp.rejectApplicationNumber(applicationNumber);
@@ -273,7 +273,7 @@ public class InternshipControl{
             e.printStackTrace();
         }
     }
-    public boolean isVisibleAndNotFullAndNotRejected(String oppID) {
+    boolean isVisibleAndNotFullAndNotRejected(String oppID) {
         InternshipOpportunity opp = getInternshipByID(oppID);
         if (opp != null) {
             if (opp.getVisibility() 
@@ -284,7 +284,7 @@ public class InternshipControl{
         }
         return false;
     }
-    public boolean studentFitsRequirements(String studentID, String oppID) {
+    boolean studentFitsRequirements(String studentID, String oppID) {
         loadStudentFromDB(studentID);
         InternshipOpportunity opp = getInternshipByID(oppID);
         if (opp != null && student != null) {
@@ -318,25 +318,25 @@ public class InternshipControl{
         }
         throw new IllegalStateException("Error in retrieving student or internship details.");
     }
-    public void addApplicationNumberToInternshipOpportunity(int applicationNumber, String internshipID) {
+    void addApplicationNumberToInternshipOpportunity(int applicationNumber, String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp != null) {
             opp.addApplicationNumberToInternship(applicationNumber);
             updateInternshipInDB();
         }
     }
-    public void removeApplicationNumberFromInternshipOpportunity(int applicationNumber, String internshipID) {
+    void removeApplicationNumberFromInternshipOpportunity(int applicationNumber, String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp != null) {
             opp.removeApplicationNumberFromInternship(applicationNumber);
             updateInternshipInDB();
         }
     }
-    public void withdrawEveryOtherApplication(String studentID) {
+    void withdrawEveryOtherApplication(String studentID) {
         appCtrl.withdrawOtherApplicationsOfApprovedStudent(studentID);
         updateInternshipInDB();
     }
-    public String getInternshipCompany(String internshipID) {
+    String getInternshipCompany(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp != null) {
             return opp.getCompanyName();
@@ -363,7 +363,7 @@ public class InternshipControl{
         }
         return out;
     }
-    public List<InternshipOpportunity> getAllInternshipOpportunities(){ //for report
+    List<InternshipOpportunity> getAllInternshipOpportunities(){ //for report
         return new ArrayList<>(internshipOpportunities);
     } 
 
