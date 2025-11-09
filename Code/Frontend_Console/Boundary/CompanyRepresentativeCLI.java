@@ -113,9 +113,9 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
                 internshipLevel = "Basic";
                 break;
         }
-        // Restrict majors to the list in Code/Lib/majors.csv
+    // Restrict majors to the list in Code/Backend/Lib/majors.csv
         List<String> allMajors = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("Code/Lib/majors.csv"))) {
+    try (BufferedReader br = new BufferedReader(new FileReader("Code/Backend/Lib/majors.csv"))) {
             String line = br.readLine(); // header
             while ((line = br.readLine()) != null) {
                 if (!line.trim().isEmpty()) {

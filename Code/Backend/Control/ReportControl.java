@@ -33,7 +33,7 @@ public class ReportControl {
         int reportIndex = optToSaveReport ? getNumberOfReports()+1 : 0;
         boolean filtered=false;
         Report report=new Report(reportIndex,allOpplist,filtered);
-    List<String> lines = report.formatOutput();
+        List<String> lines = report.formatOutput();
         if (optToSaveReport) {
             try {
                 String path = report.saveToLocal();
@@ -51,7 +51,7 @@ public class ReportControl {
         List<InternshipOpportunity> filteredList=comprehensive(allOpplist,filterIn);
         boolean filtered=true;
         Report report=new Report(reportIndex,filteredList,filtered);
-    List<String> lines = report.formatOutput();
+        List<String> lines = report.formatOutput();
         if (optToSaveReport) {
             try {
                 String path = report.saveToLocal();

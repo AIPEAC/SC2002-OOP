@@ -32,7 +32,7 @@ public class UserLoginDirectoryControl{
     }
 
     private void loadLoginListFromDB(){
-        String csvFile = "Code/Lib/login_list.csv";
+        String csvFile = "Code/Backend/Lib/login_list.csv";
         File file = new File(csvFile);
         String line = "";
         String csvSplitBy = ",";
@@ -59,7 +59,7 @@ public class UserLoginDirectoryControl{
         }
     }
     private void loadStudent(String userID){
-        String csvFile = "Code/Lib/student.csv";
+        String csvFile = "Code/Backend/Lib/student.csv";
         File file = new File(csvFile);
         String line = "";
         String csvSplitBy = ",";
@@ -89,7 +89,7 @@ public class UserLoginDirectoryControl{
         }
     }
     private void loadStaff(String userID){
-        String csvFile = "Code/Lib/staff.csv";
+        String csvFile = "Code/Backend/Lib/staff.csv";
         File file = new File(csvFile);
         String line = "";
         String csvSplitBy = ",";
@@ -119,7 +119,7 @@ public class UserLoginDirectoryControl{
         }
     }
     private void loadCompanyRep(String userID){
-        String csvFile = "Code/Lib/company_representative.csv";
+        String csvFile = "Code/Backend/Lib/company_representative.csv";
         File file = new File(csvFile);
         String line = "";
         String csvSplitBy = ",";
@@ -253,9 +253,9 @@ public class UserLoginDirectoryControl{
             }
         }
 
-        String csvFile = "Code/Lib/login_list.csv";
-        File inputFile = new File(csvFile);
-        File tempFile = new File("Code/Lib/login_list.tmp");
+    String csvFile = "Code/Backend/Lib/login_list.csv";
+    File inputFile = new File(csvFile);
+    File tempFile = new File("Code/Backend/Lib/login_list.tmp");
 
         try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
              FileWriter writer = new FileWriter(tempFile)) {
@@ -278,7 +278,7 @@ public class UserLoginDirectoryControl{
         
         String assignedID=assignIDToCompanyRep();
 
-        try (FileWriter writer = new FileWriter("Code/Lib/company_representative.csv", true)) {
+        try (FileWriter writer = new FileWriter("Code/Backend/Lib/company_representative.csv", true)) {
             writer.append(String.join(",", assignedID, name, email, postion, "pending", companyName, department));
             writer.append("\n");
         } catch (IOException e) {
@@ -286,7 +286,7 @@ public class UserLoginDirectoryControl{
             return null;
         }
 
-        try (FileWriter writer = new FileWriter("Code/Lib/login_list.csv", true)) {
+        try (FileWriter writer = new FileWriter("Code/Backend/Lib/login_list.csv", true)) {
             writer.append(String.join(",", "CompanyRepresentative", assignedID, hashPassword("password"), ""));
             writer.append("\n");
         } catch (IOException e) {
@@ -300,7 +300,7 @@ public class UserLoginDirectoryControl{
     }
     private String assignIDToCompanyRep(){
         List<String> allUserIDs = new ArrayList<>();
-        String[] csvFiles = {"Code/Lib/company_representative.csv", "Code/Lib/student.csv", "Code/Lib/staff.csv"};
+        String[] csvFiles = {"Code/Backend/Lib/company_representative.csv", "Code/Backend/Lib/student.csv", "Code/Backend/Lib/staff.csv"};
 
         for (String csvFile : csvFiles) {
             File file = new File(csvFile);
@@ -310,11 +310,11 @@ public class UserLoginDirectoryControl{
                     file.createNewFile();
                     try (FileWriter writer = new FileWriter(file)) {
                         String header = "";
-                        if (csvFile.equals("Code/Lib/company_representative.csv")) {
+                        if (csvFile.equals("Code/Backend/Lib/company_representative.csv")) {
                             header = "userID,name,email,position,accountStatus,companyName,department";
-                        } else if (csvFile.equals("Code/Lib/student.csv")) {
+                        } else if (csvFile.equals("Code/Backend/Lib/student.csv")) {
                             header = "userID,name,email,major,year,hasAcceptedInternshipOpportunity";
-                        } else if (csvFile.equals("Code/Lib/staff.csv")) {
+                        } else if (csvFile.equals("Code/Backend/Lib/staff.csv")) {
                             header = "userID,name,email,department,role";
                         }
                         writer.append(header);
@@ -398,9 +398,9 @@ public class UserLoginDirectoryControl{
 
         // Persist changes back to CSV if updated
         if (updated) {
-            String csvFile = "Code/Lib/login_list.csv";
+            String csvFile = "Code/Backend/Lib/login_list.csv";
             File inputFile = new File(csvFile);
-            File tempFile = new File("Code/Lib/login_list.tmp");
+            File tempFile = new File("Code/Backend/Lib/login_list.tmp");
 
             try (FileWriter writer = new FileWriter(tempFile)) {
                 // Write header
@@ -430,9 +430,9 @@ public class UserLoginDirectoryControl{
         }
     }
     private void updateCompanyRepStatusInCompanyRepCSV(String userID, String status) {
-        String csvFile = "Code/Lib/company_representative.csv";
+    String csvFile = "Code/Backend/Lib/company_representative.csv";
         File inputFile = new File(csvFile);
-        File tempFile = new File("Code/Lib/company_representative.tmp");
+        File tempFile = new File("Code/Backend/Lib/company_representative.tmp");
         boolean updated = false;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
@@ -476,7 +476,7 @@ public class UserLoginDirectoryControl{
 
     //intialization related methods
     private void checkHaveInitialized() {
-        String csvFile = "Code/Lib/have_initialized.csv";
+        String csvFile = "Code/Backend/Lib/have_initialized.csv";
         File file = new File(csvFile);
         String line = "";
         String csvSplitBy = ",";
@@ -503,9 +503,9 @@ public class UserLoginDirectoryControl{
         }
     }
     private void setHaveInitialized(boolean status) {
-        String csvFile = "Code/Lib/have_initialized.csv";
+        String csvFile = "Code/Backend/Lib/have_initialized.csv";
         File inputFile = new File(csvFile);
-        File tempFile = new File("Code/Lib/have_initialized.tmp");
+        File tempFile = new File("Code/Backend/Lib/have_initialized.tmp");
 
         try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
              FileWriter writer = new FileWriter(tempFile)) {
@@ -528,12 +528,12 @@ public class UserLoginDirectoryControl{
         if (haveInitialized) {
             return;
         }
-        String filePathExampleStaff = "Code/Lib_examples/staff_list.csv";
-        String filePathExampleStudent = "Code/Lib_examples/student_list.csv";
-        String filePathExampleCompanyRep = "Code/Lib_examples/company_representative.csv";
-        String filePathDBLogin = "Code/Lib/login_list.csv";
-        String filePathDBStaffString = "Code/Lib/staff_list.csv";
-        String filePathDBStudentString = "Code/Lib/student_list.csv";
+        String filePathExampleStaff = "Code/Backend/Lib_example/sample_staff_list.csv";
+        String filePathExampleStudent = "Code/Backend/Lib_example/sample_student_list.csv";
+        String filePathExampleCompanyRep = "Code/Backend/Lib_example/sample_company_representative_list.csv";
+        String filePathDBLogin = "Code/Backend/Lib/login_list.csv";
+        String filePathDBStaffString = "Code/Backend/Lib/staff.csv";
+        String filePathDBStudentString = "Code/Backend/Lib/student.csv";
         
         BufferedReader br = null;
         String line;
@@ -575,7 +575,7 @@ public class UserLoginDirectoryControl{
             br.readLine(); // Skip header
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
-                try (FileWriter writer = new FileWriter("Code/Lib/company_representative.csv", true)) {
+                try (FileWriter writer = new FileWriter("Code/Backend/Lib/company_representative.csv", true)) {
                     writer.append(String.join(",", values));
                     writer.append("\n");
                 }

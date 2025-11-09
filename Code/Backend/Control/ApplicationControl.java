@@ -27,11 +27,6 @@ public class ApplicationControl {
 	//=========================================================
 	// Both Student and Career Staff methods
 
-	void checkApplications() {
-		// Deprecated: prefer getApplicationsForDisplay() for boundary printing
-		// kept as a no-op to avoid printing from control layer
-	}
-
 	/** Return application lines for display by the boundary. */
 	public List<String> getApplicationsForDisplay() {
 		List<String> out = new ArrayList<>();
@@ -115,7 +110,7 @@ public class ApplicationControl {
 		return app.getApplicationNumber();
 	}
 	void getApplicationStatus() {
-		// Deprecated: use getApplicationsForDisplay() instead
+		// Ditched: use getApplicationsForDisplay() instead
 		return;
 	}
 	public boolean hasAcceptedOffer() {
@@ -307,7 +302,7 @@ public class ApplicationControl {
 	}
 	
 	//=========================================================
-	// Private Helpers
+	// Helpers
 
 	Application getApplicationByNumber(int appNumber) {
 		for (Application app : applications) {

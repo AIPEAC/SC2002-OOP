@@ -20,14 +20,10 @@ public class UserControl {
 		this.authCtrl = authCtrl;
 	}
 
-	void loadUserDataFromDB() {
-		// implementation
-	}
-
 	/** Return formatted lines describing pending company representative registrations. */
 	public List<String> getPendingCompanyRepList() {
 		List<String> out = new ArrayList<>();
-		String csvFile = "Code/Lib/company_representative.csv";
+		String csvFile = "Code/Backend/Lib/company_representative.csv";
 		File file = new File(csvFile);
 		if (!file.exists()) return out;
 		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
