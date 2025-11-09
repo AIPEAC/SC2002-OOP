@@ -433,6 +433,33 @@ public class InternshipControl{
         changeVisibility(opp);
     }
 
+    /**
+     * Set visibility by internship ID using a string value (safe wrapper for external UIs).
+     * Accepts boolean-like strings (y/n, yes/no, approve/reject, a/r).
+     */
+    public void changeVisibilityByID(String internshipID, String visibleStr) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp == null) {
+            System.out.println("Internship not found: " + internshipID);
+            return;
+        }
+        Boolean desired = ControlUtils.parseBooleanLike(visibleStr);
+        if (desired == null) {
+            System.out.println("Invalid visibility value: '" + visibleStr + "'. Use y/n or approve/reject.");
+            return;
+        }
+        // set visibility using reflection (entity currently lacks setter)
+        try {
+            java.lang.reflect.Field f = InternshipOpportunity.class.getDeclaredField("visibility");
+            f.setAccessible(true);
+            f.setBoolean(opp, desired.booleanValue());
+            updateInternshipInDB();
+            System.out.println("Visibility for " + internshipID + " set to " + desired);
+        } catch (Exception e) {
+            System.out.println("Unable to change visibility: " + e.getMessage());
+        }
+    }
+
     //=========================================================
     // Private Helpers / package private
     // for all users

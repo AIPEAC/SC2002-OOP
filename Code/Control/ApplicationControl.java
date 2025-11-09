@@ -207,6 +207,54 @@ public class ApplicationControl {
 		}
 	}
 
+	/** UI-friendly wrapper: accepts application number as String, parses and delegates */
+	public void approveWithdrawal(String appNumStr) {
+		if (appNumStr == null || appNumStr.isEmpty()) {
+			System.out.println("Invalid application number.");
+			return;
+		}
+		try {
+			int appNum = Integer.parseInt(appNumStr.trim());
+			approveWithdrawal(appNum);
+		} catch (NumberFormatException e) {
+			System.out.println("Invalid application number format: " + appNumStr);
+		}
+	}
+
+	/** UI-friendly wrapper: accepts application number as String, parses and delegates */
+	public void rejectWithdrawal(String appNumStr) {
+		if (appNumStr == null || appNumStr.isEmpty()) {
+			System.out.println("Invalid application number.");
+			return;
+		}
+		try {
+			int appNum = Integer.parseInt(appNumStr.trim());
+			rejectWithdrawalByNumber(appNum);
+		} catch (NumberFormatException e) {
+			System.out.println("Invalid application number format: " + appNumStr);
+		}
+	}
+
+	/**
+	 * Wrapper that accepts an application number string and a decision string (approve/reject-like)
+	 */
+	public void handleWithdrawalDecision(String appNumStr, String decisionStr) {
+		if (appNumStr == null || appNumStr.isEmpty()) {
+			System.out.println("Invalid application number.");
+			return;
+		}
+		Boolean decision = ControlUtils.parseBooleanLike(decisionStr);
+		if (decision == null) {
+			System.out.println("Invalid decision value: '" + decisionStr + "'. Use approve/reject or y/n.");
+			return;
+		}
+		if (decision) {
+			approveWithdrawal(appNumStr);
+		} else {
+			rejectWithdrawal(appNumStr);
+		}
+	}
+
 	// =========================================================
 	// Company Representative / Staff helpers
 

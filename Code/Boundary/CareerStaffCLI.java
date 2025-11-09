@@ -64,15 +64,10 @@ public class CareerStaffCLI extends AbstractCLI {
                     System.out.print("Enter Application Number to approve/reject (or press Enter to skip): ");
                     String appNumStr = sc.nextLine();
                     if (!appNumStr.isEmpty()) {
-                        try {
-                            int appNum = Integer.parseInt(appNumStr);
-                            System.out.print("Approve (a) or Reject (r)? ");
-                            String resp3 = sc.nextLine();
-                            if ("a".equalsIgnoreCase(resp3)) approveWithdrawal(appNum);
-                            else if ("r".equalsIgnoreCase(resp3)) rejectWithdrawal(appNum);
-                        } catch (NumberFormatException e) {
-                            System.out.println("Invalid number. Returning to menu.");
-                        }
+                        System.out.print("Approve (a) or Reject (r)? ");
+                        String resp3 = sc.nextLine();
+                        if ("a".equalsIgnoreCase(resp3)) approveWithdrawal(appNumStr);
+                        else if ("r".equalsIgnoreCase(resp3)) rejectWithdrawal(appNumStr);
                     }
                     break;
                 case "6":
@@ -157,14 +152,14 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
-    public void approveWithdrawal(int appID) {
-        appCtrl.approveWithdrawal(appID);
-        System.out.println("Approved withdrawal for application: " + appID);
+    public void approveWithdrawal(String appNum) {
+        appCtrl.approveWithdrawal(appNum);
+        System.out.println("Approved withdrawal for application: " + appNum);
     }
 
-    public void rejectWithdrawal(int appID) {
-        appCtrl.rejectWithdrawalByNumber(appID);
-        System.out.println("Rejected withdrawal for application: " + appID);
+    public void rejectWithdrawal(String appNum) {
+        appCtrl.rejectWithdrawal(appNum);
+        System.out.println("Rejected withdrawal for application: " + appNum);
     }
     public void generateReportOverview(boolean optToSaveReport){
         reportCtrl.generateReportOverview(optToSaveReport);
@@ -172,5 +167,4 @@ public class CareerStaffCLI extends AbstractCLI {
     public void generateReportSpecific(boolean optToSaveReport,Map<String,List<String>> filterIn){
         reportCtrl.generateReportSpecific(optToSaveReport, filterIn);
     }
-
 }
