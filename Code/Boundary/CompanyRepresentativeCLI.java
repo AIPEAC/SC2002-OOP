@@ -8,6 +8,7 @@ import Entity.InternshipOpportunity;
 
 
 public class CompanyRepresentativeCLI extends AbstractCLI{
+    private boolean hasCheckedMyOpps = false;
 
     public CompanyRepresentativeCLI(Scanner sc, InternshipControl intCtrl) {
         super(sc, intCtrl);
@@ -20,7 +21,13 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
             System.out.println("2. View Internship Opportunities");
             System.out.println("3. Create Internship Opportunity");
             System.out.println("4. Check My Internship Opportunities' Status");
-            System.out.println("5. Logout");
+            if (hasCheckedMyOpps) {
+                System.out.println("5. Approve/Reject Applications for My Opportunities");
+                System.out.println("6. Toggle Opportunity Visibility / Other Actions");
+                System.out.println("7. Logout");
+            } else {
+                System.out.println("5. Logout");
+            }
             System.out.print("Select an option: ");
             String choice = sc.nextLine();
 
@@ -36,10 +43,37 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
                     break;
                 case "4":
                     checkMyInternshipOppStatus();
+                    hasCheckedMyOpps = true;
                     break;
                 case "5":
-                    System.out.println("Logging out...");
-                    return;
+                    if (hasCheckedMyOpps) {
+                        approveApplication();
+                    } else {
+                        System.out.println("Logging out...");
+                        return;
+                    }
+                    break;
+                case "6":
+                    if (hasCheckedMyOpps) {
+                        System.out.print("Enter Internship ID to toggle visibility (or press Enter to cancel): ");
+                        String oppId = sc.nextLine();
+                        if (!oppId.isEmpty()) {
+                            // For now, we don't have the full object here; call the helper with null or let intCtrl handle lookup
+                            System.out.println("Toggling visibility for: " + oppId);
+                            // placeholder: actual toggle would require looking up the InternshipOpportunity instance
+                        }
+                    } else {
+                        System.out.println("Invalid option. Please try again.");
+                    }
+                    break;
+                case "7":
+                    if (hasCheckedMyOpps) {
+                        System.out.println("Logging out...");
+                        return;
+                    } else {
+                        System.out.println("Invalid option. Please try again.");
+                    }
+                    break;
                 default:
                     System.out.println("Invalid option. Please try again.");
             }
@@ -82,23 +116,33 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
         String[] majorsArray = sc.nextLine().split(",");
 
         preferredMajors = List.of(majorsArray);
-        System.out.print("Enter Opening Date (yyyy-MM-dd): ");
-        if (isValidDate(sc.nextLine())) {
-            openDate = parseDate(sc.nextLine());
+        System.out.print("Enter Opening Date (yyyy-MM-dd) (leave empty for today): ");
+        String openInput = sc.nextLine();
+        if (isValidDate(openInput)) {
+            openDate = parseDate(openInput);
         } else {
             System.out.println("Invalid date format. Setting to today's date.");
             openDate = new Date();
         }
-        System.out.print("Enter Closing Date (yyyy-MM-dd): ");
-        if (isValidDate(sc.nextLine())) {
-            closeDate = parseDate(sc.nextLine());
+        System.out.print("Enter Closing Date (yyyy-MM-dd) (leave empty for today): ");
+        String closeInput = sc.nextLine();
+        if (isValidDate(closeInput)) {
+            closeDate = parseDate(closeInput);
         } else {
             System.out.println("Invalid date format. Setting to today's date.");
             closeDate = new Date();
         }
-        numberOfSlots=1;
-        System.out.print("Enter Number of Slots: default to 1");
-        numberOfSlots = Integer.parseInt(sc.nextLine());
+        numberOfSlots = 1;
+        System.out.print("Enter Number of Slots (press Enter for default 1): ");
+        String slotsInput = sc.nextLine();
+        if (!slotsInput.trim().isEmpty()) {
+            try {
+                numberOfSlots = Integer.parseInt(slotsInput.trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number; defaulting to 1.");
+                numberOfSlots = 1;
+            }
+        }
         intCtrl.requestCreateInternshipOpportunity(internshipTitle,
             description, internshipLevel, 
             preferredMajors, openDate, closeDate, numberOfSlots);
@@ -131,16 +175,15 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
         return dateStr.matches("\\d{4}-\\d{2}-\\d{2}");
     }
     private Date parseDate(String dateStr) {
-        if (dateStr.trim().isEmpty()) {
+        if (dateStr == null || dateStr.trim().isEmpty()) {
             return new Date();
         }
         String[] parts = dateStr.split("-");
-        int year = Integer.parseInt(parts[0]) - 1900; // Date year starts from 1900
+        int year = Integer.parseInt(parts[0]);
         int month = Integer.parseInt(parts[1]) - 1;   // Month is 0-based
         int day = Integer.parseInt(parts[2]);
         Calendar cal = Calendar.getInstance();
-        cal.set(year + 1900, month, day);
-        Date date = cal.getTime();
-        return date;
+        cal.set(year, month, day);
+        return cal.getTime();
     }
 }
