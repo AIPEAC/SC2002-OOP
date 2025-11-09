@@ -1,12 +1,17 @@
 package Control;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.io.File;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import Entity.Users.CompanyRepresentative;
 
 public class UserControl {
 	private UserLoginDirectoryControl userDir;
 	private AuthenticationControl authCtrl;
-	private List<String> pendingCompanyRepID = new java.util.ArrayList<>();
+	private List<String> pendingCompanyRepID = new ArrayList<>();
 
 	public UserControl(UserLoginDirectoryControl userDir, AuthenticationControl authCtrl) {
 		this.userDir = userDir;
@@ -17,12 +22,13 @@ public class UserControl {
 		// implementation
 	}
 
-	public List<CompanyRepresentative> getPendingCompanyRepList() {
-		java.util.List<CompanyRepresentative> pending = new java.util.ArrayList<>();
+	/** Return formatted lines describing pending company representative registrations. */
+	public List<String> getPendingCompanyRepList() {
+		List<String> out = new ArrayList<>();
 		String csvFile = "Code/Lib/company_representative.csv";
-		java.io.File file = new java.io.File(csvFile);
-		if (!file.exists()) return pending;
-		try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(file))) {
+		File file = new File(csvFile);
+		if (!file.exists()) return out;
+		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
 			String line;
 			br.readLine(); // skip header
 			while ((line = br.readLine()) != null) {
@@ -36,24 +42,23 @@ public class UserControl {
 					String companyName = parts.length > 5 ? parts[5] : "";
 					String department = parts.length > 6 ? parts[6] : "";
 					if ("pending".equalsIgnoreCase(status)) {
-						CompanyRepresentative rep = new CompanyRepresentative(userID, name, email, position, status, companyName, department);
-						pending.add(rep);
+						out.add("ID: " + userID + " | Name: " + name + " | Company: " + companyName + " | Dept: " + department);
 					}
 				}
 			}
-		} catch (java.io.IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return pending;
+		return out;
 	}
 
 	public void approveRegister(String companyID) {
 		if (authCtrl.isLoggedIn() && authCtrl.getUserIdentity().equals("CareerStaff")) {
 			userDir.approveCompanyRep(companyID);
 		} else if (!authCtrl.isLoggedIn()) {
-			System.out.println("You are not logged in.");
+			throw new IllegalStateException("You are not logged in.");
 		} else {
-			System.out.println("You do not have the permission to approve registrations.");
+			throw new IllegalStateException("You do not have the permission to approve registrations.");
 		}
 	}
 
@@ -61,9 +66,9 @@ public class UserControl {
 		if (authCtrl.isLoggedIn() && authCtrl.getUserIdentity().equals("CareerStaff")) {
 			userDir.rejectCompanyRep(companyID);
 		} else if (!authCtrl.isLoggedIn()) {
-			System.out.println("You are not logged in.");
+			throw new IllegalStateException("You are not logged in.");
 		} else {
-			System.out.println("You do not have the permission to reject registrations.");
+			throw new IllegalStateException("You do not have the permission to reject registrations.");
 		}
 	}
 
@@ -75,7 +80,7 @@ public class UserControl {
 		pendingCompanyRepID.remove(rep.getUserID());
 	}
 
-	public List<CompanyRepresentative> getPendingCompanyRep() {
+	public List<String> getPendingCompanyRep() {
 		return getPendingCompanyRepList();
 	}
 }

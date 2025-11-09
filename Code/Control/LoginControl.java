@@ -16,69 +16,39 @@ public class LoginControl {
     }
 
     public void handleLogin(String userID, String password){
-        String identity=userLoginDirCtrl.verifyUser(userID, password);
-        if (identity == null){
-            System.out.println("Login failed. Please check your ID and password input.");
-            return;
-        } else if (identity.equals("pending")) {
-            System.out.println("Your account is pending approval. Please contact the administrator.");
-            return;
-        } else if (identity.equals("rejected")) {
-            System.out.println("Your account has been rejected. Please contact the administrator.");
-            return;
-        }
+        String identity = userLoginDirCtrl.verifyUser(userID, password);
+        if (identity == null) throw new IllegalArgumentException("Login failed. Please check your ID and password input.");
+        if (identity.equals("pending")) throw new IllegalStateException("Your account is pending approval. Please contact the administrator.");
+        if (identity.equals("rejected")) throw new IllegalStateException("Your account has been rejected. Please contact the administrator.");
 
-        User user=userLoginDirCtrl.createUser(userID,identity);
+        User user = userLoginDirCtrl.createUser(userID, identity);
         authCtrl.setLoggedin(user);
         if ("CompanyRepresentative".equals(identity) || "companyRepresentative".equals(identity)) {
-            String companyName=userLoginDirCtrl.getCompanyRepsCompany(userID);
+            String companyName = userLoginDirCtrl.getCompanyRepsCompany(userID);
             authCtrl.setCompanyName(companyName);
         }
-        System.out.println("Login successful.");
     }
-    public String handleRegister(String name,String companyName,String department,String postion,String email){
+    public String handleRegister(String name,String companyName,String department,String postion,String email) throws IllegalArgumentException, Exception{
         /*
          * assign id after register. 
          * password is default to "password" and will only be changed if requested. 
          * when registering, no choice to set password
          */
         
-        if (name==null || companyName==null || email==null){
-            System.out.println("Please fill in the essential information: name, company name, and email.");
-            return null;
-        }else{
-            String userID=userLoginDirCtrl.requestRegisterCompanyRep(name, companyName, department, postion, email);
-            try{
-                if (userID!=null){
-                    System.out.println("successfully created. Please wait for account approval from staff. Your UserID is: "+userID+".d");
-                    System.out.println("Your default password is 'password'. Please change your password after logging in.");
-                    return userID;
-                }
-                else{
-                    throw new Exception("bug: LoginControl.java : handleRegister: no UserID is created. possibly fail to create a User");
-                }
-            }catch (Exception e){
-                System.out.println(e.getMessage());
-            }
+        if (name == null || companyName == null || email == null) {
+            throw new IllegalArgumentException("Please fill in the essential information: name, company name, and email.");
         }
-        return null;
+        String userID = userLoginDirCtrl.requestRegisterCompanyRep(name, companyName, department, postion, email);
+        if (userID != null) {
+            return userID;
+        }
+        throw new Exception("bug: LoginControl.java : handleRegister: no UserID is created. possibly fail to create a User");
     }
-    public boolean changePassword(String originalPassword, String newPassword){
-        if (authCtrl.isLoggedIn()){
-            String userID=authCtrl.getUserID();
-            
-            if (userLoginDirCtrl.verifyUser(userID, originalPassword)!=null){
-                userLoginDirCtrl.changePassword(userID, newPassword);
-                System.out.println("Password changed successfully.");
-                return true;
-            }else{
-                System.out.println("Original password is incorrect.");
-                return false;
-            }
-        }else{
-            System.out.println("You are not logged in.");
-            return false;
-        }
+    public void changePassword(String originalPassword, String newPassword) throws IllegalStateException, IllegalArgumentException {
+        if (!authCtrl.isLoggedIn()) throw new IllegalStateException("You are not logged in.");
+        String userID = authCtrl.getUserID();
+        if (userLoginDirCtrl.verifyUser(userID, originalPassword) == null) throw new IllegalArgumentException("Original password is incorrect.");
+        userLoginDirCtrl.changePassword(userID, newPassword);
     }
 
 }

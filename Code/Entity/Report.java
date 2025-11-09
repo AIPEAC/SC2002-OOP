@@ -36,47 +36,35 @@ public class Report {
         this.filtered=filtered;
     }
     
-    public void formatOutput(){
-        if (!filtered){
-            if (internshipOpportunities.size()==0){
-                System.out.println("No internship opportunities found.");
-            }else{
-                statistifyTheNumbers(internshipOpportunities);
-                printStatistics();
-            }
-        }else{
-            if (internshipOpportunities.size()==0){
-                System.out.println("No internship opportunities found after filtering, try another filter.");
-            }else{
-                statistifyTheNumbers(internshipOpportunities);
-                printStatistics();
-            }
-        }
-    }
-
-    public void saveToLocal(){
-        // Ensure statistics are up-to-date (statistify resets counts)
-        if (internshipOpportunities==null || internshipOpportunities.size()==0){
-            System.out.println("No internships to save in report.");
-            return;
+    /** Build the formatted report lines instead of printing directly. */
+    public List<String> formatOutput(){
+        List<String> lines = new ArrayList<>();
+        if (internshipOpportunities == null || internshipOpportunities.size()==0){
+            if (!filtered) lines.add("No internship opportunities found.");
+            else lines.add("No internship opportunities found after filtering, try another filter.");
+            return lines;
         }
         statistifyTheNumbers(internshipOpportunities);
+        printStatistics(lines);
+        return lines;
+    }
 
+    /** Save the current report to local markdown file and return the path. Throws on error. */
+    public String saveToLocal() throws IOException {
+        if (internshipOpportunities==null || internshipOpportunities.size()==0){
+            throw new IllegalStateException("No internships to save in report.");
+        }
+        statistifyTheNumbers(internshipOpportunities);
         String md = buildMarkdownReport();
-
-        // Try to save into Output_report directory (relative to working directory)
         File dir = new File("Output_report");
         if (!dir.exists()){
             dir.mkdirs();
         }
-    // Use zero-padded 4-digit filename like Report0001.md
-    String filename = String.format("Report%04d.md", reportIndex);
+        String filename = String.format("Report%04d.md", reportIndex);
         File out = new File(dir, filename);
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(out))){
             bw.write(md);
-            System.out.println("Saved report to: "+out.getPath());
-        } catch (IOException e){
-            System.out.println("Failed to save report: "+e.getMessage());
+            return out.getPath();
         }
     }
     
@@ -110,7 +98,7 @@ public class Report {
             }else if((details.get(1)).equals("Basic")){
                 numOfBasicInternships++;
             }else{
-                System.out.println("Error in internship level, check the entity code for InternshipOpportunity.");
+                throw new IllegalStateException("Error in internship level, check the entity code for InternshipOpportunity.");
             }
             
             //numbers for visibable internships
@@ -147,74 +135,70 @@ public class Report {
         }
     }
 
-    private void printStatistics(){
+    private void printStatistics(List<String> lines){
         // Punchy header
-        System.out.println("========================================");
-        System.out.println("🔥 PREVALENT INTERNSHIP REPORT - #"+reportIndex);
-        System.out.println("(Showing "+numOfInternships+" internships"+(filtered?" after filters":"")+")");
-        System.out.println("========================================");
+        lines.add("========================================");
+        lines.add("🔥 PREVALENT INTERNSHIP REPORT - #"+reportIndex);
+        lines.add("(Showing "+numOfInternships+" internships"+(filtered?" after filters":"")+")");
+        lines.add("========================================");
 
-        // Overall counts with simple distribution bars
         int maxForBars = Math.max(1, numOfInternships);
-        System.out.println("Levels:");
-        printLabeledCount("Advanced", numOfAdvancedInternships, maxForBars);
-        printLabeledCount("Intermediate", numOfIntermediateInternships, maxForBars);
-        printLabeledCount("Basic", numOfBasicInternships, maxForBars);
-        System.out.println();
+        lines.add("Levels:");
+        appendLabeledCount(lines, "Advanced", numOfAdvancedInternships, maxForBars);
+        appendLabeledCount(lines, "Intermediate", numOfIntermediateInternships, maxForBars);
+        appendLabeledCount(lines, "Basic", numOfBasicInternships, maxForBars);
+        lines.add("");
 
-        System.out.println("Visibility & Fullness:");
-        printLabeledCount("Visible", numOfVisibleInternships, maxForBars);
-        printLabeledCount("Full", numOfFullInternships, maxForBars);
-        System.out.println();
+        lines.add("Visibility & Fullness:");
+        appendLabeledCount(lines, "Visible", numOfVisibleInternships, maxForBars);
+        appendLabeledCount(lines, "Full", numOfFullInternships, maxForBars);
+        lines.add("");
 
-        System.out.println("Total slots across all internships: "+numOfTotalSlots);
-        System.out.println();
+        lines.add("Total slots across all internships: "+numOfTotalSlots);
+        lines.add("");
 
-        // Majors: sorted by count desc
-        System.out.println("Top majors by number of internships:");
+        lines.add("Top majors by number of internships:");
         List<Entry<String,Integer>> majorsSorted = sortMapByValueDesc(majorsAndInternship);
         if (majorsSorted.isEmpty()){
-            System.out.println(" (none)");
+            lines.add(" (none)");
         } else {
             int topN = Math.min(10, majorsSorted.size());
             int maxMajorCount = majorsSorted.get(0).getValue();
             for (int i=0;i<topN;i++){
                 Entry<String,Integer> e = majorsSorted.get(i);
-                printLabeledCount(e.getKey(), e.getValue(), Math.max(1, maxMajorCount));
+                appendLabeledCount(lines, e.getKey(), e.getValue(), Math.max(1, maxMajorCount));
             }
             if (majorsSorted.size()>topN){
-                System.out.println("...and "+(majorsSorted.size()-topN)+" more majors.");
+                lines.add("...and "+(majorsSorted.size()-topN)+" more majors.");
             }
         }
-        System.out.println();
+        lines.add("");
 
-        // Companies: sorted by count desc and show top 5 prominently
-        System.out.println("Top companies by number of internships:");
+        lines.add("Top companies by number of internships:");
         List<Entry<String,Integer>> companiesSorted = sortMapByValueDesc(companyAndTheirNumOfInternships);
         if (companiesSorted.isEmpty()){
-            System.out.println(" (none)");
+            lines.add(" (none)");
         } else {
             int topCompanies = Math.min(5, companiesSorted.size());
             int maxCompanyCount = companiesSorted.get(0).getValue();
             for (int i=0;i<topCompanies;i++){
                 Entry<String,Integer> e = companiesSorted.get(i);
-                System.out.print((i+1)+". ");
-                printLabeledCount(e.getKey(), e.getValue(), Math.max(1, maxCompanyCount));
+                lines.add((i+1)+". "+tableRowText(e.getKey(), e.getValue(), Math.max(1, maxCompanyCount), 20));
             }
             if (companiesSorted.size()>topCompanies){
-                System.out.println("...and "+(companiesSorted.size()-topCompanies)+" more companies.");
+                lines.add("...and "+(companiesSorted.size()-topCompanies)+" more companies.");
             }
         }
 
-        System.out.println("========================================");
+        lines.add("========================================");
     }
 
     // Helper: print a label, raw count, percentage and a small ASCII bar
-    private void printLabeledCount(String label, int count, int maxForBars){
+    private void appendLabeledCount(List<String> lines, String label, int count, int maxForBars){
         double pct = (numOfInternships>0)?(count*100.0/numOfInternships):0.0;
         String pctStr = String.format("%.1f", pct);
         String bar = makeBar(count, maxForBars, 30);
-        System.out.println(String.format("%-20s %4d  (%5s%%) %s", label, count, pctStr, bar));
+        lines.add(String.format("%-20s %4d  (%5s%%) %s", label, count, pctStr, bar));
     }
     private String makeBar(int value, int max, int width){
         if (max<=0) max=1;
@@ -304,8 +288,13 @@ public class Report {
         double pct = (numOfInternships>0)?(count*100.0/numOfInternships):0.0;
         String pctStr = String.format("%.1f", pct);
         String bar = makeBar(count, maxForBars, width);
-        // Wrap bar in backticks to preserve monospace in Markdown
         return String.format("| %s | %d | %s%% | `%s` |\n", escapeMd(label), count, pctStr, bar);
+    }
+    private String tableRowText(String label, int count, int maxForBars, int width){
+        double pct = (numOfInternships>0)?(count*100.0/numOfInternships):0.0;
+        String pctStr = String.format("%.1f", pct);
+        String bar = makeBar(count, maxForBars, width);
+        return String.format("%s | %d | %s%% | %s", label, count, pctStr, bar);
     }
     private String escapeMd(String s){
         if (s==null) return "";

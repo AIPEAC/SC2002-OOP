@@ -1,6 +1,6 @@
 package Control;
 
-public class ControlUtils {
+class ControlUtils {
     /**
      * Parse common boolean-like strings into Boolean.
      * Returns Boolean.TRUE / Boolean.FALSE, or null if unable to parse.

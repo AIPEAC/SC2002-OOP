@@ -2,6 +2,11 @@ package Boundary;
 import Control.*;
 import java.util.Scanner;
 import java.util.List;
+import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.LinkedHashSet;
 
 public class CompanyRepresentativeCLI extends AbstractCLI{
     private boolean hasCheckedMyOpps = false;
@@ -80,7 +85,7 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
         String internshipTitle;
         String description; 
         String internshipLevel; 
-    List<String> preferredMajors = new java.util.ArrayList<>(); 
+    List<String> preferredMajors = new ArrayList<>(); 
     // we collect raw strings for dates and slots; control will parse/validate
     String openInput;
     String closeInput;
@@ -107,8 +112,8 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
                 break;
         }
         // Restrict majors to the list in Code/Lib/majors.csv
-        List<String> allMajors = new java.util.ArrayList<>();
-        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader("Code/Lib/majors.csv"))) {
+        List<String> allMajors = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader("Code/Lib/majors.csv"))) {
             String line = br.readLine(); // header
             while ((line = br.readLine()) != null) {
                 if (!line.trim().isEmpty()) {
@@ -120,7 +125,7 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
                     allMajors.add(m);
                 }
             }
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             // fallback: accept comma separated input
             System.out.print("Enter Preferred Majors (comma separated): ");
             String[] majorsArray = sc.nextLine().split(",");
@@ -137,10 +142,10 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
             System.out.print("Your selection: ");
             String sel = sc.nextLine().trim();
             if (sel.isEmpty() || sel.equals("0")) {
-                preferredMajors = new java.util.ArrayList<>(); // empty = any
+                preferredMajors = new ArrayList<>(); // empty = any
             } else {
                 String[] parts = sel.split(",");
-                java.util.LinkedHashSet<Integer> picks = new java.util.LinkedHashSet<>();
+                LinkedHashSet<Integer> picks = new LinkedHashSet<>();
                 for (String p : parts) {
                     if (p.trim().isEmpty()) continue;
                     try {
@@ -158,9 +163,9 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
                     }
                 }
                 if (picks.isEmpty()) {
-                    preferredMajors = new java.util.ArrayList<>();
+                    preferredMajors = new ArrayList<>();
                 } else {
-                    preferredMajors = new java.util.ArrayList<>();
+                    preferredMajors = new ArrayList<>();
                     for (int i : picks) preferredMajors.add(allMajors.get(i));
                 }
             }
@@ -173,19 +178,43 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
         slotsInput = sc.nextLine();
 
         // send raw strings to control; control will validate/parse and apply defaults
-        intCtrl.requestCreateInternshipOpportunity(internshipTitle,
-            description, internshipLevel,
-            preferredMajors, openInput, closeInput, slotsInput);
+        try {
+            String createdId = intCtrl.requestCreateInternshipOpportunity(internshipTitle,
+                description, internshipLevel,
+                preferredMajors, openInput, closeInput, slotsInput);
+            System.out.println("Created internship opportunity with ID: " + createdId);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void checkMyInternshipOppStatus() {
-        intCtrl.getInternshipStatus();
+        try {
+            List<String> lines = intCtrl.getInternshipStatus();
+            if (lines.isEmpty()) {
+                System.out.println("No internship opportunities found for this company representative.");
+                return;
+            }
+            for (String l : lines) System.out.println(l);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public void approveApplication() {
         System.out.print("Enter Internship ID to view applications (or press Enter to view all): ");
         String oppId = sc.nextLine();
-        intCtrl.viewApplications(oppId);
+        try {
+            List<String> lines = intCtrl.viewApplications(oppId);
+            if (lines.isEmpty()) {
+                System.out.println("No applications for the selected internship(s).");
+            } else {
+                for (String l : lines) System.out.println(l);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return;
+        }
         System.out.print("Enter Application Number to approve (or press Enter to cancel): ");
         String input = sc.nextLine();
         if (input.trim().isEmpty()) {
@@ -194,7 +223,12 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
         }
         try {
             int appNum = Integer.parseInt(input.trim());
-            intCtrl.approveApplicationAsCompanyRep(appNum);
+            try {
+                intCtrl.approveApplicationAsCompanyRep(appNum);
+                System.out.println("Offer accepted for Application Number: " + appNum);
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
         } catch (NumberFormatException e) {
             System.out.println("Invalid application number.");
         }
@@ -203,7 +237,17 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
     public void rejectApplication() {
         System.out.print("Enter Internship ID to view applications (or press Enter to view all): ");
         String oppId = sc.nextLine();
-        intCtrl.viewApplications(oppId);
+        try {
+            List<String> lines = intCtrl.viewApplications(oppId);
+            if (lines.isEmpty()) {
+                System.out.println("No applications for the selected internship(s).");
+            } else {
+                for (String l : lines) System.out.println(l);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return;
+        }
         System.out.print("Enter Application Number to reject (or press Enter to cancel): ");
         String input = sc.nextLine();
         if (input.trim().isEmpty()) {
@@ -212,7 +256,12 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
         }
         try {
             int appNum = Integer.parseInt(input.trim());
-            intCtrl.rejectApplicationAsCompanyRep(appNum);
+            try {
+                intCtrl.rejectApplicationAsCompanyRep(appNum);
+                System.out.println("Offer rejected for Application Number: " + appNum);
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
         } catch (NumberFormatException e) {
             System.out.println("Invalid application number.");
         }

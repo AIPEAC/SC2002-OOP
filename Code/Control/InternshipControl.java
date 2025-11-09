@@ -1,7 +1,9 @@
 package Control;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Comparator;
 import Entity.Application;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -15,6 +17,7 @@ import java.io.FileWriter;
 
 import Entity.InternshipOpportunity;
 import Entity.Users.Student;
+import Entity.Filter;
 
 
 public class InternshipControl{
@@ -89,47 +92,54 @@ public class InternshipControl{
         }
         return visible;
     }
-    public List<Object> getInternshipDetails(String internshipID) {
+    /** Return details for display (labelled strings) for a given internship ID. */
+    public List<String> getInternshipDetails(String internshipID) {
+        if (!authCtrl.isLoggedIn()) throw new IllegalStateException("Please login to view internship details.");
         InternshipOpportunity opp = getInternshipByID(internshipID);
-        if (authCtrl.isLoggedIn()){
-            //implementation
-            return opp.getDetailsForViewing();
-        }
-        System.out.println("Please login to view internship details.");
-        return null;
+        List<String> out = new ArrayList<>();
+        if (opp == null) return out;
+        out.add("Internship ID: " + opp.getInternshipID());
+        out.add("Title: " + opp.getInternshipTitle());
+        out.add("Description: " + opp.getDescription());
+        out.add("Level: " + opp.getInternshipLevel());
+        out.add("Preferred Majors: " + (opp.getPreferredMajors() != null ? opp.getPreferredMajors() : "N/A"));
+        out.add("Opening Date: " + opp.getOpeningDate());
+        out.add("Closing Date: " + opp.getCloseDate());
+        out.add("Status: " + opp.getStatus());
+        out.add("Company: " + opp.getCompanyName());
+        out.add("Slots: " + opp.getNumOfSlots());
+        out.add("Is Full: " + opp.isFull());
+        return out;
     }
 
     // =========================================================
     // Company Rep methods
 
-    public void requestCreateInternshipOpportunity(
+    public String requestCreateInternshipOpportunity(
         String internshipTitle, String description, 
         String internshipLevel, List<String> preferredMajors, 
         String openDateStr, String closeDateStr, String numberOfSlotsStr) {
         if (!authCtrl.isLoggedIn()) {
-            System.out.println("User not logged in.");
-            return;
+            throw new IllegalStateException("User not logged in.");
         }
 
         // Parse dates and slots here (backend handles conversions)
-        java.util.Date openDate = new java.util.Date();
-        java.util.Date closeDate = new java.util.Date();
+        Date openDate = new Date();
+        Date closeDate = new Date();
         int numberOfSlots = 1;
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         if (openDateStr != null && !openDateStr.trim().isEmpty()) {
             try {
                 openDate = sdf.parse(openDateStr.trim());
-            } catch (java.text.ParseException e) {
-                System.out.println("Invalid opening date format, defaulting to today.");
-                openDate = new java.util.Date();
+            } catch (ParseException e) {
+                openDate = new Date();
             }
         }
         if (closeDateStr != null && !closeDateStr.trim().isEmpty()) {
             try {
                 closeDate = sdf.parse(closeDateStr.trim());
-            } catch (java.text.ParseException e) {
-                System.out.println("Invalid closing date format, defaulting to today.");
-                closeDate = new java.util.Date();
+            } catch (ParseException e) {
+                closeDate = new Date();
             }
         }
         if (numberOfSlotsStr != null && !numberOfSlotsStr.trim().isEmpty()) {
@@ -137,7 +147,6 @@ public class InternshipControl{
                 numberOfSlots = Integer.parseInt(numberOfSlotsStr.trim());
                 if (numberOfSlots <= 0) numberOfSlots = 1;
             } catch (NumberFormatException e) {
-                System.out.println("Invalid number of slots, defaulting to 1.");
                 numberOfSlots = 1;
             }
         }
@@ -152,28 +161,30 @@ public class InternshipControl{
             companyName, companyRepID, numberOfSlots);
         internshipOpportunities.add(newOpp);
         updateInternshipInDB();
+        return internshipID;
     }
-    public void getInternshipStatus() {
-        if (!authCtrl.isLoggedIn() || !authCtrl.getUserIdentity().equals("Company Representative")) {
-            System.out.println("User not logged in or not a company representative.");
-            return;
+    /** Return a list of formatted internship lines for display to the company representative. */
+    public List<String> getInternshipStatus() {
+        if (!authCtrl.isLoggedIn() || !"Company Representative".equals(authCtrl.getUserIdentity())) {
+            throw new IllegalStateException("User not logged in or not a company representative.");
         }
         String companyRepID = authCtrl.getUserID();
         companyRepsInternshipOpps = getInternshipsByCompanyRepID(companyRepID);
+        List<String> out = new ArrayList<>();
         if (companyRepsInternshipOpps.isEmpty()) {
-            System.out.println("No internship opportunities found for this company representative.");
-            return;
+            return out; // empty list signals none found
         }
         for (InternshipOpportunity opp : companyRepsInternshipOpps) {
-            System.out.println(opp);
+            out.add(opp.toString());
         }
+        return out;
     }
-    public void viewApplications(String internshipID) {
-        if (!authCtrl.isLoggedIn()|| !authCtrl.getUserIdentity().equals("Company Representative")) {
-            System.out.println("User not logged in or not a company representative.");
-            return;
+    /** Return a list of formatted application lines for display to the company representative. */
+    public List<String> viewApplications(String internshipID) {
+        if (!authCtrl.isLoggedIn() || !"Company Representative".equals(authCtrl.getUserIdentity())) {
+            throw new IllegalStateException("User not logged in or not a company representative.");
         }
-        System.out.println("Please kindly informed that to ensure data privacy, you can only view the major of the students.");
+        List<String> out = new ArrayList<>();
         String companyRepID = authCtrl.getUserID();
         List<Integer> applicationNumbers;
         if (internshipID == null || internshipID.trim().isEmpty()) {
@@ -181,38 +192,30 @@ public class InternshipControl{
         } else {
             InternshipOpportunity opp = getInternshipByID(internshipID);
             if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) {
-                System.out.println("No such internship under your account or not authorized.");
-                return;
+                throw new IllegalArgumentException("No such internship under your account or not authorized.");
             }
             applicationNumbers = opp.getApplicationNumberList();
         }
         if (applicationNumbers == null || applicationNumbers.isEmpty()) {
-            System.out.println("No applications for the selected internship(s).");
-            return;
+            return out;
         }
         for (Integer appNum : applicationNumbers) {
             Application app = appCtrl.getApplicationByNumber(appNum);
             if (app == null) continue;
             InternshipOpportunity opp = getInternshipByID(app.getInternshipID());
             String title = opp != null ? opp.getInternshipTitle() : "(unknown)";
-            System.out.println("Internship Title: " + title + " | Application No. " + app.getApplicationNumber());
-            // only show majors for privacy
-            System.out.println("Student Majors: " + (app.getStudentMajors() != null ? app.getStudentMajors() : "N/A") );
-            System.out.println("Status: " + app.getApplicationStatus());
+            out.add("Internship Title: " + title + " | Application No. " + app.getApplicationNumber());
+            out.add("Student Majors: " + (app.getStudentMajors() != null ? app.getStudentMajors() : "N/A"));
+            out.add("Status: " + app.getApplicationStatus());
         }
+        return out;
     }
     
     /** Approve an application: mark application approved and add to internship accepted list. */
     public void approveApplicationNumberForInternship(int applicationNumber, String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
-        if (opp == null) {
-            System.out.println("Internship not found: " + internshipID);
-            return;
-        }
-        if (opp.isFull()) {
-            System.out.println("Cannot approve; internship is already full.");
-            return;
-        }
+        if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
+        if (opp.isFull()) throw new IllegalStateException("Cannot approve; internship is already full.");
         // move application number from pending to accepted list
         opp.approveApplicationNumber(applicationNumber);
         updateInternshipInDB();
@@ -221,10 +224,7 @@ public class InternshipControl{
     /** Reject an application for an internship. */
     public void rejectApplicationNumberForInternship(int applicationNumber, String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
-        if (opp == null) {
-            System.out.println("Internship not found: " + internshipID);
-            return;
-        }
+        if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         opp.rejectApplicationNumber(applicationNumber);
         updateInternshipInDB();
     }
@@ -236,14 +236,14 @@ public class InternshipControl{
         if (appCtrl != null) {
             appCtrl.approveApplicationByNumber(applicationNumber);
         } else {
-            System.out.println("ApplicationControl not set; cannot approve application.");
+            throw new IllegalStateException("ApplicationControl not set; cannot approve application.");
         }
     }
     public void rejectApplicationAsCompanyRep(int applicationNumber) {
         if (appCtrl != null) {
             appCtrl.rejectApplicationByNumber(applicationNumber);
         } else {
-            System.out.println("ApplicationControl not set; cannot reject application.");
+            throw new IllegalStateException("ApplicationControl not set; cannot reject application.");
         }
     }
 
@@ -310,18 +310,13 @@ public class InternshipControl{
                     }
                 }
                 if (!anyMatch) {
-                    System.out.println("Note: You do not meet the major preferences.\n");
-                    System.out.println("preferred majors:"+preferredMajors+"\n");
-                    System.out.println("You still can apply.\n");
+                    // Student does not meet preferred majors. Backend does not emit UI messages.
                 }
                 return true;
             }
-            System.out.println("level requirement:"+level+"\n");
-            System.out.println("You do not meet the level requirement.\n");
             return false;
         }
-        System.out.println("Error in retrieving student or internship details.");
-        return false;
+        throw new IllegalStateException("Error in retrieving student or internship details.");
     }
     public void addApplicationNumberToInternshipOpportunity(int applicationNumber, String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
@@ -352,24 +347,100 @@ public class InternshipControl{
         if (student != null) {
             return student.getMajors();
         }
-        System.out.println("Student not loaded.");
+        // student not loaded; backend does not print. Caller should handle null.
         return null;
     }
     // =========================================================
     // Career Staff methods
 
-    public List<InternshipOpportunity> getPendingInternshipOpportunities() {
-        List<InternshipOpportunity> pending = new ArrayList<>();
+    /** Return formatted lines for pending internship opportunities (for boundary printing). */
+    public List<String> getPendingInternshipOpportunities() {
+        List<String> out = new ArrayList<>();
         for (InternshipOpportunity opp : internshipOpportunities) {
             if ("pending".equalsIgnoreCase(opp.getStatus())) {
-                pending.add(opp);
+                out.add(opp.getInternshipID() + " | " + opp.getInternshipTitle() + " | Company: " + opp.getCompanyName() + " | Status: " + opp.getStatus());
             }
         }
-        return pending;
+        return out;
     }
     public List<InternshipOpportunity> getAllInternshipOpportunities(){ //for report
         return new ArrayList<>(internshipOpportunities);
     } 
+
+    /** Return formatted lines for visible internships applying the provided filter (filter may be null). */
+    public List<String> getAllVisibleInternshipOpportunitiesForDisplay(Filter filter) {
+        List<InternshipOpportunity> Opplist = getAllVisibleInternshipOpportunities();
+        if (Opplist == null) return new ArrayList<>();
+
+        if (filter != null) {
+            Map<String, List<String>> criteria = filter.getFilterIn();
+            if (criteria != null && !criteria.isEmpty()) {
+                Opplist = Opplist.stream().filter(opp -> {
+                    for (Map.Entry<String, List<String>> e : criteria.entrySet()) {
+                        String key = e.getKey();
+                        List<String> vals = e.getValue();
+                        if (vals == null || vals.isEmpty()) continue;
+                        boolean matches = false;
+                        switch (key) {
+                            case "companyName":
+                                for (String v : vals) if (opp.getCompanyName() != null && opp.getCompanyName().equalsIgnoreCase(v)) matches = true;
+                                break;
+                            case "internshipLevel":
+                                for (String v : vals) if (opp.getInternshipLevel() != null && opp.getInternshipLevel().equalsIgnoreCase(v)) matches = true;
+                                break;
+                            case "preferredMajors":
+                                if (opp.getPreferredMajors() != null) {
+                                    for (String v : vals) if (opp.getPreferredMajors().contains(v)) { matches = true; break; }
+                                }
+                                break;
+                            case "internshipID":
+                                for (String v : vals) if (opp.getInternshipID() != null && opp.getInternshipID().equalsIgnoreCase(v)) matches = true;
+                                break;
+                            case "internshipTitle":
+                                for (String v : vals) if (opp.getInternshipTitle() != null && opp.getInternshipTitle().equalsIgnoreCase(v)) matches = true;
+                                break;
+                            default:
+                                matches = true;
+                        }
+                        if (!matches) return false;
+                    }
+                    return true;
+                }).collect(Collectors.toList());
+            }
+        }
+
+        // Sorting
+        if (filter != null) {
+            String filterType = filter.getFilterType();
+            boolean ascending = filter.isAscending();
+            if (filterType != null && !filterType.isEmpty()) {
+                Comparator<InternshipOpportunity> cmp = null;
+                switch (filterType) {
+                    case "title":
+                        cmp = Comparator.comparing(InternshipOpportunity::getInternshipTitle, Comparator.nullsLast(String::compareToIgnoreCase));
+                        break;
+                    case "companyName":
+                        cmp = Comparator.comparing(InternshipOpportunity::getCompanyName, Comparator.nullsLast(String::compareToIgnoreCase));
+                        break;
+                    case "openDate":
+                        cmp = Comparator.comparing(InternshipOpportunity::getOpeningDate, Comparator.nullsLast(Comparator.naturalOrder()));
+                        break;
+                    case "numberOfSlots":
+                        cmp = Comparator.comparingInt(InternshipOpportunity::getNumOfSlots);
+                        break;
+                    default:
+                }
+                if (cmp != null) {
+                    if (!ascending) cmp = cmp.reversed();
+                    Opplist.sort(cmp);
+                }
+            }
+        }
+
+        List<String> out = new ArrayList<>();
+        for (InternshipOpportunity opp : Opplist) out.add(opp.toString());
+        return out;
+    }
     public void approveInternshipCreation(InternshipOpportunity opp) {
         if (opp == null) return;
         opp.setStatusToApproved();
@@ -382,18 +453,12 @@ public class InternshipControl{
     }
     public void approveInternshipCreationByID(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
-        if (opp == null) {
-            System.out.println("Internship not found: " + internshipID);
-            return;
-        }
+        if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         approveInternshipCreation(opp);
     }
     public void rejectInternshipCreationByID(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
-        if (opp == null) {
-            System.out.println("Internship not found: " + internshipID);
-            return;
-        }
+        if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         rejectInternshipCreation(opp);
     }
     public void reject(InternshipOpportunity opp) {
@@ -412,10 +477,7 @@ public class InternshipControl{
     /** Toggle visibility by internship ID (public wrapper for CLIs) */
     public void changeVisibilityByID(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
-        if (opp == null) {
-            System.out.println("Internship not found: " + internshipID);
-            return;
-        }
+        if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         changeVisibility(opp);
     }
 
@@ -425,18 +487,11 @@ public class InternshipControl{
      */
     public void changeVisibilityByID(String internshipID, String visibleStr) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
-        if (opp == null) {
-            System.out.println("Internship not found: " + internshipID);
-            return;
-        }
+        if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         Boolean desired = ControlUtils.parseBooleanLike(visibleStr);
-        if (desired == null) {
-            System.out.println("Invalid visibility value: '" + visibleStr + "'. Use y/n or approve/reject.");
-            return;
-        }
+        if (desired == null) throw new IllegalArgumentException("Invalid visibility value: '" + visibleStr + "'. Use y/n or approve/reject.");
         opp.setVisibility(desired.booleanValue());
         updateInternshipInDB();
-        System.out.println("Visibility for " + internshipID + " set to " + desired);
     }
 
     //=========================================================

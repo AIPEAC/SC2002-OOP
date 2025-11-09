@@ -26,10 +26,18 @@ public class ApplicationControl {
 	//=========================================================
 	// Both Student and Career Staff methods
 
-	public void checkApplications() {
+	void checkApplications() {
+		// Deprecated: prefer getApplicationsForDisplay() for boundary printing
+		// kept as a no-op to avoid printing from control layer
+	}
+
+	/** Return application lines for display by the boundary. */
+	public List<String> getApplicationsForDisplay() {
+		List<String> out = new ArrayList<>();
 		for (Application app : applications) {
-			System.out.println(app.toString());
+			out.add(app.toString());
 		}
+		return out;
 	}
 
 
@@ -80,46 +88,33 @@ public class ApplicationControl {
 			}
 		}
 	}
-	public void makeApplication(String internshipID) {
+	public int makeApplication(String internshipID) {
 		// Create a new application for the student
-		if (!authCtrl.isLoggedIn()) {
-			System.out.println("User not logged in.");
-			return;
-		}
-		if (!authCtrl.getUserIdentity().equals("Student")) {
-			System.out.println("Only students can make applications.");
-			return;
-		}
+		if (!authCtrl.isLoggedIn()) throw new IllegalStateException("User not logged in.");
+		if (!"Student".equals(authCtrl.getUserIdentity())) throw new IllegalStateException("Only students can make applications.");
+		if (internshipID == null || internshipID.isEmpty()) throw new IllegalArgumentException("Invalid Internship ID.");
 		if (!intCtrl.isVisibleAndNotFullAndNotRejected(internshipID)) {
-			System.out.println("Internship is either not visible or already full or is rejected by staff.");
-			return;
+			throw new IllegalStateException("Internship is either not visible or already full or is rejected by staff.");
 		}
 		if (!intCtrl.studentFitsRequirements(authCtrl.getUserID(), internshipID)) {
-			System.out.println("You do not meet the requirements for this internship.");
-			return;
+			throw new IllegalStateException("You do not meet the requirements for this internship.");
 		}
-		if (internshipID == null || internshipID.isEmpty()) {
-			System.out.println("Invalid Internship ID.");
-			return;
-		}else if (applications.stream().anyMatch(app -> app.getInternshipID().equals(internshipID))) {
-			System.out.println("You have already applied for this internship.");
-			return;
-		}else if(applications.stream().anyMatch(app -> app.getApplicationStatus().equals("approved"))) {
-			System.out.println("You have an approved application.");
-			return;
+		if (applications.stream().anyMatch(app -> app.getInternshipID().equals(internshipID))) {
+			throw new IllegalStateException("You have already applied for this internship.");
 		}
-	String companyName= intCtrl.getInternshipCompany(internshipID);
-	List<String> studentMajors = intCtrl.getStudentMajors();
-	Application app = new Application(applications.size() + 1, internshipID, companyName, authCtrl.getUserID(), studentMajors);
+		if (applications.stream().anyMatch(app -> app.getApplicationStatus().equals("approved"))) {
+			throw new IllegalStateException("You have an approved application.");
+		}
+		String companyName = intCtrl.getInternshipCompany(internshipID);
+		List<String> studentMajors = intCtrl.getStudentMajors();
+		Application app = new Application(applications.size() + 1, internshipID, companyName, authCtrl.getUserID(), studentMajors);
 		applications.add(app);
 		saveApplicationsToDB();
 		updateInternshipsApplicationsInDB(app.getApplicationNumber(), internshipID, "add");
-		System.out.println("Application is submitted successfully");
+		return app.getApplicationNumber();
 	}
-	public void getApplicationStatus() {
-		for (Application app : applications) {
-			System.out.println(app.toString());
-		}
+	void getApplicationStatus() {
+		// Deprecated: use getApplicationsForDisplay() instead
 		return;
 	}
 	public boolean hasAcceptedOffer() {
@@ -138,115 +133,105 @@ public class ApplicationControl {
 		}
 		return false;
 	}
-	public void getApprovedApplicationInternshipCompaniesAndIDs() {
+	public List<String> getApprovedApplicationInternshipCompaniesAndIDs() {
+		List<String> out = new ArrayList<>();
 		for (Application app : applications) {
 			if (app.getApplicationStatus().equals("approved")) {
-				System.out.println(app.getCompany() + " (ID: " + app.getInternshipID() + ")");
+				out.add(app.getCompany() + " (ID: " + app.getInternshipID() + ")");
 			}
 		}
-		return;
+		return out;
 	}
 	public void acceptOffer(int appNum) {
 		Application app = getApplicationByNumber(appNum);
-		if (app != null && app.getApplicationStatus().equals("approved")) {
-			System.out.println("Offer accepted for Application Number: " + appNum);
-			app.setAcceptanceYes();
-			withdrawOtherApplicationsOfApprovedStudent(app.getStudentID());
-		} else {
-			System.out.println("Application not found or not approved.");
+		if (app == null || !app.getApplicationStatus().equals("approved")) {
+			throw new IllegalArgumentException("Application not found or not approved.");
 		}
+		app.setAcceptanceYes();
+		withdrawOtherApplicationsOfApprovedStudent(app.getStudentID());
 	}
 	public void rejectOffer(int appNum) {
 		Application app = getApplicationByNumber(appNum);
-		if (app != null && app.getApplicationStatus().equals("approved")) {
-			app.setAcceptanceNo();
-			System.out.println("Offer rejected for Application Number: " + appNum);
-		} else {
-			System.out.println("Application not found or not approved.");
+		if (app == null || !app.getApplicationStatus().equals("approved")) {
+			throw new IllegalArgumentException("Application not found or not approved.");
 		}
+		app.setAcceptanceNo();
 	}
 	public void requestWithdrawApplication(int appNum) {
 		Application app = getApplicationByNumber(appNum);
-		if (app != null) {
-			String ws = app.getWithdrawStatus();
-			if (ws != null && ws.equals("rejected")){
-				System.out.println("Previous withdrawal request was rejected. You are refrained from making changes.");
-			}
-			app.setApplicationWithdrawRequested();
-			saveApplicationsToDB();
-			System.out.println("Withdrawal request submitted for Application Number: " + app.getApplicationNumber());
-		} else {
-			System.out.println("Application not found.");
+		if (app == null) throw new IllegalArgumentException("Application not found.");
+		String ws = app.getWithdrawStatus();
+		if (ws != null && ws.equals("rejected")) {
+			throw new IllegalStateException("Previous withdrawal request was rejected. You are refrained from making changes.");
 		}
+		app.setApplicationWithdrawRequested();
+		saveApplicationsToDB();
 	}
-	public void viewInternshipsAppliedTo() {
+	public List<String> viewInternshipsAppliedTo() {
+		List<String> out = new ArrayList<>();
 		for (Application app : applications) {
-			intCtrl.getInternshipByID(app.getInternshipID());
+			String internID = app.getInternshipID();
+			List<String> details = intCtrl.getInternshipDetails(internID);
+			out.add("Application Number: " + app.getApplicationNumber());
+			out.addAll(details);
 		}
+		return out;
 	}
 
 	/** Return applications which have a pending withdrawal request */
-	public java.util.List<Application> getPendingWithdrawals() {
-		java.util.List<Application> pending = new java.util.ArrayList<>();
+	public List<String> getPendingWithdrawals() {
+		List<String> pending = new ArrayList<>();
 		for (Application app : applications) {
 			if (app.getWithdrawStatus() != null && app.getWithdrawStatus().equals("pending")) {
-				pending.add(app);
+				pending.add("Application No: " + app.getApplicationNumber() + " | Internship ID: " + app.getInternshipID() + " | Student: " + app.getStudentID());
 			}
 		}
 		return pending;
 	}
 
-	public void rejectWithdrawalByNumber(int appNum) {
+	void rejectWithdrawalByNumber(int appNum) {
 		Application app = getApplicationByNumber(appNum);
-		if (app != null) {
-			app.setApplicationWithdrawnStatus(); // mark as rejected
-			saveApplicationsToDB();
-			System.out.println("Withdrawal rejected for Application Number: " + appNum);
-		} else {
-			System.out.println("Application not found.");
-		}
+		if (app == null) throw new IllegalArgumentException("Application not found: " + appNum);
+		app.setApplicationWithdrawnStatus(); // mark as rejected
+		saveApplicationsToDB();
 	}
 
 	/** UI-friendly wrapper: accepts application number as String, parses and delegates */
 	public void approveWithdrawal(String appNumStr) {
 		if (appNumStr == null || appNumStr.isEmpty()) {
-			System.out.println("Invalid application number.");
-			return;
+			throw new IllegalArgumentException("Invalid application number.");
 		}
 		try {
 			int appNum = Integer.parseInt(appNumStr.trim());
 			approveWithdrawal(appNum);
 		} catch (NumberFormatException e) {
-			System.out.println("Invalid application number format: " + appNumStr);
+			throw new IllegalArgumentException("Invalid application number format: " + appNumStr);
 		}
 	}
 
 	/** UI-friendly wrapper: accepts application number as String, parses and delegates */
 	public void rejectWithdrawal(String appNumStr) {
 		if (appNumStr == null || appNumStr.isEmpty()) {
-			System.out.println("Invalid application number.");
-			return;
+			throw new IllegalArgumentException("Invalid application number.");
 		}
 		try {
 			int appNum = Integer.parseInt(appNumStr.trim());
 			rejectWithdrawalByNumber(appNum);
 		} catch (NumberFormatException e) {
-			System.out.println("Invalid application number format: " + appNumStr);
+			throw new IllegalArgumentException("Invalid application number format: " + appNumStr);
 		}
 	}
 
 	/**
 	 * Wrapper that accepts an application number string and a decision string (approve/reject-like)
 	 */
-	public void handleWithdrawalDecision(String appNumStr, String decisionStr) {
+	void handleWithdrawalDecision(String appNumStr, String decisionStr) {
 		if (appNumStr == null || appNumStr.isEmpty()) {
-			System.out.println("Invalid application number.");
-			return;
+			throw new IllegalArgumentException("Invalid application number.");
 		}
 		Boolean decision = ControlUtils.parseBooleanLike(decisionStr);
 		if (decision == null) {
-			System.out.println("Invalid decision value: '" + decisionStr + "'. Use approve/reject or y/n.");
-			return;
+			throw new IllegalArgumentException("Invalid decision value: '" + decisionStr + "'. Use approve/reject or y/n.");
 		}
 		if (decision) {
 			approveWithdrawal(appNumStr);
@@ -261,49 +246,41 @@ public class ApplicationControl {
 	/** Approve an application by application number (called by Company Rep via InternshipControl)
 	 * This will set the application status to approved and persist applications.
 	 */
-	public void approveApplicationByNumber(int appNum) {
+	void approveApplicationByNumber(int appNum) {
 		Application app = getApplicationByNumber(appNum);
-		if (app == null) {
-			System.out.println("Application not found: " + appNum);
-			return;
-		}
+		if (app == null) throw new IllegalArgumentException("Application not found: " + appNum);
 		app.setApplicationStatusSuccess();
 		saveApplicationsToDB();
 		// Also ensure internship data is updated via InternshipControl if available
 		if (intCtrl != null) {
 			intCtrl.approveApplicationNumberForInternship(appNum, app.getInternshipID());
+		} else {
+			throw new IllegalStateException("InternshipControl not set; cannot approve application.");
 		}
-		System.out.println("Application " + appNum + " approved.");
 	}
-	public void rejectApplicationByNumber(int appNum) {
+	void rejectApplicationByNumber(int appNum) {
 		Application app = getApplicationByNumber(appNum);
-		if (app == null) {
-			System.out.println("Application not found: " + appNum);
-			return;
-		}
+		if (app == null) throw new IllegalArgumentException("Application not found: " + appNum);
 		app.setApplicationStatusFail();
 		saveApplicationsToDB();
 		if (intCtrl != null) {
 			intCtrl.rejectApplicationNumberForInternship(appNum, app.getInternshipID());
+		} else {
+			throw new IllegalStateException("InternshipControl not set; cannot reject application.");
 		}
-		System.out.println("Application " + appNum + " rejected.");
 	}
 
 	// =========================================================
 	// Career Staff methods
-	public void approveWithdrawal(int appNum) {
+	void approveWithdrawal(int appNum) {
 		Application app = getApplicationByNumber(appNum);
-		if (app != null) {
-			app.setApplicationWithdrawn();
-			// persist change
-			saveApplicationsToDB();
-			// remove application number from associated internship
-			if (intCtrl != null) {
-				intCtrl.removeApplicationNumberFromInternshipOpportunity(appNum, app.getInternshipID());
-			}
-			System.out.println("Withdrawal approved for Application Number: " + appNum);
-		} else {
-			System.out.println("Application not found.");
+		if (app == null) throw new IllegalArgumentException("Application not found: " + appNum);
+		app.setApplicationWithdrawn();
+		// persist change
+		saveApplicationsToDB();
+		// remove application number from associated internship
+		if (intCtrl != null) {
+			intCtrl.removeApplicationNumberFromInternshipOpportunity(appNum, app.getInternshipID());
 		}
 	}
 	// removed unused stub methods: rejectWithdrawal(Application), addApplicationToPendingList(Application), removeApplicationFromPendingList(Application)
@@ -315,7 +292,7 @@ public class ApplicationControl {
 	// ========================================================
 	// Other methods
 
-	public void withdrawOtherApplicationsOfApprovedStudent(String studentID) {
+	void withdrawOtherApplicationsOfApprovedStudent(String studentID) {
 		for (Application app : applications) {
 			if (app.getStudentID().equals(studentID) && app.getApplicationStatus().equals("approved")) {
 				continue; // Skip the approved application
@@ -331,7 +308,7 @@ public class ApplicationControl {
 	//=========================================================
 	// Private Helpers
 
-	protected Application getApplicationByNumber(int appNumber) {
+	Application getApplicationByNumber(int appNumber) {
 		for (Application app : applications) {
 			if (app.getApplicationNumber() == appNumber) {
 				return app;

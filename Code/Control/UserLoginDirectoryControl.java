@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 
 
@@ -82,7 +83,7 @@ public class UserLoginDirectoryControl{
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
     private void loadStaff(String userID){
@@ -112,7 +113,7 @@ public class UserLoginDirectoryControl{
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
     private void loadCompanyRep(String userID){
@@ -142,7 +143,7 @@ public class UserLoginDirectoryControl{
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }  
     
@@ -194,7 +195,7 @@ public class UserLoginDirectoryControl{
                 loadStudent(userID);
                 List<String> majors = null;
                 if (StudentInfoList[3] != null && !StudentInfoList[3].isEmpty()) {
-                    majors = java.util.Arrays.asList(StudentInfoList[3].split(" "));
+                    majors = Arrays.asList(StudentInfoList[3].split(" "));
                 }
                 Student student=new Student(StudentInfoList[0],
                     StudentInfoList[1],
@@ -225,8 +226,7 @@ public class UserLoginDirectoryControl{
                 CompanyRepInfoList=null;
                 return companyRep;
             default:
-                System.out.println("bug: UserLoginDirectory.createUser(): wrong indentity, possibly wrongly writen into login_list.csv");
-                return null;
+                throw new IllegalArgumentException("bug: UserLoginDirectory.createUser(): wrong identity, possibly wrongly written into login_list.csv");
         }
     }
     public String getCompanyRepsCompany(String userID){
@@ -236,15 +236,13 @@ public class UserLoginDirectoryControl{
             CompanyRepInfoList=null;
             return companyName;
         }
-        System.out.println("bug: UserLoginDirectoryControl.getCompanyRepsCompany(): no logged in user when getting a CompanyRep's company");
-        return null;
+        throw new IllegalStateException("UserLoginDirectoryControl.getCompanyRepsCompany(): no logged in user when getting a CompanyRep's company");
     }
     
 
     public void changePassword(String userID, String newPassword){
         if (!authCtrl.isLoggedIn()) {
-            System.out.println("bug: UserLoginDirectoryControl.changePassword(): no logged in user when changing password");
-            return;
+            throw new IllegalStateException("UserLoginDirectoryControl.changePassword(): no logged in user when changing password");
         }
         for (String[] loginData : loginList) {
             if (loginData[1].equals(userID)) {
@@ -358,14 +356,8 @@ public class UserLoginDirectoryControl{
     }
 
     public void approveCompanyRep(String userID){
-        if (authCtrl.isLoggedIn()==false){
-            System.out.println("bug: UserLoginDirectoryControl.approveCompanyRep(): no logged in user when approving a CompanyRep");
-            return;
-        }
-        if (userID==null){
-            System.out.println("bug: UserLoginDirectoryControl.approveCompanyRep(): null userID");
-            return;
-        }
+        if (!authCtrl.isLoggedIn()) throw new IllegalStateException("UserLoginDirectoryControl.approveCompanyRep(): no logged in user when approving a CompanyRep");
+        if (userID == null) throw new IllegalArgumentException("UserLoginDirectoryControl.approveCompanyRep(): null userID");
         updateCompanyRepStatusInLogin(userID, "approved");
         updateCompanyRepStatusInCompanyRepCSV(userID, "approved");
     }
@@ -432,7 +424,7 @@ public class UserLoginDirectoryControl{
             // Reload in-memory state
             loadLoginListFromDB();
         } else {
-            System.out.println("UserLoginDirectoryControl.updateCompanyRepStatusInLogin(): CompanyRepresentative not found for userID=" + userID);
+            throw new IllegalArgumentException("UserLoginDirectoryControl.updateCompanyRepStatusInLogin(): CompanyRepresentative not found for userID=" + userID);
         }
     }
     private void updateCompanyRepStatusInCompanyRepCSV(String userID, String status) {
@@ -474,7 +466,7 @@ public class UserLoginDirectoryControl{
             tempFile.renameTo(inputFile);
         } else {
             tempFile.delete();
-            System.out.println("UserLoginDirectoryControl.updateCompanyRepStatusInLogin(): CompanyRepresentative not found for userID=" + userID);
+            throw new IllegalArgumentException("UserLoginDirectoryControl.updateCompanyRepStatusInLogin(): CompanyRepresentative not found for userID=" + userID);
         }
     }
 

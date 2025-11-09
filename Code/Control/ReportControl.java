@@ -11,6 +11,8 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.io.File;
+import java.io.IOException;
+import java.util.function.Function;
 
 
 public class ReportControl {
@@ -24,46 +26,40 @@ public class ReportControl {
         // Initialize after intCtrl is assigned to avoid NPE
         this.allOpplist = (this.intCtrl == null) ? new ArrayList<>() : this.intCtrl.getAllInternshipOpportunities();
     }
-    public void generateReportOverview(boolean optToSaveReport){
-        if (authCtrl.isLoggedIn()){
-            if (authCtrl.getUserIdentity().equals("CareerStaff")){
-                int reportIndex = optToSaveReport ? getNumberOfReports()+1 : 0;
-                boolean filtered=false;
-
-                Report report=new Report(reportIndex,allOpplist,filtered);
-                report.formatOutput();
-                if (optToSaveReport){
-                    report.saveToLocal();
-                    System.out.printf("Report saved in Lib_example/report %4d.txt\n",reportIndex);
-                }
-            }else{
-                System.out.println("You do not have the permission to generate reports.");
+    public List<String> generateReportOverview(boolean optToSaveReport){
+        if (!authCtrl.isLoggedIn()) throw new IllegalStateException("You are not logged in.");
+        if (!authCtrl.getUserIdentity().equals("CareerStaff")) throw new IllegalStateException("You do not have the permission to generate reports.");
+        int reportIndex = optToSaveReport ? getNumberOfReports()+1 : 0;
+        boolean filtered=false;
+        Report report=new Report(reportIndex,allOpplist,filtered);
+    List<String> lines = report.formatOutput();
+        if (optToSaveReport) {
+            try {
+                String path = report.saveToLocal();
+                lines.add("Saved report to: " + path);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save report: " + e.getMessage());
             }
-        }else{
-            System.out.println("You are not logged in.");
         }
+        return lines;
     }
-    public void generateReportSpecific(boolean optToSaveReport,Map<String,List<String>> filterIn){
-        if (authCtrl.isLoggedIn()){
-            if (authCtrl.getUserIdentity().equals("CareerStaff")){
-                int reportIndex = optToSaveReport ? getNumberOfReports()+1 : 0;
-                List<InternshipOpportunity> filteredList=comprehensive(allOpplist,filterIn);
-                boolean filtered=true;
-
-                Report report=new Report(reportIndex,filteredList,filtered);
-                report.formatOutput();
-
-                if (optToSaveReport){
-                    report.saveToLocal();
-                    //System.out.printf("Report saved in Lib_example/report %4d.txt\n",reportIndex);
-                    //print is done in report.saveToLocal()
-                }
-            }else{
-                System.out.println("You do not have the permission to generate reports.");
+    public List<String> generateReportSpecific(boolean optToSaveReport,Map<String,List<String>> filterIn){
+        if (!authCtrl.isLoggedIn()) throw new IllegalStateException("You are not logged in.");
+        if (!authCtrl.getUserIdentity().equals("CareerStaff")) throw new IllegalStateException("You do not have the permission to generate reports.");
+        int reportIndex = optToSaveReport ? getNumberOfReports()+1 : 0;
+        List<InternshipOpportunity> filteredList=comprehensive(allOpplist,filterIn);
+        boolean filtered=true;
+        Report report=new Report(reportIndex,filteredList,filtered);
+    List<String> lines = report.formatOutput();
+        if (optToSaveReport) {
+            try {
+                String path = report.saveToLocal();
+                lines.add("Saved report to: " + path);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save report: " + e.getMessage());
             }
-        }else{
-            System.out.println("You are not logged in.");
         }
+        return lines;
     }
     
     private List<InternshipOpportunity> comprehensive(List<InternshipOpportunity> internshipOpportunities,
@@ -104,7 +100,7 @@ public class ReportControl {
             boolean matches = true;
 
             // Helper to build a set of accepted tokens (case-insensitive)
-            java.util.function.Function<List<String>, Set<String>> buildSet = (lst) -> {
+            Function<List<String>, Set<String>> buildSet = (lst) -> {
                 Set<String> s = new HashSet<>();
                 if (lst == null) return s;
                 for (String item : lst) {
@@ -189,7 +185,6 @@ public class ReportControl {
             return files == null ? 0 : files.length;
         } catch (SecurityException e) {
             // If we cannot access the directory, treat as zero
-            System.out.println("Unable to access report directory /Output_report.");
             return 0;
         }
     }

@@ -41,17 +41,25 @@ public class LoginCLI {
         System.out.print("Enter password: ");
         String password = sc.nextLine();
 
-        // Delegate to control layer
-        // LoginControl already prints the outcome and sets AuthenticationControl's current user
-        loginCtrl.handleLogin(userID, password);
-
-        // Optionally, show who is logged in if login succeeded
-        if (authCtrl.isLoggedIn()) {
-            System.out.println("Logged in as: " + authCtrl.getUserID() + " (" + authCtrl.getUserIdentity() + ")");
+        // Delegate to control layer and let boundary handle messaging
+        try {
+            loginCtrl.handleLogin(userID, password);
+            System.out.println("Login successful.");
+            if (authCtrl.isLoggedIn()) {
+                System.out.println("Logged in as: " + authCtrl.getUserID() + " (" + authCtrl.getUserIdentity() + ")");
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 
     public void registerCompanyRep(String name, String companyName, String department, String position, String email) {
-        loginCtrl.handleRegister(name, companyName, department, position, email);
+        try {
+            String userID = loginCtrl.handleRegister(name, companyName, department, position, email);
+            System.out.println("successfully created. Please wait for account approval from staff. Your UserID is: " + userID + ".d");
+            System.out.println("Your default password is 'password'. Please change your password after logging in.");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

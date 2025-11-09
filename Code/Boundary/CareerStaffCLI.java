@@ -97,74 +97,108 @@ public class CareerStaffCLI extends AbstractCLI {
     }
     
     public void viewCompanyRepRegisterList() {
-        java.util.List<Entity.Users.CompanyRepresentative> pending = userCtrl.getPendingCompanyRepList();
+    List<String> pending = userCtrl.getPendingCompanyRepList();
         if (pending == null || pending.isEmpty()) {
             System.out.println("No pending company representative registrations.");
             return;
         }
         System.out.println("Pending Company Representative Registrations:");
-        for (Entity.Users.CompanyRepresentative rep : pending) {
-            System.out.println("ID: " + rep.getUserID() + " | Name: " + rep.getName() + " | Company: " + rep.getCompanyName() + " | Dept: " + rep.getDepartment());
+        for (String line : pending) {
+            System.out.println(line);
         }
     }
 
     public void approveRegister(String id) {
-        userCtrl.approveRegister(id);
-        System.out.println("Approved company representative registration: " + id);
+        try {
+            userCtrl.approveRegister(id);
+            System.out.println("Approved company representative registration: " + id);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public void rejectRegister(String id) {
-        userCtrl.rejectRegister(id);
-        System.out.println("Rejected company representative registration: " + id);
+        try {
+            userCtrl.rejectRegister(id);
+            System.out.println("Rejected company representative registration: " + id);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public void viewPendingInternshipOpp() {
-        java.util.List<Entity.InternshipOpportunity> pending = intCtrl.getPendingInternshipOpportunities();
+    List<String> pending = intCtrl.getPendingInternshipOpportunities();
         if (pending == null || pending.isEmpty()) {
             System.out.println("No pending internship opportunities.");
             return;
         }
         System.out.println("Pending Internship Opportunities:");
-        for (Entity.InternshipOpportunity opp : pending) {
-            System.out.println(opp.getInternshipID() + " | " + opp.getInternshipTitle() + " | Company: " + opp.getCompanyName() + " | Status: " + opp.getStatus());
+        for (String line : pending) {
+            System.out.println(line);
         }
     }
 
     public void approveInternshipCreated(String oppID) {
-        intCtrl.approveInternshipCreationByID(oppID);
-        System.out.println("Approved internship creation: " + oppID);
+        try {
+            intCtrl.approveInternshipCreationByID(oppID);
+            System.out.println("Approved internship creation: " + oppID);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public void rejectInternshipCreated(String oppID) {
-        intCtrl.rejectInternshipCreationByID(oppID);
-        System.out.println("Rejected internship creation: " + oppID);
+        try {
+            intCtrl.rejectInternshipCreationByID(oppID);
+            System.out.println("Rejected internship creation: " + oppID);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public void viewPendingWithdrawal() {
-        java.util.List<Entity.Application> pending = appCtrl.getPendingWithdrawals();
+    List<String> pending = appCtrl.getPendingWithdrawals();
         if (pending == null || pending.isEmpty()) {
             System.out.println("No pending withdrawal requests.");
             return;
         }
         System.out.println("Pending Withdrawal Requests:");
-        for (Entity.Application app : pending) {
-            System.out.println("Application No: " + app.getApplicationNumber() + " | Internship ID: " + app.getInternshipID() + " | Student: " + app.getStudentID());
+        for (String line : pending) {
+            System.out.println(line);
         }
     }
 
     public void approveWithdrawal(String appNum) {
-        appCtrl.approveWithdrawal(appNum);
-        System.out.println("Approved withdrawal for application: " + appNum);
+        try {
+            appCtrl.approveWithdrawal(appNum);
+            System.out.println("Approved withdrawal for application: " + appNum);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public void rejectWithdrawal(String appNum) {
-        appCtrl.rejectWithdrawal(appNum);
-        System.out.println("Rejected withdrawal for application: " + appNum);
+        try {
+            appCtrl.rejectWithdrawal(appNum);
+            System.out.println("Rejected withdrawal for application: " + appNum);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
     public void generateReportOverview(boolean optToSaveReport){
-        reportCtrl.generateReportOverview(optToSaveReport);
+        try {
+            List<String> lines = reportCtrl.generateReportOverview(optToSaveReport);
+            for (String l : lines) System.out.println(l);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
     public void generateReportSpecific(boolean optToSaveReport,Map<String,List<String>> filterIn){
-        reportCtrl.generateReportSpecific(optToSaveReport, filterIn);
+        try {
+            List<String> lines = reportCtrl.generateReportSpecific(optToSaveReport, filterIn);
+            for (String l : lines) System.out.println(l);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

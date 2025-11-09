@@ -53,9 +53,9 @@ public class StudentCLI extends AbstractCLI{
                         break;
                     }
                     if (appCtrl.hasApprovedApplication()) {
-                        appCtrl.getApprovedApplicationInternshipCompaniesAndIDs();
-                        
+                        List<String> approved = appCtrl.getApprovedApplicationInternshipCompaniesAndIDs();
                         System.out.println("You have some approved applications for Internship Companies: ");
+                        for (String line : approved) System.out.println(line);
                         System.out.print("Enter Application Number to respond to offer, or press 0 to check the internships you applied to: ");
                         int appNum = Integer.parseInt(sc.nextLine());
                         if (appNum == 0) {
@@ -90,18 +90,33 @@ public class StudentCLI extends AbstractCLI{
     private void submitApplication() {
         System.out.println("Enter Internship ID: (refer to the internship list above)");
         String id = sc.nextLine();
-        appCtrl.makeApplication(id);
+        try {
+            int appNum = appCtrl.makeApplication(id);
+            System.out.println("Application submitted successfully. Application Number: " + appNum);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void checkMyApplicationStatus() {
         System.out.println("\n=== Your Application Status ===");
         appCtrl.loadStudentApplicationFromDB();
-        appCtrl.checkApplications();
+    List<String> lines = appCtrl.getApplicationsForDisplay();
+        if (lines.isEmpty()) {
+            System.out.println("No applications found.");
+            return;
+        }
+        for (String l : lines) System.out.println(l);
     }
     private void viewInternshipIAppliedTo() {
         System.out.println("\n=== Internship Applications Submitted ===");
         appCtrl.loadStudentApplicationFromDB();
-        appCtrl.viewInternshipsAppliedTo();
+    List<String> lines = appCtrl.viewInternshipsAppliedTo();
+        if (lines.isEmpty()) {
+            System.out.println("No internships found for your applications.");
+            return;
+        }
+        for (String l : lines) System.out.println(l);
     }
     private void withdrawApplication() {
         System.out.println("\n=== Withdrawing Intership Application ===");
