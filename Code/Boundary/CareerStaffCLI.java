@@ -13,10 +13,6 @@ public class CareerStaffCLI extends AbstractCLI {
         super(sc, intCtrl);
         this.appCtrl = appCtrl;
         this.reportCtrl = reportCtrl;
-        // reference appCtrl to avoid unused-field warnings in static analysis
-        if (this.appCtrl == null) {
-            // no-op
-        }
     }
     @Override
     public void displayMenu() {

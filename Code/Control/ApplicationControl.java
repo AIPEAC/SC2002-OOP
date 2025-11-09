@@ -186,6 +186,41 @@ public class ApplicationControl {
 	}
 
 	// =========================================================
+	// Company Representative / Staff helpers
+
+	/** Approve an application by application number (called by Company Rep via InternshipControl)
+	 * This will set the application status to approved and persist applications.
+	 */
+	public void approveApplicationByNumber(int appNum) {
+		Application app = getApplicationByNumber(appNum);
+		if (app == null) {
+			System.out.println("Application not found: " + appNum);
+			return;
+		}
+		app.setApplicationStatusSuccess();
+		saveApplicationsToDB();
+		// Also ensure internship data is updated via InternshipControl if available
+		if (intCtrl != null) {
+			intCtrl.approveApplicationNumberForInternship(appNum, app.getInternshipID());
+		}
+		System.out.println("Application " + appNum + " approved.");
+	}
+
+	public void rejectApplicationByNumber(int appNum) {
+		Application app = getApplicationByNumber(appNum);
+		if (app == null) {
+			System.out.println("Application not found: " + appNum);
+			return;
+		}
+		app.setApplicationStatusFail();
+		saveApplicationsToDB();
+		if (intCtrl != null) {
+			intCtrl.rejectApplicationNumberForInternship(appNum, app.getInternshipID());
+		}
+		System.out.println("Application " + appNum + " rejected.");
+	}
+
+	// =========================================================
 	// Career Staff methods
 
 	public void loadPendingWithdrawalApplications(Application app) {

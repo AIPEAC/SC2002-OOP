@@ -82,10 +82,14 @@ public class InternshipControl{
 
     //=========================================================
     // All Users methods
-
     public List<InternshipOpportunity> getAllVisibleInternshipOpportunities() {
-        //implementation
-        return null;
+        List<InternshipOpportunity> visible = new ArrayList<>();
+        for (InternshipOpportunity opp : internshipOpportunities) {
+            if (opp.getVisibility() && !"rejected".equalsIgnoreCase(opp.getStatus())) {
+                visible.add(opp);
+            }
+        }
+        return visible;
     }
     public List<Object> getInternshipDetails(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
@@ -142,17 +146,76 @@ public class InternshipControl{
         }
         System.out.println("Please kindly informed that to ensure data privacy, you can only view the major of the students.");
         String companyRepID = authCtrl.getUserID();
-        List<Integer> applicationNumbers = gatherApplication(companyRepID);
-        if (applicationNumbers.isEmpty()) {
-            System.out.println("No applications for any of your internship opportunities.");
+        List<Integer> applicationNumbers;
+        if (internshipID == null || internshipID.trim().isEmpty()) {
+            applicationNumbers = gatherApplication(companyRepID);
+        } else {
+            InternshipOpportunity opp = getInternshipByID(internshipID);
+            if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) {
+                System.out.println("No such internship under your account or not authorized.");
+                return;
+            }
+            applicationNumbers = opp.getApplicationNumberList();
+        }
+        if (applicationNumbers == null || applicationNumbers.isEmpty()) {
+            System.out.println("No applications for the selected internship(s).");
             return;
         }
         for (Integer appNum : applicationNumbers) {
             Application app = appCtrl.getApplicationByNumber(appNum);
-            String title= getInternshipByID(app.getInternshipID()).getInternshipTitle();
-            
-            System.out.print("Internship Title: " + title);
-            System.out.print("| Application No. " + app.getApplicationNumber());
+            if (app == null) continue;
+            InternshipOpportunity opp = getInternshipByID(app.getInternshipID());
+            String title = opp != null ? opp.getInternshipTitle() : "(unknown)";
+            System.out.println("Internship Title: " + title + " | Application No. " + app.getApplicationNumber());
+            // only show majors for privacy
+            System.out.println("Student Majors: " + (app.getStudentMajors() != null ? app.getStudentMajors() : "N/A") );
+            System.out.println("Status: " + app.getApplicationStatus());
+        }
+    }
+    
+    /** Approve an application: mark application approved and add to internship accepted list. */
+    public void approveApplicationNumberForInternship(int applicationNumber, String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp == null) {
+            System.out.println("Internship not found: " + internshipID);
+            return;
+        }
+        if (opp.isFull()) {
+            System.out.println("Cannot approve; internship is already full.");
+            return;
+        }
+        // move application number from pending to accepted list
+        opp.approveApplicationNumber(applicationNumber);
+        // persist changes to internships CSV
+        updateInternshipInDB();
+    }
+
+    /** Reject an application for an internship. */
+    public void rejectApplicationNumberForInternship(int applicationNumber, String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp == null) {
+            System.out.println("Internship not found: " + internshipID);
+            return;
+        }
+        opp.rejectApplicationNumber(applicationNumber);
+        updateInternshipInDB();
+    }
+
+    /** Convenience wrappers so a CompanyRepresentative CLI (which may not hold an ApplicationControl reference)
+     * can request approve/reject actions that also update the ApplicationControl.
+     */
+    public void approveApplicationAsCompanyRep(int applicationNumber) {
+        if (appCtrl != null) {
+            appCtrl.approveApplicationByNumber(applicationNumber);
+        } else {
+            System.out.println("ApplicationControl not set; cannot approve application.");
+        }
+    }
+    public void rejectApplicationAsCompanyRep(int applicationNumber) {
+        if (appCtrl != null) {
+            appCtrl.rejectApplicationByNumber(applicationNumber);
+        } else {
+            System.out.println("ApplicationControl not set; cannot reject application.");
         }
     }
     public void approve(Application app) {
@@ -275,26 +338,56 @@ public class InternshipControl{
     // Career Staff methods
 
     public List<InternshipOpportunity> getPendingInternshipOpportunities() {
-        //implementation
-        return null;
+        List<InternshipOpportunity> pending = new ArrayList<>();
+        for (InternshipOpportunity opp : internshipOpportunities) {
+            if ("pending".equalsIgnoreCase(opp.getStatus())) {
+                pending.add(opp);
+            }
+        }
+        return pending;
     }
     public List<InternshipOpportunity> getAllInternshipOpportunities(){ //for report
-        //implementation, excluding rejected internships.
-        return null;
+        return new ArrayList<>(internshipOpportunities);
     } 
     public void approveInternshipCreation(InternshipOpportunity opp) {
-        //implementation
+        if (opp == null) return;
+        opp.setStatusToApproved();
+        updateInternshipInDB();
     }
     public void rejectInternshipCreation(InternshipOpportunity rejectInternshipCreation) {
-        //implementation
+        if (rejectInternshipCreation == null) return;
+        rejectInternshipCreation.setStatusToRejected();
+        updateInternshipInDB();
     }
     public void reject(InternshipOpportunity opp) {
-        //
+        if (opp == null) return;
+        opp.setStatusToRejected();
+        updateInternshipInDB();
     }
     public void changeVisibility(InternshipOpportunity opp) {
-        //
+        if (opp == null) return;
+        // toggle
+        boolean cur = opp.getVisibility();
+        // there's no setter exposed; use reflection-like workaround by toggling via a small helper
+        try {
+            java.lang.reflect.Field f = InternshipOpportunity.class.getDeclaredField("visibility");
+            f.setAccessible(true);
+            f.setBoolean(opp, !cur);
+            updateInternshipInDB();
+        } catch (Exception e) {
+            System.out.println("Unable to change visibility: " + e.getMessage());
+        }
     }
 
+    /** Toggle visibility by internship ID (public wrapper for CLIs) */
+    public void changeVisibilityByID(String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp == null) {
+            System.out.println("Internship not found: " + internshipID);
+            return;
+        }
+        changeVisibility(opp);
+    }
 
     //=========================================================
     // Private Helpers / package private
@@ -399,5 +492,3 @@ public class InternshipControl{
         pendingInternshipOppID.remove(oppID);
     }  
 }
-
-// jeremy's comment to test conflict

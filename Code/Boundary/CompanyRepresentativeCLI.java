@@ -58,9 +58,8 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
                         System.out.print("Enter Internship ID to toggle visibility (or press Enter to cancel): ");
                         String oppId = sc.nextLine();
                         if (!oppId.isEmpty()) {
-                            // For now, we don't have the full object here; call the helper with null or let intCtrl handle lookup
-                            System.out.println("Toggling visibility for: " + oppId);
-                            // placeholder: actual toggle would require looking up the InternshipOpportunity instance
+                            intCtrl.changeVisibilityByID(oppId);
+                            System.out.println("Toggled visibility for: " + oppId);
                         }
                     } else {
                         System.out.println("Invalid option. Please try again.");
@@ -153,15 +152,52 @@ public class CompanyRepresentativeCLI extends AbstractCLI{
     }
 
     public void approveApplication() {
-        
+        System.out.print("Enter Internship ID to view applications (or press Enter to view all): ");
+        String oppId = sc.nextLine();
+        intCtrl.viewApplications(oppId);
+        System.out.print("Enter Application Number to approve (or press Enter to cancel): ");
+        String input = sc.nextLine();
+        if (input.trim().isEmpty()) {
+            System.out.println("No action taken.");
+            return;
+        }
+        try {
+            int appNum = Integer.parseInt(input.trim());
+            intCtrl.approveApplicationAsCompanyRep(appNum);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid application number.");
+        }
     }
 
     public void rejectApplication() {
-        //
+        System.out.print("Enter Internship ID to view applications (or press Enter to view all): ");
+        String oppId = sc.nextLine();
+        intCtrl.viewApplications(oppId);
+        System.out.print("Enter Application Number to reject (or press Enter to cancel): ");
+        String input = sc.nextLine();
+        if (input.trim().isEmpty()) {
+            System.out.println("No action taken.");
+            return;
+        }
+        try {
+            int appNum = Integer.parseInt(input.trim());
+            intCtrl.rejectApplicationAsCompanyRep(appNum);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid application number.");
+        }
     }
 
     public void toggleOppVisibility(InternshipOpportunity opp) {
-        //
+        if (opp == null) {
+            System.out.print("Enter Internship ID to toggle visibility: ");
+            String id = sc.nextLine();
+            if (id.trim().isEmpty()) return;
+            intCtrl.changeVisibilityByID(id);
+            System.out.println("Toggled visibility for " + id);
+            return;
+        }
+        intCtrl.changeVisibility(opp);
+        System.out.println("Toggled visibility for provided internship.");
     }
 
 
