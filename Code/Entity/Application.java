@@ -6,25 +6,34 @@ public class Application {
     private String internshipID;
     private String company;
     private String studentID;
+    private String studentMajor = null;
     private String status = "pending";
     private String acceptance = null;
     private String withdrawStatus = null;
+    
 
-    public Application(int applicationNumber, String internshipID, String company, String studentID) {
+    public Application(int applicationNumber, String internshipID, String company, String studentID, String studentMajor) {
         this.applicationNumber = applicationNumber;
         this.internshipID = internshipID;
         this.company = company;
         this.studentID = studentID;
+        this.studentMajor = studentMajor;
     }
 
-    public Application(int applicationNumber, String internshipID, String company, String studentID, String status, String acceptance, String withdrawStatus) {
+    public Application(int applicationNumber, String internshipID, 
+        String company, String studentID, 
+        String status, String acceptance, 
+        String withdrawStatus, String studentMajor) {
+
         this.applicationNumber = applicationNumber;
         this.studentID = studentID;
+        this.studentMajor = studentMajor;
         this.internshipID = internshipID;
         this.company = company;
         this.status = status;
         this.acceptance = acceptance;
         this.withdrawStatus = withdrawStatus;
+        
     }
 
     @Override
@@ -39,6 +48,9 @@ public class Application {
 
     public String getStudentID() {
         return studentID;
+    }
+    public String getStudentMajor() {
+        return studentMajor;
     }
 
     public String getInternshipID() {
@@ -62,6 +74,7 @@ public class Application {
     public int getApplicationNumber() {
         return applicationNumber;
     }
+    
 
     public void setApplicationStatusSuccess() {
         status = "approved";

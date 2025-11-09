@@ -48,14 +48,24 @@ public class ApplicationControl {
 			br.readLine();
 			while ((line = br.readLine()) != null) {
 				String[] values = line.split(",");
-				if (values[2].equals(studentID)) {
+				if (values.length >= 5 && values[2].equals(studentID)) {
 					int applicationNumber = Integer.parseInt(values[0]);
 					String internshipID = values[1];
-					String status = values[3];
-					String company = values[4];
-					String acceptance = values[5].isEmpty() ? null : values[5];
-					String withdrawStatus = values[6].isEmpty() ? null : values[6];
-					Application app = new Application(applicationNumber, internshipID, company, studentID, status, acceptance, withdrawStatus);
+					String company = values.length > 3 ? values[3] : null;
+					String status = values.length > 4 ? values[4] : "pending";
+					String acceptance = (values.length > 5 && !values[5].isEmpty()) ? values[5] : null;
+					String withdrawStatus = (values.length > 6 && !values[6].isEmpty()) ? values[6] : null;
+					String studentMajor = (values.length > 7 && !values[7].isEmpty()) ? values[7] : null;
+					Application app = new Application(
+						applicationNumber,
+						internshipID,
+						company,
+						studentID,
+						status,
+						acceptance,
+						withdrawStatus,
+						studentMajor
+					);
 					applications.add(app);
 				}
 			}
@@ -98,7 +108,8 @@ public class ApplicationControl {
 			return;
 		}
 		String companyName= intCtrl.getInternshipCompany(internshipID);
-		Application app = new Application(applications.size() + 1, internshipID, companyName, authCtrl.getUserID());
+		String studentMajor = intCtrl.getStudentMajors();
+		Application app = new Application(applications.size() + 1, internshipID, companyName, authCtrl.getUserID(), studentMajor);
 		applications.add(app);
 		saveApplicationsToDB();
 		updateInternshipsApplicationsInDB(app.getApplicationNumber(), internshipID, "add");
@@ -156,7 +167,8 @@ public class ApplicationControl {
 	public void requestWithdrawApplication(int appNum) {
 		Application app = getApplicationByNumber(appNum);
 		if (app != null) {
-			if (app.getWithdrawStatus().equals("rejected")){
+			String ws = app.getWithdrawStatus();
+			if (ws != null && ws.equals("rejected")){
 				System.out.println("Previous withdrawal request was rejected. You are refrained from making changes.");
 			}
 			app.setApplicationWithdrawRequested();
@@ -220,7 +232,7 @@ public class ApplicationControl {
 	//=========================================================
 	// Private Helpers
 
-	private Application getApplicationByNumber(int appNumber) {
+	protected Application getApplicationByNumber(int appNumber) {
 		for (Application app : applications) {
 			if (app.getApplicationNumber() == appNumber) {
 				return app;
@@ -231,10 +243,18 @@ public class ApplicationControl {
 	private void saveApplicationsToDB() {
 		final String CSV_FILE = "Database/Applications.csv";
 		try (FileWriter writer = new FileWriter(CSV_FILE)) {
-			// Write header
-			writer.append("ApplicationNumber,InternshipID,StudentID,Status,WithdrawStatus\n");
+			// Updated header to include company, acceptance, withdrawStatus, studentMajor
+			writer.append("ApplicationNumber,InternshipID,StudentID,Company,Status,Acceptance,WithdrawStatus,StudentMajor\n");
 			for (Application app : applications) {
-				writer.append(app.getApplicationNumber() + "," + app.getInternshipID() + "," + app.getStudentID() + "," + app.getApplicationStatus() + "," + (app.getWithdrawStatus() != null ? app.getWithdrawStatus() : "") + "\n");
+				writer.append(String.valueOf(app.getApplicationNumber())).append(",")
+					.append(app.getInternshipID()).append(",")
+					.append(app.getStudentID()).append(",")
+					.append(app.getCompany() != null ? app.getCompany() : "").append(",")
+					.append(app.getApplicationStatus() != null ? app.getApplicationStatus() : "pending").append(",")
+					.append(app.getAcceptance() != null ? app.getAcceptance() : "").append(",")
+					.append(app.getWithdrawStatus() != null ? app.getWithdrawStatus() : "").append(",")
+					.append(app.getStudentMajor() != null ? app.getStudentMajor() : "")
+					.append("\n");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

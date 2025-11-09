@@ -1,7 +1,8 @@
-package Interface;
+package Boundary;
 
 import Control.InternshipControl;
 import Control.LoginControl;
+import Entity.Filter;
 
 import Entity.InternshipOpportunity;
 import java.util.Map;
@@ -9,12 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
-public abstract class InterfaceCLI {
+public abstract class AbstractCLI {
     protected Scanner sc;
     protected InternshipControl intCtrl;
     protected LoginControl loginCtrl;
+    protected Filter filter=null;
 
-    public InterfaceCLI(Scanner sc, InternshipControl intCtrl) {
+    public AbstractCLI(Scanner sc, InternshipControl intCtrl) {
         this.sc = sc;
         this.intCtrl = intCtrl;
     }
@@ -57,6 +59,7 @@ public abstract class InterfaceCLI {
     }
 
     public void viewFilteredInternshipOpportunities() {
+        
         System.out.print("Enter filter type (e.g., title, companyName, openDate, numberOfSlots): ");
         String filterType = sc.nextLine();
         System.out.print("Enter sorting order (asc/desc): ");

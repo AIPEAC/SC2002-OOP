@@ -1,9 +1,8 @@
 package Boundary;
 import Control.*;
-import Interface.*;
 import java.util.*;
 
-public class StudentCLI extends InterfaceCLI{
+public class StudentCLI extends AbstractCLI{
     private ApplicationControl appCtrl;
 
 

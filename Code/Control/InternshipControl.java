@@ -137,9 +137,9 @@ public class InternshipControl{
     public void viewApplications(String internshipID) {
         if (!authCtrl.isLoggedIn()|| !authCtrl.getUserIdentity().equals("Company Representative")) {
             System.out.println("User not logged in or not a company representative.");
-            //comment for testing conflict
             return;
         }
+        System.out.println("Please kindly informed that to ensure data privacy, you can only view the major of the students.");
         String companyRepID = authCtrl.getUserID();
         List<Integer> applicationNumbers = gatherApplication(companyRepID);
         if (applicationNumbers.isEmpty()) {
@@ -147,7 +147,11 @@ public class InternshipControl{
             return;
         }
         for (Integer appNum : applicationNumbers) {
-            System.out.println("Application Number: " + appNum);
+            Application app = appCtrl.getApplicationByNumber(appNum);
+            String title= getInternshipByID(app.getInternshipID()).getInternshipTitle();
+            
+            System.out.print("Internship Title: " + title);
+            System.out.print("| Application No. " + app.getApplicationNumber());
         }
     }
     public void approve(Application app) {
@@ -247,6 +251,13 @@ public class InternshipControl{
         if (opp != null) {
             return opp.getCompanyName();
         }
+        return null;
+    }
+    protected String getStudentMajors() {
+        if (student != null) {
+            return student.getMajor();
+        }
+        System.out.println("Student not loaded.");
         return null;
     }
     // =========================================================

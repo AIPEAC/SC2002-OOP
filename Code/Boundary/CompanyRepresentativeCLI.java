@@ -1,6 +1,5 @@
 package Boundary;
 import Control.*;
-import Interface.*;
 import java.util.Scanner;
 import java.util.List;
 import java.util.Date;
@@ -8,7 +7,7 @@ import java.util.Calendar;
 import Entity.InternshipOpportunity;
 
 
-public class CompanyRepresentativeCLI extends InterfaceCLI{
+public class CompanyRepresentativeCLI extends AbstractCLI{
 
     public CompanyRepresentativeCLI(Scanner sc, InternshipControl intCtrl) {
         super(sc, intCtrl);
@@ -18,9 +17,10 @@ public class CompanyRepresentativeCLI extends InterfaceCLI{
         while (true) {
             System.out.println("\n=== Company Representative Menu ===");
             System.out.println("1. Change Password");
-            System.out.println("2. Create Internship Opportunity");
-            System.out.println("3. Check My Internship Opportunities' Status");
-            System.out.println("4. Logout");
+            System.out.println("2. View Internship Opportunities");
+            System.out.println("3. Create Internship Opportunity");
+            System.out.println("4. Check My Internship Opportunities' Status");
+            System.out.println("5. Logout");
             System.out.print("Select an option: ");
             String choice = sc.nextLine();
 
@@ -29,12 +29,15 @@ public class CompanyRepresentativeCLI extends InterfaceCLI{
                     changePassword();
                     break;
                 case "2":
-                    createInternshipOpportunity();
+                    viewFilteredInternshipOpportunities();
                     break;
                 case "3":
-                    checkMyInternshipOppStatus();
+                    createInternshipOpportunity();
                     break;
                 case "4":
+                    checkMyInternshipOppStatus();
+                    break;
+                case "5":
                     System.out.println("Logging out...");
                     return;
                 default:
@@ -106,7 +109,7 @@ public class CompanyRepresentativeCLI extends InterfaceCLI{
     }
 
     public void approveApplication() {
-        //
+        
     }
 
     public void rejectApplication() {

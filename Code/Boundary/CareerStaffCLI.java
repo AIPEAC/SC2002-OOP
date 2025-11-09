@@ -2,13 +2,12 @@ package Boundary;
 
 import Control.*;
 import Entity.Application;
-import Interface.*;
 import Entity.InternshipOpportunity;
 import java.util.Map;
 import java.util.List;
 import java.util.Scanner;
 
-public class CareerStaffCLI extends InterfaceCLI {
+public class CareerStaffCLI extends AbstractCLI {
     private ApplicationControl appCtrl;
     private ReportControl reportCtrl;
     
