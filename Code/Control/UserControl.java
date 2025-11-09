@@ -36,8 +36,8 @@ public class UserControl {
 				if (parts.length >= 5) {
 					String userID = parts[0];
 					String name = parts.length > 1 ? parts[1] : "";
-					String email = parts.length > 2 ? parts[2] : "";
-					String position = parts.length > 3 ? parts[3] : "";
+					//String email = parts.length > 2 ? parts[2] : "";
+					//String position = parts.length > 3 ? parts[3] : "";
 					String status = parts.length > 4 ? parts[4] : "";
 					String companyName = parts.length > 5 ? parts[5] : "";
 					String department = parts.length > 6 ? parts[6] : "";

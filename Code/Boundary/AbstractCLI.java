@@ -4,12 +4,10 @@ import Control.InternshipControl;
 import Control.LoginControl;
 import Entity.Filter;
 
-import Entity.InternshipOpportunity;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Comparator;
 
 public abstract class AbstractCLI {
     protected Scanner sc;
