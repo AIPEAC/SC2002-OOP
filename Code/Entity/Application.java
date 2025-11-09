@@ -1,33 +1,34 @@
 package Entity;
 
+import java.util.List;
 
 public class Application {
     private int applicationNumber;
     private String internshipID;
     private String company;
     private String studentID;
-    private String studentMajor = null;
+    private List<String> studentMajors = null;
     private String status = "pending";
     private String acceptance = null;
     private String withdrawStatus = null;
     
 
-    public Application(int applicationNumber, String internshipID, String company, String studentID, String studentMajor) {
+    public Application(int applicationNumber, String internshipID, String company, String studentID, List<String> studentMajors) {
         this.applicationNumber = applicationNumber;
         this.internshipID = internshipID;
         this.company = company;
         this.studentID = studentID;
-        this.studentMajor = studentMajor;
+        this.studentMajors = studentMajors;
     }
 
     public Application(int applicationNumber, String internshipID, 
         String company, String studentID, 
         String status, String acceptance, 
-        String withdrawStatus, String studentMajor) {
+        String withdrawStatus, List<String> studentMajors) {
 
         this.applicationNumber = applicationNumber;
         this.studentID = studentID;
-        this.studentMajor = studentMajor;
+        this.studentMajors = studentMajors;
         this.internshipID = internshipID;
         this.company = company;
         this.status = status;
@@ -49,8 +50,8 @@ public class Application {
     public String getStudentID() {
         return studentID;
     }
-    public String getStudentMajor() {
-        return studentMajor;
+    public List<String> getStudentMajors() {
+        return studentMajors;
     }
 
     public String getInternshipID() {

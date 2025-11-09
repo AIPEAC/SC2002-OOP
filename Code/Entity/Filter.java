@@ -16,4 +16,13 @@ public class Filter {
         this.ascending = ascending;
         this.filterIn = filterIn;
     }
+    public String getFilterType() {
+        return filterType;
+    }
+    public boolean isAscending() {
+        return ascending;
+    }
+    public Map<String, List<String>> getFilterIn() {
+        return filterIn;
+    }
 }

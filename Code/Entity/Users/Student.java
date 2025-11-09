@@ -1,14 +1,16 @@
 package Entity.Users;
 
+import java.util.List;
+
 public class Student extends User {
-    private String major;
+    private List<String> majors;
     private int year;
     private boolean hasAcceptedInternshipOpportunity = false;
 
-    public Student(String userID, String name, String email, String major, int year, boolean hasAcceptedInternshipOpportunity) {
+    public Student(String userID, String name, String email, List<String> majors, int year, boolean hasAcceptedInternshipOpportunity) {
         super(userID, name, email);
         // Additional fields for Student
-        this.major = major;
+        this.majors = majors;
         this.year = year;
         this.hasAcceptedInternshipOpportunity = hasAcceptedInternshipOpportunity;
     }
@@ -25,8 +27,8 @@ public class Student extends User {
         return hasAcceptedInternshipOpportunity;
     }
 
-    public String getMajor() {
-        return major;
+    public List<String> getMajors() {
+        return majors;
     }
 
     public int getYear() {

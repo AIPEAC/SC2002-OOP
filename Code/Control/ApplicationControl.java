@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import Entity.Application;
 
@@ -55,7 +56,7 @@ public class ApplicationControl {
 					String status = values.length > 4 ? values[4] : "pending";
 					String acceptance = (values.length > 5 && !values[5].isEmpty()) ? values[5] : null;
 					String withdrawStatus = (values.length > 6 && !values[6].isEmpty()) ? values[6] : null;
-					String studentMajor = (values.length > 7 && !values[7].isEmpty()) ? values[7] : null;
+					List<String> studentMajors = (values.length > 7 && !values[7].isEmpty()) ? Arrays.asList(values[7].split(" ")) : null;
 					Application app = new Application(
 						applicationNumber,
 						internshipID,
@@ -64,7 +65,7 @@ public class ApplicationControl {
 						status,
 						acceptance,
 						withdrawStatus,
-						studentMajor
+						studentMajors
 					);
 					applications.add(app);
 				}
@@ -107,9 +108,9 @@ public class ApplicationControl {
 			System.out.println("You have an approved application.");
 			return;
 		}
-		String companyName= intCtrl.getInternshipCompany(internshipID);
-		String studentMajor = intCtrl.getStudentMajors();
-		Application app = new Application(applications.size() + 1, internshipID, companyName, authCtrl.getUserID(), studentMajor);
+	String companyName= intCtrl.getInternshipCompany(internshipID);
+	List<String> studentMajors = intCtrl.getStudentMajors();
+	Application app = new Application(applications.size() + 1, internshipID, companyName, authCtrl.getUserID(), studentMajors);
 		applications.add(app);
 		saveApplicationsToDB();
 		updateInternshipsApplicationsInDB(app.getApplicationNumber(), internshipID, "add");
@@ -243,7 +244,7 @@ public class ApplicationControl {
 	private void saveApplicationsToDB() {
 		final String CSV_FILE = "Database/Applications.csv";
 		try (FileWriter writer = new FileWriter(CSV_FILE)) {
-			// Updated header to include company, acceptance, withdrawStatus, studentMajor
+			// Updated header to include company, acceptance, withdrawStatus, studentMajors (space-separated)
 			writer.append("ApplicationNumber,InternshipID,StudentID,Company,Status,Acceptance,WithdrawStatus,StudentMajor\n");
 			for (Application app : applications) {
 				writer.append(String.valueOf(app.getApplicationNumber())).append(",")
@@ -253,7 +254,7 @@ public class ApplicationControl {
 					.append(app.getApplicationStatus() != null ? app.getApplicationStatus() : "pending").append(",")
 					.append(app.getAcceptance() != null ? app.getAcceptance() : "").append(",")
 					.append(app.getWithdrawStatus() != null ? app.getWithdrawStatus() : "").append(",")
-					.append(app.getStudentMajor() != null ? app.getStudentMajor() : "")
+					.append(app.getStudentMajors() != null ? String.join(" ", app.getStudentMajors()) : "")
 					.append("\n");
 			}
 		} catch (IOException e) {

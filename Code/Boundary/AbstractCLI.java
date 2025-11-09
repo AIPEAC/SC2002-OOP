@@ -41,7 +41,10 @@ public abstract class AbstractCLI {
         }
     }
 
-    private List<InternshipOpportunity> filterInternshipOpportunities(String filterType, boolean ascending, Map<String,List<String>> filterIn) {
+    private List<InternshipOpportunity> filterInternshipOpportunities(Filter filter) {
+        String filterType = filter.getFilterType();
+        boolean ascending = filter.isAscending();
+        Map<String, List<String>> filterIn = filter.getFilterIn();
         // Implementation for filtering internship opportunities based on the criteria
         // can refer to reportControl.comprehensive()
         // filterType: the attribute sequence to sort by
@@ -59,7 +62,17 @@ public abstract class AbstractCLI {
     }
 
     public void viewFilteredInternshipOpportunities() {
-        
+        if (filter != null) {
+            System.out.println("Do you want to use previously set filter criteria? (Enter to proceed, any other key to set new filters): ");
+            if ("".equalsIgnoreCase(sc.nextLine())) {
+                List<InternshipOpportunity> filteredList = filterInternshipOpportunities(filter);
+                // Display the filtered internship opportunities
+                for (InternshipOpportunity opp : filteredList) {
+                    System.out.println(opp);
+                }
+                return;
+            }
+        }
         System.out.print("Enter filter type (e.g., title, companyName, openDate, numberOfSlots): ");
         String filterType = sc.nextLine();
         System.out.print("Enter sorting order (asc/desc): ");
@@ -68,7 +81,8 @@ public abstract class AbstractCLI {
         Map<String, List<String>> filterIn = new HashMap<>();
         // Collect additional filtering criteria from the user
         // ...
-        List<InternshipOpportunity> filteredList = filterInternshipOpportunities(filterType, ascending, filterIn);
+        filter = new Filter(filterType, ascending, filterIn);
+        List<InternshipOpportunity> filteredList = filterInternshipOpportunities(filter);
         // Display the filtered internship opportunities
         for (InternshipOpportunity opp : filteredList) {
             System.out.println(opp);

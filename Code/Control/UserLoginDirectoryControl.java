@@ -192,10 +192,14 @@ public class UserLoginDirectoryControl{
         switch(identity){
             case "Student":
                 loadStudent(userID);
+                List<String> majors = null;
+                if (StudentInfoList[3] != null && !StudentInfoList[3].isEmpty()) {
+                    majors = java.util.Arrays.asList(StudentInfoList[3].split(" "));
+                }
                 Student student=new Student(StudentInfoList[0],
                     StudentInfoList[1],
                     StudentInfoList[2],
-                    StudentInfoList[3],
+                    majors,
                     Integer.parseInt(StudentInfoList[4]),
                     Boolean.parseBoolean(StudentInfoList[5]));
                 StudentInfoList=null;

@@ -8,12 +8,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.Arrays; // needed for splitting majors and IDs
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 
 import Entity.InternshipOpportunity;
+// removed duplicate import of Arrays
 import Entity.Users.Student;
 
 
@@ -168,7 +169,7 @@ public class InternshipControl{
         if (student != null && student.getUserID().equals(studentID)) {
             return; // Already loaded
         }
-        String CSV_FILE = "Lib/student_list.csv";
+    String CSV_FILE = "Lib/student_list.csv";
         //read from csv and initialize student
         try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
             String line;
@@ -179,10 +180,10 @@ public class InternshipControl{
                 String[] values = line.split(",");
                 String name = values[1];
                 String email = values[2];
-                String major = values[3];
+                List<String> majors = Arrays.asList(values[3].split(" "));
                 boolean hasAcceptedInternshipOpportunity = Boolean.parseBoolean(values[5]);
                 int year = Integer.parseInt(values[4]);
-                student = new Student(studentID, name, email, major, year, hasAcceptedInternshipOpportunity);
+                student = new Student(studentID, name, email, majors, year, hasAcceptedInternshipOpportunity);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -214,10 +215,20 @@ public class InternshipControl{
                 }
             }
             if (levelMatch) {
-                if (!preferredMajors.contains(student.getMajor())) {
-                System.out.println("Note: You do not meet the major preferences.\n");
-                System.out.println("preferred majors:"+preferredMajors+"\n");
-                System.out.println("You still can apply.\n");
+                // Check if any of the student's majors are in preferred majors
+                boolean anyMatch = false;
+                if (student.getMajors() != null) {
+                    for (String m : student.getMajors()) {
+                        if (preferredMajors.contains(m)) {
+                            anyMatch = true;
+                            break;
+                        }
+                    }
+                }
+                if (!anyMatch) {
+                    System.out.println("Note: You do not meet the major preferences.\n");
+                    System.out.println("preferred majors:"+preferredMajors+"\n");
+                    System.out.println("You still can apply.\n");
                 }
                 return true;
             }
@@ -253,9 +264,9 @@ public class InternshipControl{
         }
         return null;
     }
-    protected String getStudentMajors() {
+    protected List<String> getStudentMajors() {
         if (student != null) {
-            return student.getMajor();
+            return student.getMajors();
         }
         System.out.println("Student not loaded.");
         return null;
