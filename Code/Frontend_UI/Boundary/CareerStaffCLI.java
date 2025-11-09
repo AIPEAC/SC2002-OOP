@@ -84,7 +84,7 @@ public class CareerStaffCLI {
         }
     }
 
-    public void viewCompanyRepRegisterList() {
+    private void viewCompanyRepRegisterList() {
         try {
             List<String> pending = userCtrl.getPendingCompanyRepList();
             if (pending == null || pending.isEmpty()) {
@@ -118,7 +118,7 @@ public class CareerStaffCLI {
         }
     }
 
-    public void approveRegister(String id) {
+    private void approveRegister(String id) {
         try {
             userCtrl.approveRegister(id);
             JOptionPane.showMessageDialog(frame, "Approved company representative registration: " + id);
@@ -127,7 +127,7 @@ public class CareerStaffCLI {
         }
     }
 
-    public void rejectRegister(String id) {
+    private void rejectRegister(String id) {
         try {
             userCtrl.rejectRegister(id);
             JOptionPane.showMessageDialog(frame, "Rejected company representative registration: " + id);
@@ -136,7 +136,7 @@ public class CareerStaffCLI {
         }
     }
 
-    public void viewPendingInternshipOpp() {
+    private void viewPendingInternshipOpp() {
         try {
             List<String> pending = intCtrl.getPendingInternshipOpportunities();
             if (pending == null || pending.isEmpty()) {
@@ -153,7 +153,7 @@ public class CareerStaffCLI {
         }
     }
 
-    public void viewPendingWithdrawal() {
+    private void viewPendingWithdrawal() {
         try {
             List<String> pending = appCtrl.getPendingWithdrawals();
             if (pending == null || pending.isEmpty()) {
@@ -170,7 +170,7 @@ public class CareerStaffCLI {
         }
     }
 
-    public void generateReportChoice() {
+    private void generateReportChoice() {
         String[] options = {"Overview","Specific","Cancel"};
         int c = JOptionPane.showOptionDialog(frame, "Generate report overview (o) or specific (s)?", "Generate Report",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
@@ -185,7 +185,7 @@ public class CareerStaffCLI {
         }
     }
 
-    public void approveWithdrawal(String appNum) {
+    private void approveWithdrawal(String appNum) {
         try {
             appCtrl.approveWithdrawal(appNum);
             JOptionPane.showMessageDialog(frame, "Approved withdrawal for application: " + appNum);
@@ -194,7 +194,7 @@ public class CareerStaffCLI {
         }
     }
 
-    public void rejectWithdrawal(String appNum) {
+    private void rejectWithdrawal(String appNum) {
         try {
             appCtrl.rejectWithdrawal(appNum);
             JOptionPane.showMessageDialog(frame, "Rejected withdrawal for application: " + appNum);
@@ -203,7 +203,7 @@ public class CareerStaffCLI {
         }
     }
 
-    public void generateReportOverview(boolean optToSaveReport){
+    private void generateReportOverview(boolean optToSaveReport){
         try {
             List<String> lines = reportCtrl.generateReportOverview(optToSaveReport);
             JOptionPane.showMessageDialog(frame, String.join("\n", lines), "Report", JOptionPane.INFORMATION_MESSAGE);
@@ -211,7 +211,7 @@ public class CareerStaffCLI {
             JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    public void generateReportSpecific(boolean optToSaveReport,Map<String,List<String>> filterIn){
+    private void generateReportSpecific(boolean optToSaveReport,Map<String,List<String>> filterIn){
         try {
             List<String> lines = reportCtrl.generateReportSpecific(optToSaveReport, filterIn);
             JOptionPane.showMessageDialog(frame, String.join("\n", lines), "Report", JOptionPane.INFORMATION_MESSAGE);

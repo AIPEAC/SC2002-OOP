@@ -97,8 +97,8 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
     
-    public void viewCompanyRepRegisterList() {
-    List<String> pending = userCtrl.getPendingCompanyRepList();
+    private void viewCompanyRepRegisterList() {
+        List<String> pending = userCtrl.getPendingCompanyRepList();
         if (pending == null || pending.isEmpty()) {
             System.out.println("No pending company representative registrations.");
             return;
@@ -109,7 +109,7 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
-    public void approveRegister(String id) {
+    private void approveRegister(String id) {
         try {
             userCtrl.approveRegister(id);
             System.out.println("Approved company representative registration: " + id);
@@ -118,7 +118,7 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
-    public void rejectRegister(String id) {
+    private void rejectRegister(String id) {
         try {
             userCtrl.rejectRegister(id);
             System.out.println("Rejected company representative registration: " + id);
@@ -127,8 +127,8 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
-    public void viewPendingInternshipOpp() {
-    List<String> pending = intCtrl.getPendingInternshipOpportunities();
+    private void viewPendingInternshipOpp() {
+        List<String> pending = intCtrl.getPendingInternshipOpportunities();
         if (pending == null || pending.isEmpty()) {
             System.out.println("No pending internship opportunities.");
             return;
@@ -139,7 +139,7 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
-    public void approveInternshipCreated(String oppID) {
+    private void approveInternshipCreated(String oppID) {
         try {
             intCtrl.approveInternshipCreationByID(oppID);
             System.out.println("Approved internship creation: " + oppID);
@@ -148,7 +148,7 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
-    public void rejectInternshipCreated(String oppID) {
+    private void rejectInternshipCreated(String oppID) {
         try {
             intCtrl.rejectInternshipCreationByID(oppID);
             System.out.println("Rejected internship creation: " + oppID);
@@ -157,8 +157,8 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
-    public void viewPendingWithdrawal() {
-    List<String> pending = appCtrl.getPendingWithdrawals();
+    private void viewPendingWithdrawal() {
+        List<String> pending = appCtrl.getPendingWithdrawals();
         if (pending == null || pending.isEmpty()) {
             System.out.println("No pending withdrawal requests.");
             return;
@@ -169,7 +169,7 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
-    public void approveWithdrawal(String appNum) {
+    private void approveWithdrawal(String appNum) {
         try {
             appCtrl.approveWithdrawal(appNum);
             System.out.println("Approved withdrawal for application: " + appNum);
@@ -178,7 +178,7 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
-    public void rejectWithdrawal(String appNum) {
+    private void rejectWithdrawal(String appNum) {
         try {
             appCtrl.rejectWithdrawal(appNum);
             System.out.println("Rejected withdrawal for application: " + appNum);
@@ -186,7 +186,7 @@ public class CareerStaffCLI extends AbstractCLI {
             System.out.println(e.getMessage());
         }
     }
-    public void generateReportOverview(boolean optToSaveReport){
+    private void generateReportOverview(boolean optToSaveReport){
         try {
             List<String> lines = reportCtrl.generateReportOverview(optToSaveReport);
             for (String l : lines) System.out.println(l);
@@ -194,7 +194,7 @@ public class CareerStaffCLI extends AbstractCLI {
             System.out.println(e.getMessage());
         }
     }
-    public void generateReportSpecific(boolean optToSaveReport,Map<String,List<String>> filterIn){
+    private void generateReportSpecific(boolean optToSaveReport,Map<String,List<String>> filterIn){
         try {
             List<String> lines = reportCtrl.generateReportSpecific(optToSaveReport, filterIn);
             for (String l : lines) System.out.println(l);
