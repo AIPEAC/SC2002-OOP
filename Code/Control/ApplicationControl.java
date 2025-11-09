@@ -291,9 +291,6 @@ public class ApplicationControl {
 
 	// =========================================================
 	// Career Staff methods
-	public void loadPendingWithdrawalApplications(Application app) {
-		
-	}	
 	public void approveWithdrawal(int appNum) {
 		Application app = getApplicationByNumber(appNum);
 		if (app != null) {
@@ -309,15 +306,7 @@ public class ApplicationControl {
 			System.out.println("Application not found.");
 		}
 	}
-	public void rejectWithdrawal(Application app) {
-		
-	}
-	public void addApplicationToPendingList(Application app) {
-		
-	}
-	public void removeApplicationFromPendingList(Application app) {
-
-	}
+	// removed unused stub methods: rejectWithdrawal(Application), addApplicationToPendingList(Application), removeApplicationFromPendingList(Application)
 
 	// =========================================================
 	// Company Representative methods

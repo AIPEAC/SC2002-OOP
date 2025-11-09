@@ -30,7 +30,7 @@ public class LoginControl {
 
         User user=userLoginDirCtrl.createUser(userID,identity);
         authCtrl.setLoggedin(user);
-        if (identity.equals("companyRepresentative")) {
+        if ("CompanyRepresentative".equals(identity) || "companyRepresentative".equals(identity)) {
             String companyName=userLoginDirCtrl.getCompanyRepsCompany(userID);
             authCtrl.setCompanyName(companyName);
         }

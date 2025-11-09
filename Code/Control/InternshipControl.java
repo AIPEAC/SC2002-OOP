@@ -215,7 +215,6 @@ public class InternshipControl{
         }
         // move application number from pending to accepted list
         opp.approveApplicationNumber(applicationNumber);
-        // persist changes to internships CSV
         updateInternshipInDB();
     }
 
@@ -246,12 +245,6 @@ public class InternshipControl{
         } else {
             System.out.println("ApplicationControl not set; cannot reject application.");
         }
-    }
-    public void approve(Application app) {
-        //implementation
-    }
-    public void reject(Application app) {
-        //
     }
 
     // =========================================================
@@ -458,8 +451,8 @@ public class InternshipControl{
         return null;
     }
     private void updateInternshipInDB() {
-        //write the updated internshipOpportunities list back to the CSV file
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("internships.csv"))) {
+        //write the updated internshipOpportunities list back to the CSV file (same file the loader reads)
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("Lib/internship_opportunity_list.csv"))) {
             for (InternshipOpportunity opp : internshipOpportunities) {
                 String line = String.join(",",
                     opp.getInternshipID(),
