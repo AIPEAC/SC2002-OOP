@@ -25,6 +25,8 @@ public class StudentCLI extends AbstractCLI{
 
             switch (choice) {
                 case "1":
+
+                
                     changePassword();
                     break;
                 case "2":
