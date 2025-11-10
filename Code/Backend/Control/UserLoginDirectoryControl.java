@@ -45,7 +45,7 @@ public class UserLoginDirectoryControl{
                 file.getParentFile().mkdirs(); 
                 file.createNewFile();
                 try (FileWriter writer = new FileWriter(file)) {
-                    writer.append("identity,userID,passwordHash,salt\n");
+                    writer.append("identity,userID,passwordHash,salt,status\n");
                 }
             }
 
@@ -53,6 +53,25 @@ public class UserLoginDirectoryControl{
                 br.readLine(); // Skip header
                 while ((line = br.readLine()) != null) {
                     String[] loginData = line.split(csvSplitBy);
+                    // Normalize legacy rows to 5 columns (identity,userID,passwordHash,salt,status)
+                    if (loginData.length < 5) {
+                        String[] expanded = new String[5];
+                        for (int i = 0; i < loginData.length; i++) expanded[i] = loginData[i];
+                        for (int i = loginData.length; i < 5; i++) expanded[i] = "";
+                        loginData = expanded;
+                    }
+                    // Repair case where status was mistakenly written into salt (legacy bug)
+                    if ("CompanyRepresentative".equals(loginData[0])) {
+                        String maybeSalt = loginData[3];
+                        if (maybeSalt != null) {
+                            String v = maybeSalt.trim().toLowerCase();
+                            if ("approved".equals(v) || "rejected".equals(v) || "pending".equals(v)) {
+                                // move value to status column, clear salt
+                                loginData[4] = loginData[3];
+                                loginData[3] = "";
+                            }
+                        }
+                    }
                     loginList.add(loginData);
                 }
             }
@@ -268,16 +287,22 @@ public class UserLoginDirectoryControl{
         for (String[] loginData : loginList) {
             if (loginData[1].equals(userID)) {
                 String newSalt = generateSalt();
-                // ensure array length
-                if (loginData.length < 4) {
-                    String[] expanded = new String[4];
-                    for (int i = 0; i < loginData.length; i++) expanded[i] = loginData[i];
-                    for (int i = loginData.length; i < 4; i++) expanded[i] = "";
-                    loginData = expanded;
+                // ensure array length to 5 (identity,userID,passwordHash,salt,status)
+                for (int i = 0; i < loginList.size(); i++) {
+                    String[] row = loginList.get(i);
+                    if (row.length > 1 && row[1].equals(userID)) {
+                        if (row.length < 5) {
+                            String[] expanded = new String[5];
+                            for (int j = 0; j < row.length; j++) expanded[j] = row[j];
+                            for (int j = row.length; j < 5; j++) expanded[j] = "";
+                            row = expanded;
+                        }
+                        row[3] = newSalt; // salt
+                        row[2] = hashPassword(newPassword, newSalt);
+                        loginList.set(i, row);
+                        break;
+                    }
                 }
-                loginData[3] = newSalt;
-                loginData[2] = hashPassword(newPassword, newSalt);
-                break;
             }
         }
 
@@ -288,9 +313,14 @@ public class UserLoginDirectoryControl{
         try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
              FileWriter writer = new FileWriter(tempFile)) {
 
-            writer.append("identity,userID,passwordHash,salt\n");
+            writer.append("identity,userID,passwordHash,salt,status\n");
             for (String[] loginData : loginList) {
-                writer.append(String.join(",", loginData));
+                // normalize to 5 columns
+                String[] out = new String[] {"", "", "", "", ""};
+                for (int k = 0; k < loginData.length && k < 5; k++) {
+                    out[k] = (loginData[k] == null) ? "" : loginData[k];
+                }
+                writer.append(String.join(",", out));
                 writer.append("\n");
             }
 
@@ -316,7 +346,8 @@ public class UserLoginDirectoryControl{
 
         try (FileWriter writer = new FileWriter("Code/Backend/Lib/login_list.csv", true)) {
             String salt = generateSalt();
-            writer.append(String.join(",", "CompanyRepresentative", assignedID, hashPassword("password", salt), salt));
+            // store status as pending in the 5th column
+            writer.append(String.join(",", "CompanyRepresentative", assignedID, hashPassword("password", salt), salt, "pending"));
             writer.append("\n");
         } catch (IOException e) {
             e.printStackTrace();
@@ -396,7 +427,7 @@ public class UserLoginDirectoryControl{
         updateCompanyRepStatusInLogin(userID, "rejected");
         updateCompanyRepStatusInCompanyRepCSV(userID, "rejected");
     }
-    // Update the status field (stored in the 4th column) for a CompanyRepresentative in login_list.csv
+    // Update the status field (stored in the 5th column) for a CompanyRepresentative in login_list.csv
     private void updateCompanyRepStatusInLogin(String userID, String status) {
         boolean updated = false;
 
@@ -412,13 +443,14 @@ public class UserLoginDirectoryControl{
                 && "CompanyRepresentative".equals(row[0])
                 && userID.equals(row[1])) {
                 // Ensure row has at least 4 columns
-                if (row.length < 4) {
-                    String[] expanded = new String[4];
+                if (row.length < 5) {
+                    String[] expanded = new String[5];
                     for (int j = 0; j < row.length; j++) expanded[j] = row[j];
-                    for (int j = row.length; j < 4; j++) expanded[j] = "";
+                    for (int j = row.length; j < 5; j++) expanded[j] = "";
                     row = expanded;
                 }
-                row[3] = status; // store status in the 4th column
+                // store status in the 5th column (index 4)
+                row[4] = status;
                 loginList.set(i, row);
                 updated = true;
                 break;
@@ -432,13 +464,13 @@ public class UserLoginDirectoryControl{
             File tempFile = new File("Code/Backend/Lib/login_list.tmp");
 
             try (FileWriter writer = new FileWriter(tempFile)) {
-                // Write header
-                writer.append("identity,userID,passwordHash,salt\n");
+                // Write header (with status column)
+                writer.append("identity,userID,passwordHash,salt,status\n");
                 // Write rows
                 for (String[] data : loginList) {
-                    // Normalize to 4 columns when writing
-                    String[] out = new String[] {"", "", "", ""};
-                    for (int k = 0; k < data.length && k < 4; k++) {
+                    // Normalize to 5 columns when writing
+                    String[] out = new String[] {"", "", "", "", ""};
+                    for (int k = 0; k < data.length && k < 5; k++) {
                         out[k] = (data[k] == null) ? "" : data[k];
                     }
                     writer.append(String.join(",", out)).append("\n");
@@ -560,7 +592,7 @@ public class UserLoginDirectoryControl{
         String filePathExampleStaff = "Code/Backend/Lib_example/sample_staff_list.csv";
         String filePathExampleStudent = "Code/Backend/Lib_example/sample_student_list.csv";
         String filePathExampleCompanyRep = "Code/Backend/Lib_example/sample_company_representative_list.csv";
-        String filePathDBLogin = "Code/Backend/Lib/login_list.csv";
+    String filePathDBLogin = "Code/Backend/Lib/login_list.csv";
         String filePathDBStaffString = "Code/Backend/Lib/staff.csv";
         String filePathDBStudentString = "Code/Backend/Lib/student.csv";
         
@@ -568,7 +600,7 @@ public class UserLoginDirectoryControl{
         String line;
         try {
             // Ensure DB CSVs exist with headers and end with newline to avoid concatenation
-            ControlUtils.ensureCsvPrepared(filePathDBLogin, "identity,userID,passwordHash,salt");
+            ControlUtils.ensureCsvPrepared(filePathDBLogin, "identity,userID,passwordHash,salt,status");
             ControlUtils.ensureCsvPrepared(filePathDBStaffString, "userID,name,email,department,role");
             ControlUtils.ensureCsvPrepared(filePathDBStudentString, "userID,name,email,major,year,hasAcceptedInternshipOpportunity");
             ControlUtils.ensureCsvPrepared("Code/Backend/Lib/company_representative.csv", "userID,name,email,position,accountStatus,companyName,department");
@@ -589,7 +621,8 @@ public class UserLoginDirectoryControl{
                 }
                 try (FileWriter writer = new FileWriter(filePathDBLogin, true)) {
                     String salt = generateSalt();
-                    writer.append(String.join(",", "Staff", staffID, hashPassword("password", salt), salt));
+                    // Staff have no status column value
+                    writer.append(String.join(",", "Staff", staffID, hashPassword("password", salt), salt, ""));
                     writer.append("\n");
                 }
             }
@@ -612,7 +645,8 @@ public class UserLoginDirectoryControl{
                 }
                 try (FileWriter writer = new FileWriter(filePathDBLogin, true)) {
                     String salt = generateSalt();
-                    writer.append(String.join(",", "Student", studentID, hashPassword("password", salt), salt));
+                    // Students have no status column value
+                    writer.append(String.join(",", "Student", studentID, hashPassword("password", salt), salt, ""));
                     writer.append("\n");
                 }
             }
@@ -637,7 +671,8 @@ public class UserLoginDirectoryControl{
                 }
                 try (FileWriter writer = new FileWriter(filePathDBLogin, true)) {
                     String salt = generateSalt();
-                    writer.append(String.join(",", "CompanyRepresentative", compID, hashPassword("password", salt), salt));
+                    // Preserve the status from the example data
+                    writer.append(String.join(",", "CompanyRepresentative", compID, hashPassword("password", salt), salt, compStatus));
                     writer.append("\n");
                 }
             }
