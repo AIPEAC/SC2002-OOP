@@ -234,6 +234,42 @@ public class Report {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         sb.append("# 🔥 PREVALENT INTERNSHIP REPORT - #"+reportIndex+"\n\n");
         sb.append("_Generated: "+LocalDateTime.now().format(dtf)+"_\n\n");
+        
+        // Add filter information if this is a filtered report
+        if (filtered && appliedFilters != null && !appliedFilters.isEmpty()) {
+            sb.append("## 🔍 Applied Filters\n\n");
+            
+            // Company Names
+            if (appliedFilters.containsKey("CompanyName") && !appliedFilters.get("CompanyName").isEmpty()) {
+                sb.append("**Companies:** ");
+                sb.append(String.join(", ", appliedFilters.get("CompanyName")));
+                sb.append("\n\n");
+            }
+            
+            // Levels
+            if (appliedFilters.containsKey("Level") && !appliedFilters.get("Level").isEmpty()) {
+                sb.append("**Levels:** ");
+                sb.append(String.join(", ", appliedFilters.get("Level")));
+                sb.append("\n\n");
+            }
+            
+            // Majors
+            if (appliedFilters.containsKey("Major") && !appliedFilters.get("Major").isEmpty()) {
+                sb.append("**Majors:** ");
+                sb.append(String.join(", ", appliedFilters.get("Major")));
+                sb.append("\n\n");
+            }
+            
+            // Start Date
+            if (appliedFilters.containsKey("StartDate") && !appliedFilters.get("StartDate").isEmpty()) {
+                sb.append("**Start Date (from):** ");
+                sb.append(appliedFilters.get("StartDate").get(0));
+                sb.append("\n\n");
+            }
+            
+            sb.append("---\n\n");
+        }
+        
         sb.append("**Total internships:** "+numOfInternships+(filtered?" (filtered)":"")+"\n\n");
 
         int maxForBars = Math.max(1, numOfInternships);

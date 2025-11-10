@@ -50,7 +50,7 @@ public class ReportControl {
         int reportIndex = optToSaveReport ? getNumberOfReports()+1 : 0;
         List<InternshipOpportunity> filteredList=comprehensive(allOpplist,filterIn);
         boolean filtered=true;
-        Report report=new Report(reportIndex,filteredList,filtered);
+        Report report=new Report(reportIndex,filteredList,filtered,filterIn);
         List<String> lines = report.formatOutput();
         if (optToSaveReport) {
             try {
