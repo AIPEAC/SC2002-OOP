@@ -570,6 +570,11 @@ public class UserLoginDirectoryControl{
         BufferedReader br = null;
         String line;
         try {
+            // Ensure DB CSVs exist with headers and end with newline to avoid concatenation
+            ControlUtils.ensureCsvPrepared(filePathDBLogin, "identity,userID,passwordHash,salt");
+            ControlUtils.ensureCsvPrepared(filePathDBStaffString, "userID,name,email,department,role");
+            ControlUtils.ensureCsvPrepared(filePathDBStudentString, "userID,name,email,major,year,hasAcceptedInternshipOpportunity");
+            ControlUtils.ensureCsvPrepared("Code/Backend/Lib/company_representative.csv", "userID,name,email,position,accountStatus,companyName,department");
             // Load Staff - map sample to DB header: userID,name,email,department,role
             br = new BufferedReader(new FileReader(filePathExampleStaff));
             br.readLine(); // Skip header

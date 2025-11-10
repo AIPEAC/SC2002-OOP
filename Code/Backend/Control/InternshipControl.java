@@ -40,7 +40,13 @@ public class InternshipControl{
         this.appCtrl = appCtrl;
     }
     private void loadInternshipOpportunityFromDB() {
-        String CSV_FILE = "Lib/internship_opportunity_list.csv";
+        String CSV_FILE = "Code/Backend/Lib/internship_opportunity_list.csv"; // corrected absolute path within project
+        // Ensure header newline present to avoid concatenation when first opportunity is written
+        try {
+            ControlUtils.ensureCsvPrepared(CSV_FILE, "internshipID,title,description,level,preferredMajors,openingDate,closeDate,status,CompanyName,companyRepInCharge,numOfSlots,pendingApplicationNumberList,acceptedApplicationNumberList,visibility");
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
         //read from csv and initialize internship opportunities
         try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
             String line;
@@ -507,8 +513,12 @@ public class InternshipControl{
         return null;
     }
     private void updateInternshipInDB() {
-        //write the updated internshipOpportunities list back to the CSV file (same file the loader reads)
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("Lib/internship_opportunity_list.csv"))) {
+        // Write the updated internshipOpportunities list back to the CSV file (same file the loader reads)
+        String CSV_FILE = "Code/Backend/Lib/internship_opportunity_list.csv";
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_FILE))) {
+            // Always write header first followed by newline
+            writer.write("internshipID,title,description,level,preferredMajors,openingDate,closeDate,status,CompanyName,companyRepInCharge,numOfSlots,pendingApplicationNumberList,acceptedApplicationNumberList,visibility");
+            writer.newLine();
             for (InternshipOpportunity opp : internshipOpportunities) {
                 String line = String.join(",",
                     opp.getInternshipID(),
