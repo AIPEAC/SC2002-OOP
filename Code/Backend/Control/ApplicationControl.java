@@ -160,6 +160,12 @@ public class ApplicationControl {
 		if (ws != null && ws.equals("rejected")) {
 			throw new IllegalStateException("Previous withdrawal request was rejected. You are refrained from making changes.");
 		}
+		if (ws != null && ws.equals("pending")) {
+			throw new IllegalStateException("Withdrawal request already pending. Please wait for staff approval.");
+		}
+		if (ws != null && ws.equals("approved")) {
+			throw new IllegalStateException("Application already withdrawn.");
+		}
 		app.setApplicationWithdrawRequested();
 		saveApplicationsToDB();
 	}
@@ -170,6 +176,30 @@ public class ApplicationControl {
 			List<String> details = intCtrl.getInternshipDetails(internID);
 			out.add("Application Number: " + app.getApplicationNumber());
 			out.addAll(details);
+		}
+		return out;
+	}
+
+	/** Return applications with internship details in structured format for table display */
+	public List<String> getApplicationsWithInternshipDetails() {
+		List<String> out = new ArrayList<>();
+		for (Application app : applications) {
+			String internID = app.getInternshipID();
+			String internTitle = intCtrl.getInternshipTitle(internID);
+			String internLevel = intCtrl.getInternshipLevel(internID);
+			String internCompany = app.getCompany();
+			String internMajors = intCtrl.getInternshipPreferredMajors(internID);
+			
+			String line = "applicationNumber=" + app.getApplicationNumber() +
+			              " | internshipID=" + internID +
+			              " | internshipTitle=" + (internTitle != null ? internTitle : "N/A") +
+			              " | internshipLevel=" + (internLevel != null ? internLevel : "N/A") +
+			              " | companyName=" + (internCompany != null ? internCompany : "N/A") +
+			              " | preferredMajors=" + (internMajors != null ? internMajors : "N/A") +
+			              " | status=" + app.getApplicationStatus() +
+			              " | acceptance=" + (app.getAcceptance() != null ? app.getAcceptance() : "N/A") +
+			              " | withdrawStatus=" + (app.getWithdrawStatus() != null ? app.getWithdrawStatus() : "N/A");
+			out.add(line);
 		}
 		return out;
 	}

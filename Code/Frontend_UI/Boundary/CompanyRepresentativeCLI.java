@@ -44,10 +44,6 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
             checkStatus.addActionListener(e -> checkMyInternshipOppStatus());
             p.add(checkStatus);
 
-            JButton toggleVis = new JButton("Toggle Visibility by ID");
-            toggleVis.addActionListener(e -> toggleVisibility());
-            p.add(toggleVis);
-
             JButton logout = new JButton("Logout");
             logout.addActionListener(e -> {
                 UIHelper.closeLoggedInPopup();
@@ -163,9 +159,21 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                 checkApps.addActionListener(e -> showApplicationsForInternship(finalId));
                 // Only enable if approved and has applications
                 checkApps.setEnabled("approved".equalsIgnoreCase(finalStatus));
+                
+                JButton toggleVis = new JButton("Toggle Visibility");
+                toggleVis.addActionListener(e -> {
+                    try {
+                        intCtrl.changeVisibilityByID(finalId);
+                        JOptionPane.showMessageDialog(frame, "Toggled visibility for: " + finalId);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                });
+                
                 JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
                 actionsPanel.add(checkApps);
-                actionsPanel.setPreferredSize(new Dimension(180, 28));
+                actionsPanel.add(toggleVis);
+                actionsPanel.setPreferredSize(new Dimension(300, 28));
                 row.add(actionsPanel, r);
 
                 r.gridx = 1; r.weightx = 0.15; r.fill = GridBagConstraints.HORIZONTAL; row.add(new JLabel(id != null ? id : ""), r);
@@ -274,16 +282,5 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
             return r;
         }
         return "[" + r + "]";
-    }
-
-    private void toggleVisibility() {
-        String id = JOptionPane.showInputDialog(frame, "Enter Internship ID to toggle visibility:");
-        if (id == null || id.trim().isEmpty()) return;
-        try {
-            intCtrl.changeVisibilityByID(id);
-            JOptionPane.showMessageDialog(frame, "Toggled visibility for: " + id);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
     }
 }

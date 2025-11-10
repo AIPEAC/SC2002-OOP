@@ -383,7 +383,7 @@ public class InternshipControl{
         if (student != null && student.getUserID().equals(studentID)) {
             return; // Already loaded
         }
-    String CSV_FILE = "Lib/student_list.csv";
+    String CSV_FILE = "Code/Backend/Lib/student.csv";
         //read from csv and initialize student
         try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
             String line;
@@ -473,6 +473,32 @@ public class InternshipControl{
         }
         return null;
     }
+    
+    String getInternshipTitle(String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp != null) {
+            return opp.getInternshipTitle();
+        }
+        return null;
+    }
+    
+    String getInternshipLevel(String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp != null) {
+            return opp.getInternshipLevel();
+        }
+        return null;
+    }
+    
+    String getInternshipPreferredMajors(String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp != null) {
+            List<String> majors = opp.getPreferredMajors();
+            return majors != null ? majors.toString() : "[]";
+        }
+        return "[]";
+    }
+    
     protected List<String> getStudentMajors() {
         if (student != null) {
             return student.getMajors();
