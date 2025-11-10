@@ -211,41 +211,54 @@ public abstract class AbstractCLI {
         JPanel listPanel = new JPanel();
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
 
-    // Determine if current user may apply (only students)
-        boolean canApply = false;
-        try { canApply = intCtrl.getLoggedInStudentYear() != null; } catch (Exception ex) { canApply = false; }
+    // (Apply availability is checked per-row using backend helper)
 
-        for (String line : lines) {
-            String id = parseFieldByPrefix(line, "internshipID", false);
-            String title = parseField(line, "internshipTitle");
-            String company = parseField(line, "companyName");
-            String majors = parseField(line, "preferredMajors");
+            // Header row
+            JPanel header = new JPanel(new GridLayout(1,5));
+            header.setBackground(new Color(240,240,240));
+            header.add(new JLabel("Actions", SwingConstants.CENTER));
+            header.add(new JLabel("ID", SwingConstants.CENTER));
+            header.add(new JLabel("Title", SwingConstants.CENTER));
+            header.add(new JLabel("Company", SwingConstants.CENTER));
+            header.add(new JLabel("Preferred Majors", SwingConstants.CENTER));
+            header.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.GRAY));
+            listPanel.add(header);
 
-            String summary = String.format("%s | %s | %s | Majors: %s",
-                    id != null ? id : "",
-                    title != null ? title : "",
-                    company != null ? company : "",
-                    majors != null ? majors : "");
+            for (String line : lines) {
+                String id = parseFieldByPrefix(line, "internshipID", false);
+                String title = parseField(line, "internshipTitle");
+                String company = parseField(line, "companyName");
+                String majorsRaw = parseField(line, "preferredMajors");
+                String majors = formatMajors(majorsRaw);
 
-            JPanel row = new JPanel(new BorderLayout());
-            row.add(new JLabel(summary), BorderLayout.CENTER);
-            JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            JButton details = new JButton("View Details");
-            String finalId = id;
-            details.addActionListener(e -> showInternshipDetails(finalId));
-            JButton applyBtn = new JButton("Apply");
-            applyBtn.addActionListener(e -> onApply(finalId));
-            applyBtn.setEnabled(canApply);
-            if (!canApply) applyBtn.setToolTipText("Log in as a student to apply");
-            actions.add(details);
-            actions.add(applyBtn);
-            row.add(actions, BorderLayout.EAST);
-            row.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.LIGHT_GRAY));
-            listPanel.add(row);
-        }
-        JScrollPane sp = new JScrollPane(listPanel);
-        sp.setPreferredSize(new Dimension(700,400));
-        JOptionPane.showMessageDialog(null, sp, "Internships", JOptionPane.INFORMATION_MESSAGE);
+                JPanel row = new JPanel(new GridLayout(1,5));
+                // Actions (buttons) on the left
+                JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                JButton details = new JButton("Details");
+                String finalId = id;
+                details.addActionListener(e -> showInternshipDetails(finalId));
+                JButton applyBtn = new JButton("Apply");
+                applyBtn.addActionListener(e -> onApply(finalId));
+                // Enable apply only if current logged-in student fits requirements for this internship
+                boolean canApplyForThis = false;
+                try { canApplyForThis = (finalId != null && intCtrl.canCurrentLoggedInStudentApply(finalId)); } catch (Exception ex) { canApplyForThis = false; }
+                applyBtn.setEnabled(canApplyForThis);
+                if (!applyBtn.isEnabled()) applyBtn.setToolTipText("You must be a student who meets requirements to apply");
+                actions.add(details);
+                actions.add(applyBtn);
+
+                row.add(actions);
+                row.add(new JLabel(id != null ? id : "", SwingConstants.LEFT));
+                row.add(new JLabel(title != null ? title : "", SwingConstants.LEFT));
+                row.add(new JLabel(company != null ? company : "", SwingConstants.LEFT));
+                row.add(new JLabel(majors, SwingConstants.LEFT));
+                row.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.LIGHT_GRAY));
+                listPanel.add(row);
+            }
+
+            JScrollPane sp = new JScrollPane(listPanel);
+            sp.setPreferredSize(new Dimension(900,400));
+            JOptionPane.showMessageDialog(null, sp, "Internships", JOptionPane.INFORMATION_MESSAGE);
     }
 
     // Default no-op apply handler (subclasses like StudentCLI should override)
@@ -294,5 +307,25 @@ public abstract class AbstractCLI {
         int end = line.indexOf(", ", start);
         if (end < 0) end = line.length();
         return line.substring(start, end).trim();
+    }
+
+    private String formatMajors(String raw) {
+        if (raw == null) return "[]";
+        String r = raw.trim();
+        if (r.isEmpty()) return "[]";
+        // If already bracketed like [A, B], normalize spacing
+        if (r.startsWith("[") && r.endsWith("]")) {
+            return r;
+        }
+        // possible separators: ; , or space
+        String[] parts = r.split("[;,]|\\s+");
+        List<String> p = new ArrayList<>();
+        for (String s : parts) {
+            if (s == null) continue;
+            String t = s.trim();
+            if (t.isEmpty()) continue;
+            p.add(t);
+        }
+        return "[" + String.join(", ", p) + "]";
     }
 }

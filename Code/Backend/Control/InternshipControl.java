@@ -626,6 +626,23 @@ public class InternshipControl{
                 .sorted(String::compareToIgnoreCase)
                 .collect(Collectors.toList());
     }
+    /**
+     * Return whether the currently logged-in user (if a student) can apply to the given internship ID.
+     * Encapsulates auth checks and requirement checks so the UI doesn't need to access entities.
+     */
+    public boolean canCurrentLoggedInStudentApply(String internshipID) {
+        try {
+            if (authCtrl == null || !authCtrl.isLoggedIn() || !"Student".equals(authCtrl.getUserIdentity())) {
+                return false;
+            }
+            String sid = authCtrl.getUserID();
+            // Both visibility/slot/status and student fits requirements must be true
+            return isVisibleAndNotFullAndNotRejected(internshipID) && studentFitsRequirements(sid, internshipID);
+        } catch (Exception e) {
+            // On any error, be conservative and return false
+            return false;
+        }
+    }
     /** Return logged-in student year (3/4 gating logic for level filter) or null if not a student / not found. */
     public Integer getLoggedInStudentYear() {
         if (authCtrl == null || !authCtrl.isLoggedIn() || !"Student".equals(authCtrl.getUserIdentity())) {
