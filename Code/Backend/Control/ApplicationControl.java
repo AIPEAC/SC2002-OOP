@@ -42,8 +42,10 @@ public class ApplicationControl {
 
 	public void loadStudentApplicationFromDB() {
 		String studentID = authCtrl.getUserID();
+		// Clear existing applications to avoid duplicates
+		applications.clear();
 		// Load applications from the database for the given studentID
-		final String CSV_FILE = "Database/Applications.csv";
+		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
 		File file = new File(CSV_FILE);
 		BufferedReader br = null;
 		try {
@@ -103,7 +105,8 @@ public class ApplicationControl {
 		}
 		String companyName = intCtrl.getInternshipCompany(internshipID);
 		List<String> studentMajors = intCtrl.getStudentMajors();
-		Application app = new Application(applications.size() + 1, internshipID, companyName, authCtrl.getUserID(), studentMajors);
+		int newAppNumber = getNextApplicationNumber();
+		Application app = new Application(newAppNumber, internshipID, companyName, authCtrl.getUserID(), studentMajors);
 		applications.add(app);
 		saveApplicationsToDB();
 		updateInternshipsApplicationsInDB(app.getApplicationNumber(), internshipID, "add");
@@ -335,15 +338,82 @@ public class ApplicationControl {
 	// Helpers
 
 	Application getApplicationByNumber(int appNumber) {
+		// First check in loaded applications
 		for (Application app : applications) {
 			if (app.getApplicationNumber() == appNumber) {
 				return app;
 			}
 		}
+		// If not found, load from database directly
+		return loadApplicationByNumberFromDB(appNumber);
+	}
+	
+	/**
+	 * Get the next available application number by reading all applications from the database
+	 * and finding the maximum application number, then returning max + 1.
+	 */
+	private int getNextApplicationNumber() {
+		int maxAppNumber = 0;
+		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
+		try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
+			String line;
+			br.readLine(); // Skip header
+			while ((line = br.readLine()) != null) {
+				if (line.trim().isEmpty()) continue;
+				String[] values = line.split(",");
+				if (values.length < 1) continue;
+				try {
+					int appNum = Integer.parseInt(values[0].trim());
+					if (appNum > maxAppNumber) {
+						maxAppNumber = appNum;
+					}
+				} catch (NumberFormatException e) {
+					// Skip invalid lines
+					continue;
+				}
+			}
+		} catch (IOException e) {
+			// If file doesn't exist or can't be read, start from 1
+			return 1;
+		}
+		return maxAppNumber + 1;
+	}
+	
+	private Application loadApplicationByNumberFromDB(int appNumber) {
+		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
+		try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
+			String line;
+			br.readLine(); // Skip header
+			while ((line = br.readLine()) != null) {
+				String[] values = line.split(",");
+				if (values.length < 1) continue;
+				int appNum = Integer.parseInt(values[0].trim());
+				if (appNum != appNumber) continue;
+				
+				// Found the application, parse it
+				String internshipID = values.length > 1 ? values[1].trim() : "";
+				String studentID = values.length > 2 ? values[2].trim() : "";
+				String company = values.length > 3 ? values[3].trim() : "";
+				String status = values.length > 4 ? values[4].trim() : "pending";
+				String acceptance = values.length > 5 ? values[5].trim() : null;
+				String withdrawStatus = values.length > 6 ? values[6].trim() : null;
+				List<String> studentMajors = null;
+				if (values.length > 7 && !values[7].trim().isEmpty()) {
+					studentMajors = Arrays.asList(values[7].trim().split(" "));
+				}
+				
+				if (acceptance != null && acceptance.isEmpty()) acceptance = null;
+				if (withdrawStatus != null && withdrawStatus.isEmpty()) withdrawStatus = null;
+				
+				return new Application(appNum, internshipID, company, studentID, status, acceptance, withdrawStatus, studentMajors);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 	private void saveApplicationsToDB() {
-		final String CSV_FILE = "Database/Applications.csv";
+		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
 		try (FileWriter writer = new FileWriter(CSV_FILE)) {
 			// Updated header to include company, acceptance, withdrawStatus, studentMajors (space-separated)
 			writer.append("ApplicationNumber,InternshipID,StudentID,Company,Status,Acceptance,WithdrawStatus,StudentMajor\n");

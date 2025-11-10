@@ -1,1 +1,2 @@
-applicationIndex,Company,internshipID,studentID,studentMajor,status,acceptance,withdrawnStatus
+ApplicationNumber,InternshipID,StudentID,Company,Status,Acceptance,WithdrawStatus,StudentMajor
+2,#INT0001,U2310004D,alo,pending,,,Information Engineering & Media

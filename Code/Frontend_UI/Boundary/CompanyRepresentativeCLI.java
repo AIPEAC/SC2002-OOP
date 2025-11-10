@@ -163,8 +163,12 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                 JButton toggleVis = new JButton("Toggle Visibility");
                 toggleVis.addActionListener(e -> {
                     try {
-                        intCtrl.changeVisibilityByID(finalId);
-                        JOptionPane.showMessageDialog(frame, "Toggled visibility for: " + finalId);
+                        boolean newVisibility = intCtrl.changeVisibilityByID(finalId);
+                        String visibilityStatus = newVisibility ? "VISIBLE" : "HIDDEN";
+                        JOptionPane.showMessageDialog(frame, 
+                            "Visibility toggled for: " + finalId + "\nNew status: " + visibilityStatus,
+                            "Visibility Updated",
+                            JOptionPane.INFORMATION_MESSAGE);
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     }

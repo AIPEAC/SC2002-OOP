@@ -619,19 +619,20 @@ public class InternshipControl{
         opp.setStatusToRejected();
         updateInternshipInDB();
     }
-    public void changeVisibility(InternshipOpportunity opp) {
-        if (opp == null) return;
+    public boolean changeVisibility(InternshipOpportunity opp) {
+        if (opp == null) return false;
         // toggle
         boolean cur = opp.getVisibility();
         opp.setVisibility(!cur);
         updateInternshipInDB();
+        return !cur; // return new visibility state
     }
 
     /** Toggle visibility by internship ID (public wrapper for CLIs) */
-    public void changeVisibilityByID(String internshipID) {
+    public boolean changeVisibilityByID(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
-        changeVisibility(opp);
+        return changeVisibility(opp);
     }
 
     /**
