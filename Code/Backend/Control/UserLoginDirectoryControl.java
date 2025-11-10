@@ -183,10 +183,7 @@ public class UserLoginDirectoryControl{
         }
         return null;
     }
-    private static String hashPassword(String password) {
-        // Delegate to salted version with empty salt for backward compatibility
-        return hashPassword(password, "");
-    }  
+     
     
     // New: SHA-256 hash with salt. If salt is empty string, behaves like previous hashPassword.
     private static String hashPassword(String password, String salt) {

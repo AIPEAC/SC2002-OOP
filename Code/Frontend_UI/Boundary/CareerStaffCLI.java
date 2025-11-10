@@ -78,6 +78,18 @@ public class CareerStaffCLI extends AbstractCLI {
             JScrollPane sp = new JScrollPane(ta);
             sp.setPreferredSize(new Dimension(600,300));
             JOptionPane.showMessageDialog(frame, sp, "Pending Company Reps", JOptionPane.INFORMATION_MESSAGE);
+            // After viewing, ask if staff wants to approve/reject an ID (mirror console flow)
+            String id = JOptionPane.showInputDialog(frame, "Enter ID to approve/reject (leave blank to skip):");
+            if (id != null && !id.trim().isEmpty()) {
+                String[] opts = {"Approve","Reject","Cancel"};
+                int c = JOptionPane.showOptionDialog(frame, "Approve or reject this registration?", "Approve/Reject",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opts, opts[0]);
+                if (c == 0) {
+                    approveRegister(id.trim());
+                } else if (c == 1) {
+                    rejectRegister(id.trim());
+                }
+            }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -114,6 +126,18 @@ public class CareerStaffCLI extends AbstractCLI {
             JScrollPane sp = new JScrollPane(ta);
             sp.setPreferredSize(new Dimension(600,300));
             JOptionPane.showMessageDialog(frame, sp, "Pending Internships", JOptionPane.INFORMATION_MESSAGE);
+            // Ask for an internship ID to approve/reject (mirror console)
+            String oppId = JOptionPane.showInputDialog(frame, "Enter Internship ID to approve/reject (leave blank to skip):");
+            if (oppId != null && !oppId.trim().isEmpty()) {
+                String[] opts = {"Approve","Reject","Cancel"};
+                int c = JOptionPane.showOptionDialog(frame, "Approve or reject this internship?", "Approve/Reject",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opts, opts[0]);
+                if (c == 0) {
+                    try { intCtrl.approveInternshipCreationByID(oppId.trim()); JOptionPane.showMessageDialog(frame, "Approved internship: " + oppId.trim()); } catch (Exception ex) { JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); }
+                } else if (c == 1) {
+                    try { intCtrl.rejectInternshipCreationByID(oppId.trim()); JOptionPane.showMessageDialog(frame, "Rejected internship: " + oppId.trim()); } catch (Exception ex) { JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); }
+                }
+            }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -131,6 +155,18 @@ public class CareerStaffCLI extends AbstractCLI {
             JScrollPane sp = new JScrollPane(ta);
             sp.setPreferredSize(new Dimension(600,300));
             JOptionPane.showMessageDialog(frame, sp, "Pending Withdrawals", JOptionPane.INFORMATION_MESSAGE);
+            // Ask for application number to approve/reject (mirror console flow)
+            String appNumStr = JOptionPane.showInputDialog(frame, "Enter Application Number to approve/reject (leave blank to skip):");
+            if (appNumStr != null && !appNumStr.trim().isEmpty()) {
+                String[] opts = {"Approve","Reject","Cancel"};
+                int c = JOptionPane.showOptionDialog(frame, "Approve or reject this withdrawal?", "Approve/Reject",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opts, opts[0]);
+                if (c == 0) {
+                    approveWithdrawal(appNumStr.trim());
+                } else if (c == 1) {
+                    rejectWithdrawal(appNumStr.trim());
+                }
+            }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
