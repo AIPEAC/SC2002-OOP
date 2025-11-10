@@ -59,14 +59,7 @@ public class InternshipControl{
                 String description = values.length > 2 ? values[2] : "";
                 String level = values.length > 3 ? values[3] : "";
                 String pmRaw = values.length > 4 ? values[4] : "";
-                List<String> preferredMajors = new ArrayList<>();
-                if (pmRaw != null && !pmRaw.trim().isEmpty()) {
-                    if (pmRaw.contains(";")) {
-                        preferredMajors = Arrays.asList(pmRaw.split(";"));
-                    } else {
-                        preferredMajors = Arrays.asList(pmRaw);
-                    }
-                }
+                List<String> preferredMajors = parsePreferredMajorsRaw(pmRaw);
                 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 String openStr = values.length > 5 ? values[5] : "";
@@ -626,6 +619,132 @@ public class InternshipControl{
                 .sorted(String::compareToIgnoreCase)
                 .collect(Collectors.toList());
     }
+
+    /** Parse a raw preferred majors field from CSV into a cleaned List<String>.
+     *  Accepts formats like: "a;b;c" or "a, b, c" or "[a, b]" or single value. Does not split on spaces.
+     */
+    private List<String> parsePreferredMajorsRaw(String pmRaw) {
+        List<String> out = new ArrayList<>();
+        if (pmRaw == null) return out;
+        String s = pmRaw.trim();
+        if (s.isEmpty()) return out;
+        // strip surrounding brackets
+        if (s.startsWith("[") && s.endsWith("]")) {
+            s = s.substring(1, s.length()-1).trim();
+        }
+        // Prefer semicolon separator
+        if (s.contains(";")) {
+            for (String part : s.split(";")) {
+                String t = part.trim(); if (!t.isEmpty()) out.add(t);
+            }
+            return out;
+        }
+        // Fall back to comma separator
+        if (s.contains(",")) {
+            for (String part : s.split(",")) {
+                String t = part.trim(); if (!t.isEmpty()) out.add(t);
+            }
+            return out;
+        }
+        // Single entry (may contain spaces)
+        out.add(s);
+        return out;
+    }
+
+    /** Format preferredMajors list into a bracketed, comma-separated string for display. */
+    public String formatPreferredMajorsForDisplay(List<String> majors) {
+        if (majors == null || majors.isEmpty()) return "[]";
+        List<String> clean = new ArrayList<>();
+        for (String m : majors) {
+            if (m == null) continue; String t = m.trim(); if (!t.isEmpty()) clean.add(t);
+        }
+        return "[" + String.join(", ", clean) + "]";
+    }
+
+    /**
+     * Return formatted lines for approved, visible internships applying the provided filter criteria.
+     * This avoids exposing entities to the UI and centralizes approved-only logic.
+     */
+    public List<String> getApprovedVisibleInternshipOpportunitiesForDisplay(String filterType, boolean ascending, Map<String, List<String>> filterIn) {
+        List<InternshipOpportunity> Opplist = getAllVisibleInternshipOpportunities().stream()
+                .filter(opp -> "approved".equalsIgnoreCase(opp.getStatus()))
+                .collect(Collectors.toList());
+        if (Opplist == null) return new ArrayList<>();
+
+        if (filterIn != null && !filterIn.isEmpty()) {
+            Map<String, List<String>> criteria = filterIn;
+            Opplist = Opplist.stream().filter(opp -> {
+                for (Map.Entry<String, List<String>> e : criteria.entrySet()) {
+                    String key = e.getKey();
+                    List<String> vals = e.getValue();
+                    if (vals == null || vals.isEmpty()) continue;
+                    boolean matches = false;
+                    switch (key) {
+                        case "companyName":
+                            for (String v : vals) if (opp.getCompanyName() != null && opp.getCompanyName().equalsIgnoreCase(v)) matches = true;
+                            break;
+                        case "internshipLevel":
+                            for (String v : vals) if (opp.getInternshipLevel() != null && opp.getInternshipLevel().equalsIgnoreCase(v)) matches = true;
+                            break;
+                        case "preferredMajors":
+                            if (opp.getPreferredMajors() != null) {
+                                for (String v : vals) if (opp.getPreferredMajors().contains(v)) { matches = true; break; }
+                            }
+                            break;
+                        case "internshipID":
+                            for (String v : vals) if (opp.getInternshipID() != null && opp.getInternshipID().equalsIgnoreCase(v)) matches = true;
+                            break;
+                        case "internshipTitle":
+                            for (String v : vals) if (opp.getInternshipTitle() != null && opp.getInternshipTitle().equalsIgnoreCase(v)) matches = true;
+                            break;
+                        default:
+                            matches = true;
+                    }
+                    if (!matches) return false;
+                }
+                return true;
+            }).collect(Collectors.toList());
+        }
+
+        // Sorting
+        if (filterType != null && !filterType.isEmpty()) {
+            Comparator<InternshipOpportunity> cmp = null;
+            switch (filterType) {
+                case "title":
+                    cmp = Comparator.comparing(InternshipOpportunity::getInternshipTitle, Comparator.nullsLast(String::compareToIgnoreCase));
+                    break;
+                case "companyName":
+                    cmp = Comparator.comparing(InternshipOpportunity::getCompanyName, Comparator.nullsLast(String::compareToIgnoreCase));
+                    break;
+                case "openDate":
+                    cmp = Comparator.comparing(InternshipOpportunity::getOpeningDate, Comparator.nullsLast(Comparator.naturalOrder()));
+                    break;
+                case "numberOfSlots":
+                    cmp = Comparator.comparingInt(InternshipOpportunity::getNumOfSlots);
+                    break;
+                default:
+            }
+            if (cmp != null) {
+                if (!ascending) cmp = cmp.reversed();
+                Opplist.sort(cmp);
+            }
+        }
+
+        List<String> out = new ArrayList<>();
+        // Use a delimiter unlikely to appear in normal text to preserve bracketed majors: ' | '
+        String DELIM = " | ";
+        for (InternshipOpportunity opp : Opplist) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("internshipID=").append(opp.getInternshipID() != null ? opp.getInternshipID() : "");
+            sb.append(DELIM).append("internshipTitle=").append(opp.getInternshipTitle() != null ? opp.getInternshipTitle() : "");
+            sb.append(DELIM).append("internshipLevel=").append(opp.getInternshipLevel() != null ? opp.getInternshipLevel() : "");
+            sb.append(DELIM).append("companyName=").append(opp.getCompanyName() != null ? opp.getCompanyName() : "");
+            sb.append(DELIM).append("preferredMajors=").append(formatPreferredMajorsForDisplay(opp.getPreferredMajors()));
+            sb.append(DELIM).append("status=").append(opp.getStatus() != null ? opp.getStatus() : "");
+            out.add(sb.toString());
+        }
+            return out;
+        }
     /**
      * Return whether the currently logged-in user (if a student) can apply to the given internship ID.
      * Encapsulates auth checks and requirement checks so the UI doesn't need to access entities.

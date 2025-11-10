@@ -184,7 +184,7 @@ public abstract class AbstractCLI {
         }
 
         filter = new Filter(chosenFilterType, ascending, filterIn);
-        renderInternshipList(intCtrl.getAllVisibleInternshipOpportunitiesForDisplay(filter.getFilterType(), filter.isAscending(), filter.getFilterIn()));
+        renderInternshipList(intCtrl.getApprovedVisibleInternshipOpportunitiesForDisplay(filter.getFilterType(), filter.isAscending(), filter.getFilterIn()));
     }
 
     private List<String> loadMajorsFromCSV() {
@@ -211,54 +211,69 @@ public abstract class AbstractCLI {
         JPanel listPanel = new JPanel();
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
 
-    // (Apply availability is checked per-row using backend helper)
+        // (Apply availability is checked per-row using backend helper)
 
-            // Header row
-            JPanel header = new JPanel(new GridLayout(1,5));
-            header.setBackground(new Color(240,240,240));
-            header.add(new JLabel("Actions", SwingConstants.CENTER));
-            header.add(new JLabel("ID", SwingConstants.CENTER));
-            header.add(new JLabel("Title", SwingConstants.CENTER));
-            header.add(new JLabel("Company", SwingConstants.CENTER));
-            header.add(new JLabel("Preferred Majors", SwingConstants.CENTER));
-            header.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.GRAY));
-            listPanel.add(header);
+        // Header row (use GridBag so actions column can be fixed width and other columns align)
+        JPanel header = new JPanel(new GridBagLayout());
+        header.setBackground(new Color(240,240,240));
+        GridBagConstraints hgb = new GridBagConstraints();
+        hgb.insets = new Insets(4,6,4,6);
+        hgb.gridy = 0;
+        hgb.gridx = 0; hgb.weightx = 0; hgb.fill = GridBagConstraints.NONE; header.add(new JLabel("Actions", SwingConstants.CENTER), hgb);
+        hgb.gridx = 1; hgb.weightx = 0.15; hgb.fill = GridBagConstraints.HORIZONTAL; header.add(new JLabel("ID", SwingConstants.CENTER), hgb);
+        hgb.gridx = 2; hgb.weightx = 0.35; header.add(new JLabel("Title", SwingConstants.CENTER), hgb);
+        hgb.gridx = 3; hgb.weightx = 0.12; header.add(new JLabel("Level", SwingConstants.CENTER), hgb);
+        hgb.gridx = 4; hgb.weightx = 0.2; header.add(new JLabel("Company", SwingConstants.CENTER), hgb);
+        hgb.gridx = 5; hgb.weightx = 0.18; header.add(new JLabel("Preferred Majors", SwingConstants.CENTER), hgb);
+        header.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.GRAY));
+        listPanel.add(header);
 
-            for (String line : lines) {
-                String id = parseFieldByPrefix(line, "internshipID", false);
-                String title = parseField(line, "internshipTitle");
-                String company = parseField(line, "companyName");
-                String majorsRaw = parseField(line, "preferredMajors");
-                String majors = formatMajors(majorsRaw);
+        for (String line : lines) {
+            String id = parseFieldByPrefix(line, "internshipID", false);
+            String title = parseField(line, "internshipTitle");
+            String company = parseField(line, "companyName");
+            String level = parseField(line, "internshipLevel");
+            String majorsRaw = parseField(line, "preferredMajors");
+            String majors = formatMajors(majorsRaw);
 
-                JPanel row = new JPanel(new GridLayout(1,5));
-                // Actions (buttons) on the left
-                JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT));
-                JButton details = new JButton("Details");
-                String finalId = id;
-                details.addActionListener(e -> showInternshipDetails(finalId));
-                JButton applyBtn = new JButton("Apply");
-                applyBtn.addActionListener(e -> onApply(finalId));
-                // Enable apply only if current logged-in student fits requirements for this internship
-                boolean canApplyForThis = false;
-                try { canApplyForThis = (finalId != null && intCtrl.canCurrentLoggedInStudentApply(finalId)); } catch (Exception ex) { canApplyForThis = false; }
-                applyBtn.setEnabled(canApplyForThis);
-                if (!applyBtn.isEnabled()) applyBtn.setToolTipText("You must be a student who meets requirements to apply");
-                actions.add(details);
-                actions.add(applyBtn);
+            JPanel row = new JPanel(new GridBagLayout());
+            GridBagConstraints r = new GridBagConstraints();
+            r.insets = new Insets(6,6,6,6);
+            r.gridy = 0;
+            // Actions column (fixed width)
+            r.gridx = 0; r.weightx = 0; r.fill = GridBagConstraints.NONE;
+            JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+            JButton details = new JButton("Details");
+            String finalId = id;
+            details.addActionListener(e -> showInternshipDetails(finalId));
+            JButton applyBtn = new JButton("Apply");
+            applyBtn.addActionListener(e -> onApply(finalId));
+            boolean canApplyForThis = false;
+            try { canApplyForThis = (finalId != null && intCtrl.canCurrentLoggedInStudentApply(finalId)); } catch (Exception ex) { canApplyForThis = false; }
+            applyBtn.setEnabled(canApplyForThis);
+            if (!applyBtn.isEnabled()) applyBtn.setToolTipText("You must be a student who meets requirements to apply");
+            actions.add(details);
+            actions.add(applyBtn);
+            actions.setPreferredSize(new Dimension(220, 28));
+            row.add(actions, r);
 
-                row.add(actions);
-                row.add(new JLabel(id != null ? id : "", SwingConstants.LEFT));
-                row.add(new JLabel(title != null ? title : "", SwingConstants.LEFT));
-                row.add(new JLabel(company != null ? company : "", SwingConstants.LEFT));
-                row.add(new JLabel(majors, SwingConstants.LEFT));
-                row.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.LIGHT_GRAY));
-                listPanel.add(row);
-            }
+            // ID
+            r.gridx = 1; r.weightx = 0.15; r.fill = GridBagConstraints.HORIZONTAL; row.add(new JLabel(id != null ? id : ""), r);
+            // Title
+            r.gridx = 2; r.weightx = 0.35; row.add(new JLabel(title != null ? title : ""), r);
+            // Level (third column)
+            r.gridx = 3; r.weightx = 0.12; row.add(new JLabel(level != null ? level : ""), r);
+            // Company
+            r.gridx = 4; r.weightx = 0.2; row.add(new JLabel(company != null ? company : ""), r);
+            // Majors
+            r.gridx = 5; r.weightx = 0.18; row.add(new JLabel(majors), r);
+            row.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.LIGHT_GRAY));
+            listPanel.add(row);
+        }
 
-            JScrollPane sp = new JScrollPane(listPanel);
-            sp.setPreferredSize(new Dimension(900,400));
-            JOptionPane.showMessageDialog(null, sp, "Internships", JOptionPane.INFORMATION_MESSAGE);
+        JScrollPane sp = new JScrollPane(listPanel);
+        sp.setPreferredSize(new Dimension(900,400));
+        JOptionPane.showMessageDialog(null, sp, "Internships", JOptionPane.INFORMATION_MESSAGE);
     }
 
     // Default no-op apply handler (subclasses like StudentCLI should override)
@@ -289,22 +304,26 @@ public abstract class AbstractCLI {
 
     // Parsing helpers from toString() line format
     private String parseField(String line, String key) {
-        // pattern like "key=value, "
         String marker = key + "=";
         int idx = line.indexOf(marker);
         if (idx < 0) return null;
         int start = idx + marker.length();
-        int end = line.indexOf(", ", start);
+        // New delimiter
+        String DELIM = " | ";
+        int end = line.indexOf(DELIM, start);
         if (end < 0) end = line.length();
         return line.substring(start, end).trim();
     }
     private String parseFieldByPrefix(String line, String key, boolean includeEquals) {
-        // handles the internshipID prefix without '=' in toString()
         String marker = key + (includeEquals ? "=" : "");
         int idx = line.indexOf(marker);
         if (idx < 0) return null;
         int start = idx + marker.length();
-        int end = line.indexOf(", ", start);
+        if (!includeEquals && start < line.length() && line.charAt(start) == '=') {
+            start++;
+        }
+        String DELIM = " | ";
+        int end = line.indexOf(DELIM, start);
         if (end < 0) end = line.length();
         return line.substring(start, end).trim();
     }
@@ -313,19 +332,32 @@ public abstract class AbstractCLI {
         if (raw == null) return "[]";
         String r = raw.trim();
         if (r.isEmpty()) return "[]";
-        // If already bracketed like [A, B], normalize spacing
+        // Collapse accidental double brackets e.g. "[[A, B]]" -> "[A, B]"
+        while (r.startsWith("[[") && r.endsWith("]]")) {
+            r = r.substring(1, r.length()-1).trim();
+        }
+        // If already bracketed like [A, B], normalize spacing and return
         if (r.startsWith("[") && r.endsWith("]")) {
-            return r;
+            String inner = r.substring(1, r.length()-1).trim();
+            if (inner.isEmpty()) return "[]";
+            String[] items = inner.split(",");
+            List<String> p = new ArrayList<>();
+            for (String s : items) { String t = s.trim(); if (!t.isEmpty()) p.add(t); }
+            return "[" + String.join(", ", p) + "]";
         }
-        // possible separators: ; , or space
-        String[] parts = r.split("[;,]|\\s+");
+        // Prefer semicolon as separator if present
         List<String> p = new ArrayList<>();
-        for (String s : parts) {
-            if (s == null) continue;
-            String t = s.trim();
-            if (t.isEmpty()) continue;
-            p.add(t);
+        if (r.contains(";")) {
+            for (String s : r.split(";")) { String t = s.trim(); if (!t.isEmpty()) p.add(t); }
+            return "[" + String.join(", ", p) + "]";
         }
-        return "[" + String.join(", ", p) + "]";
+        // Otherwise, split on commas if present
+        if (r.contains(",")) {
+            // Do not split inside existing brackets already handled above.
+            for (String s : r.split(",")) { String t = s.trim(); if (!t.isEmpty()) p.add(t); }
+            return "[" + String.join(", ", p) + "]";
+        }
+        // Fallback: single entry (may contain spaces)
+        return "[" + r + "]";
     }
 }
