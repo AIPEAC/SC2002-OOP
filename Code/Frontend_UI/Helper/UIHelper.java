@@ -1,10 +1,11 @@
-package Frontend_UI;
+package Frontend_UI.Helper;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
 public class UIHelper {
+    private static volatile JFrame loggedInFrame = null;
     public static boolean showYesNo(String message) {
         int res = JOptionPane.showConfirmDialog(null, message, "Confirm", JOptionPane.YES_NO_OPTION);
         return res == JOptionPane.YES_OPTION;
@@ -26,6 +27,12 @@ public class UIHelper {
 
     public static void showLoggedInPopup(String userID, String identity) {
         SwingUtilities.invokeLater(() -> {
+            // Dispose existing popup if present
+            if (loggedInFrame != null) {
+                try { loggedInFrame.dispose(); } catch (Exception ex) { /* ignore */ }
+                loggedInFrame = null;
+            }
+
             JFrame frame = new JFrame("Logged in");
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             frame.setSize(350,150);
@@ -41,7 +48,17 @@ public class UIHelper {
             bp.add(close);
             p.add(bp, BorderLayout.SOUTH);
             frame.setContentPane(p);
+            loggedInFrame = frame;
             frame.setVisible(true);
+        });
+    }
+
+    public static void closeLoggedInPopup() {
+        SwingUtilities.invokeLater(() -> {
+            if (loggedInFrame != null) {
+                try { loggedInFrame.dispose(); } catch (Exception ex) { /* ignore */ }
+                loggedInFrame = null;
+            }
         });
     }
 }

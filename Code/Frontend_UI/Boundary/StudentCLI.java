@@ -5,18 +5,15 @@ import java.awt.*;
 import java.util.List;
 
 import Backend.Control.*;
-import Frontend_UI.UIHelper;
 
-public class StudentCLI {
+public class StudentCLI extends AbstractCLI {
     private ApplicationControl appCtrl;
-    private InternshipControl intCtrl;
-    private LoginControl loginCtrl;
     private JFrame frame;
 
     public StudentCLI(ApplicationControl appCtrl, InternshipControl intCtrl, LoginControl loginCtrl) {
+        super(intCtrl);
         this.appCtrl = appCtrl;
-        this.intCtrl = intCtrl;
-        this.loginCtrl = loginCtrl;
+        setLoginControl(loginCtrl);
         appCtrl.loadStudentApplicationFromDB();
     }
 
@@ -36,16 +33,19 @@ public class StudentCLI {
             viewOpp.addActionListener(e -> viewFilteredInternshipOpportunities());
             p.add(viewOpp);
 
-            JButton submit = new JButton("Submit Internship Application");
-            submit.addActionListener(e -> submitApplication());
-            p.add(submit);
-
             JButton check = new JButton("Check My Application Status");
             check.addActionListener(e -> checkMyApplicationStatus());
             p.add(check);
 
+            JButton viewApplied = new JButton("View Internships I Applied To");
+            viewApplied.addActionListener(e -> viewInternshipIAppliedTo());
+            p.add(viewApplied);
+
             JButton logout = new JButton("Logout");
-            logout.addActionListener(e -> frame.dispose());
+            logout.addActionListener(e -> {
+                Frontend_UI.Helper.UIHelper.closeLoggedInPopup();
+                frame.dispose();
+            });
             p.add(logout);
 
             frame.setContentPane(p);
@@ -53,43 +53,16 @@ public class StudentCLI {
         });
     }
 
-    private void changePassword() {
-        JPanel panel = new JPanel(new GridLayout(0,1));
-        JPasswordField oldP = new JPasswordField();
-        JPasswordField newP = new JPasswordField();
-        panel.add(new JLabel("Original Password:"));
-        panel.add(oldP);
-        panel.add(new JLabel("New Password:"));
-        panel.add(newP);
-        int res = JOptionPane.showConfirmDialog(frame, panel, "Change Password", JOptionPane.OK_CANCEL_OPTION);
-        if (res == JOptionPane.OK_OPTION) {
-            try {
-                loginCtrl.changePassword(new String(oldP.getPassword()), new String(newP.getPassword()));
-                JOptionPane.showMessageDialog(frame, "Password changed.");
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
+    // changePassword and viewFilteredInternshipOpportunities inherited from AbstractCLI
 
-    private void viewFilteredInternshipOpportunities() {
-        List<String> lines = intCtrl.getAllVisibleInternshipOpportunitiesForDisplay(null);
-        if (lines == null || lines.isEmpty()) {
-            JOptionPane.showMessageDialog(frame, "No internships found.");
+    @Override
+    protected void onApply(String internshipID) {
+        if (internshipID == null || internshipID.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Invalid Internship ID.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        JTextArea ta = new JTextArea(String.join("\n", lines));
-        ta.setEditable(false);
-        JScrollPane sp = new JScrollPane(ta);
-        sp.setPreferredSize(new Dimension(600,300));
-        JOptionPane.showMessageDialog(frame, sp, "Internships", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void submitApplication() {
-        String id = JOptionPane.showInputDialog(frame, "Enter Internship ID:");
-        if (id == null || id.trim().isEmpty()) return;
         try {
-            int appNum = appCtrl.makeApplication(id);
+            int appNum = appCtrl.makeApplication(internshipID);
             JOptionPane.showMessageDialog(frame, "Application submitted successfully. Application Number: " + appNum);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -97,68 +70,249 @@ public class StudentCLI {
     }
 
     private void checkMyApplicationStatus() {
-        appCtrl.loadStudentApplicationFromDB();
-        List<String> lines = appCtrl.getApplicationsForDisplay();
-        if (lines == null || lines.isEmpty()) {
-            JOptionPane.showMessageDialog(frame, "No applications found.");
-            return;
-        }
-        JTextArea ta = new JTextArea(String.join("\n", lines));
-        ta.setEditable(false);
-        JScrollPane sp = new JScrollPane(ta);
-        sp.setPreferredSize(new Dimension(600,300));
-        JOptionPane.showMessageDialog(frame, sp, "My Applications", JOptionPane.INFORMATION_MESSAGE);
+        try {
+            appCtrl.loadStudentApplicationFromDB();
+            List<String> lines = appCtrl.getApplicationsWithInternshipDetails();
+            if (lines == null || lines.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "No applications found.");
+                return;
+            }
+            JPanel listPanel = new JPanel();
+            listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
 
-        if (appCtrl.hasAcceptedOffer()) {
-            if (UIHelper.showYesNo("You have accepted an internship offer. Do you want to view the internships you applied to?")) {
-                viewInternshipIAppliedTo();
+            // Check if there are approved applications and show warning
+            boolean hasApproved = lines.stream().anyMatch(l -> {
+                String st = parseFieldValue(l, "status");
+                String acc = parseFieldValue(l, "acceptance");
+                return "approved".equalsIgnoreCase(st) && !"yes".equalsIgnoreCase(acc) && !"no".equalsIgnoreCase(acc);
+            });
+            if (hasApproved) {
+                JPanel warningPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                warningPanel.setBackground(new Color(255, 250, 205));
+                JLabel warningLabel = new JLabel("⚠ Warning: Accepting an internship offer will automatically withdraw all your other applications.");
+                warningLabel.setForeground(new Color(184, 134, 11));
+                warningLabel.setFont(warningLabel.getFont().deriveFont(Font.BOLD));
+                warningPanel.add(warningLabel);
+                warningPanel.setBorder(BorderFactory.createLineBorder(new Color(255, 215, 0), 2));
+                listPanel.add(warningPanel);
             }
-            if (UIHelper.showYesNo("Do you want to withdraw this application?")) {
-                withdrawApplication();
+
+            // Header row
+            JPanel header = new JPanel(new GridBagLayout());
+            header.setBackground(new Color(240,240,240));
+            GridBagConstraints hgb = new GridBagConstraints();
+            hgb.insets = new Insets(4,6,4,6);
+            hgb.gridy = 0;
+            hgb.gridx = 0; hgb.weightx = 0; hgb.fill = GridBagConstraints.NONE; header.add(new JLabel("Actions", SwingConstants.CENTER), hgb);
+            hgb.gridx = 1; hgb.weightx = 0.08; hgb.fill = GridBagConstraints.HORIZONTAL; header.add(new JLabel("App#", SwingConstants.CENTER), hgb);
+            hgb.gridx = 2; hgb.weightx = 0.1; header.add(new JLabel("ID", SwingConstants.CENTER), hgb);
+            hgb.gridx = 3; hgb.weightx = 0.2; header.add(new JLabel("Title", SwingConstants.CENTER), hgb);
+            hgb.gridx = 4; hgb.weightx = 0.08; header.add(new JLabel("Level", SwingConstants.CENTER), hgb);
+            hgb.gridx = 5; hgb.weightx = 0.12; header.add(new JLabel("Company", SwingConstants.CENTER), hgb);
+            hgb.gridx = 6; hgb.weightx = 0.15; header.add(new JLabel("Preferred Majors", SwingConstants.CENTER), hgb);
+            hgb.gridx = 7; hgb.weightx = 0.1; header.add(new JLabel("Status", SwingConstants.CENTER), hgb);
+            hgb.gridx = 8; hgb.weightx = 0.1; header.add(new JLabel("Acceptance", SwingConstants.CENTER), hgb);
+            hgb.gridx = 9; hgb.weightx = 0.07; header.add(new JLabel("Withdraw", SwingConstants.CENTER), hgb);
+            header.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.GRAY));
+            listPanel.add(header);
+
+            for (String line : lines) {
+                String appNum = parseFieldValue(line, "applicationNumber");
+                String id = parseFieldValue(line, "internshipID");
+                String title = parseFieldValue(line, "internshipTitle");
+                String level = parseFieldValue(line, "internshipLevel");
+                String company = parseFieldValue(line, "companyName");
+                String majorsRaw = parseFieldValue(line, "preferredMajors");
+                String majors = formatMajorsSimple(majorsRaw);
+                String status = parseFieldValue(line, "status");
+                String acceptance = parseFieldValue(line, "acceptance");
+                String withdrawStatus = parseFieldValue(line, "withdrawStatus");
+
+                JPanel row = new JPanel(new GridBagLayout());
+                GridBagConstraints r = new GridBagConstraints();
+                r.insets = new Insets(6,6,6,6);
+                r.gridy = 0;
+
+                // Actions column
+                r.gridx = 0; r.weightx = 0; r.fill = GridBagConstraints.NONE;
+                JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+                
+                String finalAppNum = appNum;
+                boolean isWithdrawn = "approved".equalsIgnoreCase(withdrawStatus);
+                
+                // Accept/Reject buttons for approved applications (only if not already accepted/rejected)
+                if ("approved".equalsIgnoreCase(status) && !"yes".equalsIgnoreCase(acceptance) && !"no".equalsIgnoreCase(acceptance)) {
+                    JButton acceptBtn = new JButton("Accept");
+                    JButton rejectBtn = new JButton("Reject");
+                    
+                    acceptBtn.addActionListener(e -> {
+                        // Confirm acceptance with warning
+                        int confirm = JOptionPane.showConfirmDialog(frame, 
+                            "Are you sure you want to accept this internship offer?\n" +
+                            "All your other applications will be automatically withdrawn.",
+                            "Confirm Acceptance", 
+                            JOptionPane.YES_NO_OPTION, 
+                            JOptionPane.WARNING_MESSAGE);
+                        if (confirm == JOptionPane.YES_OPTION) {
+                            try {
+                                acceptInternshipOpportunity(Integer.parseInt(finalAppNum));
+                                // Disable buttons immediately to prevent double-clicking
+                                acceptBtn.setEnabled(false);
+                                rejectBtn.setEnabled(false);
+                                JOptionPane.showMessageDialog(frame, "Internship accepted! Close this window and reopen to see updated status.");
+                            } catch (Exception ex) {
+                                JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    });
+                    rejectBtn.addActionListener(e -> {
+                        try {
+                            rejectInternshipOpportunity(Integer.parseInt(finalAppNum));
+                            // Disable buttons immediately to prevent double-clicking
+                            acceptBtn.setEnabled(false);
+                            rejectBtn.setEnabled(false);
+                            JOptionPane.showMessageDialog(frame, "Offer rejected. Close this window and reopen to see updated status.");
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    });
+                    actionsPanel.add(acceptBtn);
+                    actionsPanel.add(rejectBtn);
+                }
+                
+                // Withdraw button - available for any application that hasn't been withdrawn yet
+                // Can withdraw: pending applications, approved applications, even accepted ones
+                // Cannot withdraw: already withdrawn or withdrawal pending
+                boolean canWithdraw = !isWithdrawn && (withdrawStatus == null || "N/A".equals(withdrawStatus) || "".equals(withdrawStatus.trim()));
+                
+                if (canWithdraw) {
+                    JButton withdrawBtn = new JButton("Withdraw");
+                    withdrawBtn.addActionListener(e -> {
+                        try {
+                            appCtrl.requestWithdrawApplication(Integer.parseInt(finalAppNum));
+                            JOptionPane.showMessageDialog(frame, "Withdrawal request submitted. Awaiting staff approval.");
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    });
+                    actionsPanel.add(withdrawBtn);
+                }
+                
+                actionsPanel.setPreferredSize(new Dimension(220, 28));
+                row.add(actionsPanel, r);
+
+                r.gridx = 1; r.weightx = 0.08; r.fill = GridBagConstraints.HORIZONTAL; row.add(new JLabel(appNum != null ? appNum : ""), r);
+                r.gridx = 2; r.weightx = 0.1; row.add(new JLabel(id != null ? id : ""), r);
+                r.gridx = 3; r.weightx = 0.2; row.add(new JLabel(title != null ? title : ""), r);
+                r.gridx = 4; r.weightx = 0.08; row.add(new JLabel(level != null ? level : ""), r);
+                r.gridx = 5; r.weightx = 0.12; row.add(new JLabel(company != null ? company : ""), r);
+                r.gridx = 6; r.weightx = 0.15; row.add(new JLabel(majors), r);
+                r.gridx = 7; r.weightx = 0.1; row.add(new JLabel(status != null ? status : ""), r);
+                r.gridx = 8; r.weightx = 0.1; row.add(new JLabel(acceptance != null ? acceptance : "N/A"), r);
+                r.gridx = 9; r.weightx = 0.07; row.add(new JLabel(withdrawStatus != null ? withdrawStatus : "N/A"), r);
+                row.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.LIGHT_GRAY));
+                listPanel.add(row);
             }
-        } else if (appCtrl.hasApprovedApplication()) {
-            List<String> approved = appCtrl.getApprovedApplicationInternshipCompaniesAndIDs();
-            JOptionPane.showMessageDialog(frame, String.join("\n", approved), "Approved applications", JOptionPane.INFORMATION_MESSAGE);
-            String appNumStr = JOptionPane.showInputDialog(frame, "Enter Application Number to respond to offer, or press 0 to check the internships you applied to:");
-            if (appNumStr == null) return;
-            int appNum = Integer.parseInt(appNumStr);
-            if (appNum == 0) { viewInternshipIAppliedTo(); return; }
-            String[] options = {"Accept","Reject","Cancel"};
-            int rsp = JOptionPane.showOptionDialog(frame, "Accept or reject the offer?", "Respond", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-            if (rsp == 0) acceptInternshipOpportunity(appNum);
-            else if (rsp == 1) rejectInternshipOpportunity(appNum);
+
+            JScrollPane sp = new JScrollPane(listPanel);
+            sp.setPreferredSize(new Dimension(1200, 400));
+            JOptionPane.showMessageDialog(frame, sp, "My Applications", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void viewInternshipIAppliedTo() {
-        appCtrl.loadStudentApplicationFromDB();
-        List<String> lines = appCtrl.viewInternshipsAppliedTo();
-        if (lines == null || lines.isEmpty()) {
-            JOptionPane.showMessageDialog(frame, "No internships found for your applications.");
-            return;
-        }
-        JTextArea ta = new JTextArea(String.join("\n", lines));
-        ta.setEditable(false);
-        JScrollPane sp = new JScrollPane(ta);
-        sp.setPreferredSize(new Dimension(600,300));
-        JOptionPane.showMessageDialog(frame, sp, "Internships Applied To", JOptionPane.INFORMATION_MESSAGE);
-    }
+        try {
+            appCtrl.loadStudentApplicationFromDB();
+            List<String> lines = appCtrl.getApplicationsWithInternshipDetails();
+            if (lines == null || lines.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "No internships found for your applications.");
+                return;
+            }
+            JPanel listPanel = new JPanel();
+            listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
 
-    private void withdrawApplication() {
-        String input = JOptionPane.showInputDialog(frame, "Enter Application Number to withdraw, or leave blank to cancel:");
-        if (input == null || input.trim().isEmpty()) { JOptionPane.showMessageDialog(frame, "Withdrawal cancelled."); return; }
-        int appNumber = Integer.parseInt(input);
-        appCtrl.requestWithdrawApplication(appNumber);
-        JOptionPane.showMessageDialog(frame, "Withdrawal requested.");
+            // Header row
+            JPanel header = new JPanel(new GridBagLayout());
+            header.setBackground(new Color(240,240,240));
+            GridBagConstraints hgb = new GridBagConstraints();
+            hgb.insets = new Insets(4,6,4,6);
+            hgb.gridy = 0;
+            hgb.gridx = 0; hgb.weightx = 0.1; hgb.fill = GridBagConstraints.HORIZONTAL; header.add(new JLabel("App#", SwingConstants.CENTER), hgb);
+            hgb.gridx = 1; hgb.weightx = 0.12; header.add(new JLabel("ID", SwingConstants.CENTER), hgb);
+            hgb.gridx = 2; hgb.weightx = 0.25; header.add(new JLabel("Title", SwingConstants.CENTER), hgb);
+            hgb.gridx = 3; hgb.weightx = 0.1; header.add(new JLabel("Level", SwingConstants.CENTER), hgb);
+            hgb.gridx = 4; hgb.weightx = 0.15; header.add(new JLabel("Company", SwingConstants.CENTER), hgb);
+            hgb.gridx = 5; hgb.weightx = 0.18; header.add(new JLabel("Preferred Majors", SwingConstants.CENTER), hgb);
+            hgb.gridx = 6; hgb.weightx = 0.1; header.add(new JLabel("Status", SwingConstants.CENTER), hgb);
+            header.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.GRAY));
+            listPanel.add(header);
+
+            for (String line : lines) {
+                String appNum = parseFieldValue(line, "applicationNumber");
+                String id = parseFieldValue(line, "internshipID");
+                String title = parseFieldValue(line, "internshipTitle");
+                String level = parseFieldValue(line, "internshipLevel");
+                String company = parseFieldValue(line, "companyName");
+                String majorsRaw = parseFieldValue(line, "preferredMajors");
+                String majors = formatMajorsSimple(majorsRaw);
+                String status = parseFieldValue(line, "status");
+
+                JPanel row = new JPanel(new GridBagLayout());
+                GridBagConstraints r = new GridBagConstraints();
+                r.insets = new Insets(6,6,6,6);
+                r.gridy = 0;
+
+                r.gridx = 0; r.weightx = 0.1; r.fill = GridBagConstraints.HORIZONTAL; row.add(new JLabel(appNum != null ? appNum : ""), r);
+                r.gridx = 1; r.weightx = 0.12; row.add(new JLabel(id != null ? id : ""), r);
+                r.gridx = 2; r.weightx = 0.25; row.add(new JLabel(title != null ? title : ""), r);
+                r.gridx = 3; r.weightx = 0.1; row.add(new JLabel(level != null ? level : ""), r);
+                r.gridx = 4; r.weightx = 0.15; row.add(new JLabel(company != null ? company : ""), r);
+                r.gridx = 5; r.weightx = 0.18; row.add(new JLabel(majors), r);
+                r.gridx = 6; r.weightx = 0.1; row.add(new JLabel(status != null ? status : ""), r);
+                row.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.LIGHT_GRAY));
+                listPanel.add(row);
+            }
+
+            JScrollPane sp = new JScrollPane(listPanel);
+            sp.setPreferredSize(new Dimension(1000, 400));
+            JOptionPane.showMessageDialog(frame, sp, "Internships I Applied To", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void acceptInternshipOpportunity(int appNum) {
         appCtrl.acceptOffer(appNum);
-        JOptionPane.showMessageDialog(frame, "Internship accepted successfully! Other pending applications will be withdrawn.");
     }
 
     private void rejectInternshipOpportunity(int appNum) {
         appCtrl.rejectOffer(appNum);
         JOptionPane.showMessageDialog(frame, "You have rejected this internship offer.");
+    }
+
+    private String parseFieldValue(String line, String key) {
+        String marker = key + "=";
+        int idx = line.indexOf(marker);
+        if (idx < 0) return null;
+        int start = idx + marker.length();
+        String DELIM = " | ";
+        int end = line.indexOf(DELIM, start);
+        if (end < 0) end = line.length();
+        return line.substring(start, end).trim();
+    }
+
+    private String formatMajorsSimple(String raw) {
+        if (raw == null) return "[]";
+        String r = raw.trim();
+        if (r.isEmpty()) return "[]";
+        while (r.startsWith("[[") && r.endsWith("]]")) {
+            r = r.substring(1, r.length()-1).trim();
+        }
+        if (r.startsWith("[") && r.endsWith("]")) {
+            return r;
+        }
+        return "[" + r + "]";
     }
 }

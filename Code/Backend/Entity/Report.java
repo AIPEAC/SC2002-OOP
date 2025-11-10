@@ -17,6 +17,7 @@ public class Report {
     private int reportIndex;
     private List<InternshipOpportunity> internshipOpportunities;
     private boolean filtered;
+    private Map<String, List<String>> appliedFilters;
     private int numOfInternships=0;
 
     private int numOfAdvancedInternships=0;
@@ -34,6 +35,14 @@ public class Report {
         this.reportIndex = reportIndex;
         this.internshipOpportunities = internshipOpportunities;
         this.filtered=filtered;
+        this.appliedFilters = null;
+    }
+    
+    public Report(int reportIndex,List<InternshipOpportunity> internshipOpportunities,boolean filtered, Map<String, List<String>> appliedFilters) {
+        this.reportIndex = reportIndex;
+        this.internshipOpportunities = internshipOpportunities;
+        this.filtered=filtered;
+        this.appliedFilters = appliedFilters;
     }
     
     /** Build the formatted report lines instead of printing directly. */
@@ -56,7 +65,7 @@ public class Report {
         }
         statistifyTheNumbers(internshipOpportunities);
         String md = buildMarkdownReport();
-        File dir = new File("Output_report");
+        File dir = new File("Code/Output_report");
         if (!dir.exists()){
             dir.mkdirs();
         }
@@ -225,6 +234,42 @@ public class Report {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         sb.append("# 🔥 PREVALENT INTERNSHIP REPORT - #"+reportIndex+"\n\n");
         sb.append("_Generated: "+LocalDateTime.now().format(dtf)+"_\n\n");
+        
+        // Add filter information if this is a filtered report
+        if (filtered && appliedFilters != null && !appliedFilters.isEmpty()) {
+            sb.append("## 🔍 Applied Filters\n\n");
+            
+            // Company Names
+            if (appliedFilters.containsKey("CompanyName") && !appliedFilters.get("CompanyName").isEmpty()) {
+                sb.append("**Companies:** ");
+                sb.append(String.join(", ", appliedFilters.get("CompanyName")));
+                sb.append("\n\n");
+            }
+            
+            // Levels
+            if (appliedFilters.containsKey("Level") && !appliedFilters.get("Level").isEmpty()) {
+                sb.append("**Levels:** ");
+                sb.append(String.join(", ", appliedFilters.get("Level")));
+                sb.append("\n\n");
+            }
+            
+            // Majors
+            if (appliedFilters.containsKey("Major") && !appliedFilters.get("Major").isEmpty()) {
+                sb.append("**Majors:** ");
+                sb.append(String.join(", ", appliedFilters.get("Major")));
+                sb.append("\n\n");
+            }
+            
+            // Start Date
+            if (appliedFilters.containsKey("StartDate") && !appliedFilters.get("StartDate").isEmpty()) {
+                sb.append("**Start Date (from):** ");
+                sb.append(appliedFilters.get("StartDate").get(0));
+                sb.append("\n\n");
+            }
+            
+            sb.append("---\n\n");
+        }
+        
         sb.append("**Total internships:** "+numOfInternships+(filtered?" (filtered)":"")+"\n\n");
 
         int maxForBars = Math.max(1, numOfInternships);

@@ -1,1 +1,4 @@
 internshipID,title,description,level,preferredMajors,openingDate,closeDate,status,CompanyName,companyRepInCharge,numOfSlots,pendingApplicationNumberList,acceptedApplicationNumberList,visibility
+#INT0001,title0,hi,Basic,Bioengineering;Biological Sciences,2024-01-01,2025-11-10,approved,alo,comprep0001,1,,1,true
+#INT0002,wow,,Basic,Computer Science,2002-01-23,2025-11-10,approved,alo,comprep0001,3,,,true
+#INT0003,random sdf,,Basic,Applied Computing in Finance;Artificial Intelligence and Society;Bioengineering;Business,2025-11-10,2025-11-10,approved,alo,comprep0001,2,,,false
