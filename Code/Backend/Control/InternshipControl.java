@@ -57,7 +57,15 @@ public class InternshipControl{
                 String title = values[1];
                 String description = values[2];
                 String level = values[3];
-                List<String> preferredMajors = Arrays.asList(values[4].split(" "));
+                String pmRaw = values.length > 4 ? values[4] : "";
+                List<String> preferredMajors = new ArrayList<>();
+                if (pmRaw != null && !pmRaw.trim().isEmpty()) {
+                    if (pmRaw.contains(";")) {
+                        preferredMajors = Arrays.asList(pmRaw.split(";"));
+                    } else {
+                        preferredMajors = Arrays.asList(pmRaw);
+                    }
+                }
                 Date openingDate = new SimpleDateFormat("yyyy-MM-dd").parse(values[5]);
                 Date closeDate = new SimpleDateFormat("yyyy-MM-dd").parse(values[6]);
                 String status = values[7];
@@ -521,7 +529,7 @@ public class InternshipControl{
                     opp.getInternshipTitle(),
                     opp.getDescription(),
                     opp.getInternshipLevel(),
-                    String.join(" ", opp.getPreferredMajors()),
+                    (opp.getPreferredMajors() != null ? String.join(";", opp.getPreferredMajors()) : ""),
                     new SimpleDateFormat("yyyy-MM-dd").format(opp.getOpeningDate()),
                     new SimpleDateFormat("yyyy-MM-dd").format(opp.getCloseDate()),
                     opp.getStatus(),
@@ -584,5 +592,35 @@ public class InternshipControl{
             }
         }
         return applicationNumbers;
+    }
+    // =========================================================
+    // Helper methods for frontend filtering UI
+    /** Return unique company names among visible internship opportunities. */
+    public List<String> getVisibleCompanyNames() {
+        return getAllVisibleInternshipOpportunities().stream()
+                .map(InternshipOpportunity::getCompanyName)
+                .filter(n -> n != null && !n.isEmpty())
+                .distinct()
+                .sorted(String::compareToIgnoreCase)
+                .collect(Collectors.toList());
+    }
+    /** Return logged-in student year (3/4 gating logic for level filter) or null if not a student / not found. */
+    public Integer getLoggedInStudentYear() {
+        if (authCtrl == null || !authCtrl.isLoggedIn() || !"Student".equals(authCtrl.getUserIdentity())) {
+            return null;
+        }
+        String studentID = authCtrl.getUserID();
+        try (BufferedReader br = new BufferedReader(new FileReader("Code/Backend/Lib/student.csv"))) {
+            String line = br.readLine(); // header
+            while ((line = br.readLine()) != null) {
+                String[] vals = line.split(",");
+                if (vals.length > 4 && vals[0].equals(studentID)) {
+                    try { return Integer.parseInt(vals[4]); } catch (NumberFormatException ex) { return null; }
+                }
+            }
+        } catch (IOException ioe) {
+            // swallow and return null to avoid UI crash; UI will assume early year
+        }
+        return null;
     }
 }
