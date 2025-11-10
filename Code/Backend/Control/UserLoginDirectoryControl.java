@@ -154,6 +154,13 @@ public class UserLoginDirectoryControl{
                 br.readLine(); // Skip header
                 while ((line = br.readLine()) != null) {
                     String[] CompanyRepData = line.split(csvSplitBy);
+                    // Normalize to 7 columns: userID,name,email,position,accountStatus,companyName,department
+                    if (CompanyRepData.length < 7) {
+                        String[] expanded = new String[7];
+                        for (int i = 0; i < CompanyRepData.length; i++) expanded[i] = CompanyRepData[i];
+                        for (int i = CompanyRepData.length; i < 7; i++) expanded[i] = "";
+                        CompanyRepData = expanded;
+                    }
                     if (CompanyRepData[0].equals(userID)) {
                         CompanyRepInfoList = CompanyRepData;
                         break;
@@ -333,7 +340,39 @@ public class UserLoginDirectoryControl{
     }
     
     String requestRegisterCompanyRep(String name,String companyName,String department,String postion,String email){
-        
+        // Validate inputs: require at least 3 characters for companyName and name
+        if (companyName == null || companyName.trim().length() < 3) {
+            throw new IllegalArgumentException("Company name must be at least 3 characters.");
+        }
+        if (name == null || name.trim().length() < 3) {
+            throw new IllegalArgumentException("Name must be at least 3 characters.");
+        }
+
+        // Check duplicates: existing company representative names or company names should not duplicate
+        String csvFile = "Code/Backend/Lib/company_representative.csv";
+        File file = new File(csvFile);
+        if (file.exists()) {
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                br.readLine(); // skip header
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 2) {
+                        String existingName = parts[1] != null ? parts[1].trim() : "";
+                        String existingCompany = parts.length > 5 && parts[5] != null ? parts[5].trim() : "";
+                        if (!existingName.isEmpty() && existingName.equalsIgnoreCase(name.trim())) {
+                            throw new IllegalArgumentException("A company representative with the same name already exists: " + existingName);
+                        }
+                        if (!existingCompany.isEmpty() && existingCompany.equalsIgnoreCase(companyName.trim())) {
+                            throw new IllegalArgumentException("A company with the same name already exists: " + existingCompany);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         String assignedID=assignIDToCompanyRep();
 
         try (FileWriter writer = new FileWriter("Code/Backend/Lib/company_representative.csv", true)) {
@@ -500,19 +539,25 @@ public class UserLoginDirectoryControl{
              FileWriter writer = new FileWriter(tempFile)) {
 
             String header = reader.readLine();
-            writer.append(header).append("\n");
+            // ensure header present and write normalized header with 7 columns
+            if (header == null || header.trim().isEmpty()) {
+                writer.append("userID,name,email,position,accountStatus,companyName,department").append("\n");
+            } else {
+                writer.append(header).append("\n");
+            }
 
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
+                // normalize to 7 columns
+                if (data.length < 7) {
+                    String[] expanded = new String[7];
+                    for (int j = 0; j < data.length; j++) expanded[j] = data[j];
+                    for (int j = data.length; j < 7; j++) expanded[j] = "";
+                    data = expanded;
+                }
                 if (data.length > 0 && data[0].equals(userID)) {
-                    // Update status (5th column)
-                    if (data.length < 5) {
-                        String[] expanded = new String[5];
-                        for (int j = 0; j < data.length; j++) expanded[j] = data[j];
-                        for (int j = data.length; j < 5; j++) expanded[j] = "";
-                        data = expanded;
-                    }
+                    // Update status (5th column, index 4)
                     data[4] = status;
                     updated = true;
                 }
