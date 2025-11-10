@@ -6,10 +6,30 @@ import java.util.List;
 
 import Backend.Control.*;
 
+/**
+ * Boundary class for student user interface.
+ * Provides functionality for students to view internships (filtered by their major),
+ * apply for opportunities, check application status, accept/reject offers,
+ * and request withdrawals. Students can apply to maximum 3 internships at once
+ * and can accept only 1 internship placement.
+ * 
+ * @author Allen
+ * @version 1.0
+ */
 public class StudentCLI extends AbstractCLI {
+    /** Application controller for managing student applications */
     private ApplicationControl appCtrl;
+    
+    /** Main frame for student interface */
     private JFrame frame;
 
+    /**
+     * Constructs a StudentCLI and loads the student's applications.
+     * 
+     * @param appCtrl the application controller
+     * @param intCtrl the internship controller
+     * @param loginCtrl the login controller for password changes
+     */
     public StudentCLI(ApplicationControl appCtrl, InternshipControl intCtrl, LoginControl loginCtrl) {
         super(intCtrl);
         this.appCtrl = appCtrl;

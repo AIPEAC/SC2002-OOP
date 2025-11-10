@@ -10,17 +10,41 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ * Controls user management operations performed by Career Center Staff.
+ * Handles approval and rejection of company representative registrations.
+ * Career staff use this controller to authorize new company representatives to access the system.
+ * 
+ * @author Allen
+ * @version 1.0
+ */
 public class UserControl {
+	/** User login directory for managing user data */
 	private UserLoginDirectoryControl userDir;
+	
+	/** Authentication controller for session management */
 	private AuthenticationControl authCtrl;
+	
+	/** List of pending company representative IDs */
 	private List<String> pendingCompanyRepID = new ArrayList<>();
 
+	/**
+	 * Constructs a UserControl with required dependencies.
+	 * 
+	 * @param userDir the user login directory controller
+	 * @param authCtrl the authentication controller
+	 */
 	public UserControl(UserLoginDirectoryControl userDir, AuthenticationControl authCtrl) {
 		this.userDir = userDir;
 		this.authCtrl = authCtrl;
 	}
 
-	/** Return formatted lines describing pending company representative registrations. */
+	/**
+	 * Gets a list of all pending company representative registrations.
+	 * Used by career center staff to review and approve/reject new registrations.
+	 * 
+	 * @return formatted list of pending registrations with ID, name, company, and department
+	 */
 	public List<String> getPendingCompanyRepList() {
 		List<String> out = new ArrayList<>();
 		String csvFile = "Code/Backend/Lib/company_representative.csv";

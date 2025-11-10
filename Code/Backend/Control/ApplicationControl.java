@@ -11,14 +11,34 @@ import java.util.List;
 
 import Backend.Entity.Application;
 
+/**
+ * Controls all application-related operations in the system.
+ * Manages student applications for internships, including submission, approval/rejection,
+ * acceptance decisions, and withdrawal requests. Coordinates with InternshipControl
+ * to update internship slot availability.
+ * 
+ * @author Allen
+ * @version 1.0
+ */
 public class ApplicationControl {
+	/** List of applications currently loaded in memory */
 	private List<Application> applications = new ArrayList<Application>();
+	
+	/** Authentication controller for verifying user permissions */
 	private AuthenticationControl authCtrl;
+	
+	/** Internship controller for updating internship data */
 	private InternshipControl intCtrl;
 
 	// =========================================================
 	// Constructor and Initializer
 
+	/**
+	 * Constructs an ApplicationControl with required dependencies.
+	 * 
+	 * @param authCtrl the authentication controller
+	 * @param intCtrl the internship controller
+	 */
 	public ApplicationControl(AuthenticationControl authCtrl, InternshipControl intCtrl) {
 		this.authCtrl = authCtrl;
 		this.intCtrl = intCtrl;
@@ -210,6 +230,10 @@ public class ApplicationControl {
 		saveApplicationsToDB();
 		// Update student's hasAcceptedInternshipOpportunity in student.csv
 		updateStudentAcceptanceStatus(app.getStudentID(), true);
+		// Add student to internship's acceptedApplicationNumbers list
+		if (intCtrl != null) {
+			intCtrl.studentAcceptedOfferForInternship(appNum, app.getInternshipID());
+		}
 		withdrawOtherApplicationsOfApprovedStudent(app.getStudentID());
 	}
 	public void rejectOffer(int appNum) {
@@ -430,6 +454,36 @@ public class ApplicationControl {
 		}
 		// If not found, load from database directly
 		return loadApplicationByNumberFromDB(appNumber);
+	}
+	
+	/** Reject all approved applications for a specific internship that haven't been accepted by students yet. */
+	void rejectUnansweredApprovedApplicationsForInternship(String internshipID, List<Integer> acceptedApps) {
+		// Load all applications from database to check for this internship
+		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
+		try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
+			String line;
+			br.readLine(); // Skip header
+			while ((line = br.readLine()) != null) {
+				if (line.trim().isEmpty()) continue;
+				String[] values = line.split(",");
+				if (values.length >= 5 && values[1].equals(internshipID)) {
+					int appNum = Integer.parseInt(values[0]);
+					String status = values[4];
+					String acceptance = (values.length > 5 && !values[5].isEmpty()) ? values[5] : null;
+					
+					// If approved but not accepted yet, and not in the acceptedApps list, reject it
+					if ("approved".equals(status) && acceptance == null && !acceptedApps.contains(appNum)) {
+						try {
+							rejectApplicationByNumber(appNum);
+						} catch (Exception e) {
+							// Continue rejecting others even if one fails
+						}
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**

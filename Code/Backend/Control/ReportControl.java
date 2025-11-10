@@ -15,12 +15,31 @@ import java.util.function.Function;
 import Backend.Entity.InternshipOpportunity;
 import Backend.Entity.Report;
 
-
+/**
+ * Controls report generation and management for career center staff.
+ * Generates comprehensive reports on internship opportunities with various filters
+ * including status, major, level, company, and date ranges.
+ * Reports can be saved to CSV files for documentation and analysis.
+ * 
+ * @author Allen
+ * @version 1.0
+ */
 public class ReportControl {
+    /** Authentication controller for verifying staff permissions */
     private AuthenticationControl authCtrl;
+    
+    /** Internship controller for accessing internship data */
     private InternshipControl intCtrl;
+    
+    /** Cached list of all internship opportunities */
     private List<InternshipOpportunity> allOpplist;
 
+    /**
+     * Constructs a ReportControl with required dependencies.
+     * 
+     * @param authCtrl the authentication controller
+     * @param intCtrl the internship controller for accessing opportunity data
+     */
     public ReportControl(AuthenticationControl authCtrl, InternshipControl intCtrl){
         this.authCtrl=authCtrl;
         this.intCtrl=intCtrl;

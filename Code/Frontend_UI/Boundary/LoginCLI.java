@@ -4,10 +4,27 @@ import javax.swing.*;
 import Backend.Control.*;
 import Frontend_UI.Helper.UIHelper;
 
+/**
+ * Boundary class for handling login and registration user interface.
+ * Provides dialogs for user authentication and company representative registration.
+ * Routes authenticated users to their role-specific interfaces.
+ * 
+ * @author Allen
+ * @version 1.0
+ */
 public class LoginCLI {
+    /** Login controller for handling authentication */
     private final LoginControl loginCtrl;
+    
+    /** Authentication controller for session management */
     private final AuthenticationControl authCtrl;
 
+    /**
+     * Constructs a LoginCLI with required controllers.
+     * 
+     * @param loginCtrl the login controller
+     * @param authCtrl the authentication controller
+     */
     public LoginCLI(LoginControl loginCtrl, AuthenticationControl authCtrl) {
         this.loginCtrl = loginCtrl;
         this.authCtrl = authCtrl;

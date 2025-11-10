@@ -11,9 +11,26 @@ import java.util.ArrayList;
 import Backend.Control.*;
 import Frontend_UI.Helper.UIHelper;
 
+/**
+ * Boundary class for company representative user interface.
+ * Allows company representatives to create internship opportunities (up to 5),
+ * view their opportunities' status, manage applications (approve/reject),
+ * view detailed student information, and toggle opportunity visibility.
+ * Each opportunity can have maximum 10 slots.
+ * 
+ * @author Allen
+ * @version 1.0
+ */
 public class CompanyRepresentativeCLI extends AbstractCLI {
+    /** Main frame for company representative interface */
     private JFrame frame;
 
+    /**
+     * Constructs a CompanyRepresentativeCLI.
+     * 
+     * @param intCtrl the internship controller
+     * @param loginCtrl the login controller for password changes
+     */
     public CompanyRepresentativeCLI(InternshipControl intCtrl, LoginControl loginCtrl) {
         super(intCtrl);
         setLoginControl(loginCtrl);
@@ -219,6 +236,7 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                 row.add(label, BorderLayout.CENTER);
 
                 JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+                JButton viewDetails = new JButton("View Student Details");
                 JButton approve = new JButton("Approve");
                 JButton reject = new JButton("Reject");
 
@@ -228,6 +246,43 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                 reject.setEnabled(isPending);
 
                 String finalAppNum = appNumStr;
+                
+                viewDetails.addActionListener(e -> {
+                    try {
+                        int num = Integer.parseInt(finalAppNum);
+                        String details = intCtrl.getDetailedStudentInfoForApplication(num);
+                        
+                        // Parse the details
+                        String studentID = parseFieldValue(details, "studentID");
+                        String studentName = parseFieldValue(details, "studentName");
+                        String studentEmail = parseFieldValue(details, "studentEmail");
+                        String studentMajors = parseFieldValue(details, "studentMajors");
+                        String studentYear = parseFieldValue(details, "studentYear");
+                        String status = parseFieldValue(details, "status");
+                        
+                        // Display in a formatted panel
+                        JPanel detailPanel = new JPanel(new GridLayout(0, 2, 10, 5));
+                        detailPanel.add(new JLabel("Student ID:"));
+                        detailPanel.add(new JLabel(studentID));
+                        detailPanel.add(new JLabel("Name:"));
+                        detailPanel.add(new JLabel(studentName));
+                        detailPanel.add(new JLabel("Email:"));
+                        detailPanel.add(new JLabel(studentEmail));
+                        detailPanel.add(new JLabel("Majors:"));
+                        detailPanel.add(new JLabel(studentMajors));
+                        detailPanel.add(new JLabel("Year:"));
+                        detailPanel.add(new JLabel(studentYear));
+                        detailPanel.add(new JLabel("Application Status:"));
+                        detailPanel.add(new JLabel(status));
+                        
+                        JOptionPane.showMessageDialog(frame, detailPanel, 
+                            "Student Details - Application #" + finalAppNum, 
+                            JOptionPane.INFORMATION_MESSAGE);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                });
+                
                 approve.addActionListener(e -> {
                     try {
                         int num = Integer.parseInt(finalAppNum);
@@ -259,6 +314,7 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                     }
                 });
 
+                btns.add(viewDetails);
                 btns.add(approve);
                 btns.add(reject);
                 row.add(btns, BorderLayout.EAST);

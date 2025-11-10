@@ -11,12 +11,37 @@ import java.util.Arrays;
 import Backend.Control.*;
 import Frontend_UI.Helper.UIHelper;
 
+/**
+ * Boundary class for career center staff user interface.
+ * Provides functionality for staff to approve/reject company representative registrations,
+ * approve/reject internship opportunities, handle student withdrawal requests,
+ * and generate comprehensive reports with various filters.
+ * 
+ * @author Allen
+ * @version 1.0
+ */
 public class CareerStaffCLI extends AbstractCLI {
+    /** Application controller for managing student applications */
     private ApplicationControl appCtrl;
+    
+    /** Report controller for generating statistics */
     private ReportControl reportCtrl;
+    
+    /** User controller for managing company rep approvals */
     private UserControl userCtrl;
+    
+    /** Main frame for staff interface */
     private JFrame frame;
 
+    /**
+     * Constructs a CareerStaffCLI with all required controllers.
+     * 
+     * @param appCtrl the application controller
+     * @param intCtrl the internship controller
+     * @param reportCtrl the report controller
+     * @param userCtrl the user controller
+     * @param loginCtrl the login controller for password changes
+     */
     public CareerStaffCLI(ApplicationControl appCtrl, InternshipControl intCtrl, ReportControl reportCtrl, UserControl userCtrl, LoginControl loginCtrl) {
         super(intCtrl);
         this.appCtrl = appCtrl;

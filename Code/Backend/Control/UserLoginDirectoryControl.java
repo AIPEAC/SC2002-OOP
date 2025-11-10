@@ -347,6 +347,16 @@ public class UserLoginDirectoryControl{
         if (name == null || name.trim().length() < 3) {
             throw new IllegalArgumentException("Name must be at least 3 characters.");
         }
+        // Validate email: must be non-empty and follow proper email format
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email is required for company representative registration.");
+        }
+        // More robust email pattern: requires at least 1 char before @, at least 1 char for domain, and proper TLD
+        // Pattern: one or more alphanumeric/dots/underscores/hyphens, @, domain name, ., TLD (2-6 chars)
+        String emailPattern = "^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
+        if (!email.trim().matches(emailPattern)) {
+            throw new IllegalArgumentException("Email must follow a valid format (e.g., user@company.com)");
+        }
 
         // Check duplicates: existing company representative names or company names should not duplicate
         String csvFile = "Code/Backend/Lib/company_representative.csv";
@@ -373,7 +383,15 @@ public class UserLoginDirectoryControl{
             }
         }
 
-        String assignedID=assignIDToCompanyRep();
+        // Use email as the userID for company representatives
+        String assignedID = email.trim();
+
+        // Check if email already exists in login list
+        for (String[] loginEntry : loginList) {
+            if (loginEntry.length > 1 && loginEntry[1].equals(assignedID)) {
+                throw new IllegalArgumentException("A user with this email already exists.");
+            }
+        }
 
         try (FileWriter writer = new FileWriter("Code/Backend/Lib/company_representative.csv", true)) {
             writer.append(String.join(",", assignedID, name, email, postion, "pending", companyName, department));

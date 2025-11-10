@@ -6,6 +6,17 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Utility class providing common helper methods for control layer operations.
+ * <p>
+ * This class contains static utility methods for parsing boolean-like strings,
+ * managing CSV file initialization, and updating CSV records. These methods
+ * support the data persistence operations used throughout the control layer.
+ * </p>
+ * 
+ * @author Allen
+ * @version 1.0
+ */
 class ControlUtils {
     /**
      * Parse common boolean-like strings into Boolean.

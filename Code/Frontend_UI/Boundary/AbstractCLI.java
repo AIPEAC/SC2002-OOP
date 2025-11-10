@@ -15,14 +15,29 @@ import Backend.Control.LoginControl;
 import Frontend_UI.Helper.Filter;
 
 /**
- * UI base class mirroring the console AbstractCLI, but using Swing dialogs.
- * Provides common wiring for controls and shared actions (logout, changePassword, viewFilteredInternshipOpportunities).
+ * Abstract base class for all user interface boundary classes.
+ * Provides common functionality for viewing internships, changing passwords,
+ * and applying filters. Uses Swing components for GUI interaction.
+ * Subclasses implement role-specific UI (Student, Company Rep, Career Staff).
+ * 
+ * @author Allen
+ * @version 1.0
  */
 public abstract class AbstractCLI {
+    /** The internship control for managing internship operations */
     protected InternshipControl intCtrl;
+    
+    /** The login control for authentication and password management */
     protected LoginControl loginCtrl;
+    
+    /** Current filter settings for internship searches */
     protected Filter filter = null;
 
+    /**
+     * Constructs an AbstractCLI with the specified internship control.
+     * 
+     * @param intCtrl The internship control instance
+     */
     public AbstractCLI(InternshipControl intCtrl) {
         this.intCtrl = intCtrl;
     }
@@ -30,16 +45,28 @@ public abstract class AbstractCLI {
     /** Implementors should show their UI (window/dialogs). */
     public abstract void show();
 
+    /**
+     * Sets the login control for this CLI.
+     * 
+     * @param loginCtrl The login control instance
+     */
     public void setLoginControl(LoginControl loginCtrl) {
         this.loginCtrl = loginCtrl;
     }
 
+    /**
+     * Logs out the current user and closes any open popup windows.
+     */
     public void logout() {
         // Close any logged-in popup left open by the login flow
         Frontend_UI.Helper.UIHelper.closeLoggedInPopup();
         JOptionPane.showMessageDialog(null, "Logged out (frontend).", "Logout", JOptionPane.INFORMATION_MESSAGE);
     }
 
+    /**
+     * Displays a dialog for the user to change their password.
+     * Prompts for old password and new password, then updates via login control.
+     */
     public void changePassword() {
         if (loginCtrl == null) {
             JOptionPane.showMessageDialog(null, "Password change is not available in this context.", "Not available", JOptionPane.WARNING_MESSAGE);
@@ -63,6 +90,10 @@ public abstract class AbstractCLI {
         }
     }
 
+    /**
+     * Displays a UI for viewing and filtering internship opportunities.
+     * Includes sorting controls and filtering options for company, level, and majors.
+     */
     public void viewFilteredInternshipOpportunities() {
         if (intCtrl == null) {
             JOptionPane.showMessageDialog(null, "Internship control not available.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -94,10 +125,23 @@ public abstract class AbstractCLI {
         gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST;
 
         // Preferred Majors dropdown (loaded from majors.csv)
+        // For students, this filter is disabled as they can only see their major's internships
         List<String> allMajors = loadMajorsFromCSV();
         JComboBox<String> majorCombo = new JComboBox<>();
         majorCombo.addItem("(Any)");
         for (String m : allMajors) majorCombo.addItem(m);
+        
+        // Check if user is a student and disable the major filter
+        boolean isStudent = false;
+        try {
+            isStudent = intCtrl.getLoggedInStudentYear() != null;
+        } catch (Exception ex) { /* not a student */ }
+        
+        if (isStudent) {
+            majorCombo.setEnabled(false);
+            majorCombo.setToolTipText("Students can only view internships matching their major(s)");
+        }
+        
         filterBlock.add(new JLabel("Preferred Major:"), gbc);
         gbc.gridx = 1;
         filterBlock.add(majorCombo, gbc);
@@ -261,7 +305,7 @@ public abstract class AbstractCLI {
             r.gridx = 1; r.weightx = 0.15; r.fill = GridBagConstraints.HORIZONTAL; row.add(new JLabel(id != null ? id : ""), r);
             // Title
             r.gridx = 2; r.weightx = 0.35; row.add(new JLabel(title != null ? title : ""), r);
-            // Level (third column)
+            // Level
             r.gridx = 3; r.weightx = 0.12; row.add(new JLabel(level != null ? level : ""), r);
             // Company
             r.gridx = 4; r.weightx = 0.2; row.add(new JLabel(company != null ? company : ""), r);
@@ -276,7 +320,12 @@ public abstract class AbstractCLI {
         JOptionPane.showMessageDialog(null, sp, "Internships", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    // Default no-op apply handler (subclasses like StudentCLI should override)
+    /**
+     * Handles application submission for an internship.
+     * Default implementation shows "not available" - subclasses like StudentCLI should override.
+     * 
+     * @param internshipID The ID of the internship to apply for
+     */
     protected void onApply(String internshipID) {
         JOptionPane.showMessageDialog(null, "Applying is not available here.", "Not available", JOptionPane.INFORMATION_MESSAGE);
     }

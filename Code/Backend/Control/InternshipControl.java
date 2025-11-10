@@ -19,22 +19,50 @@ import java.util.Arrays;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 
-
+/**
+ * Controls all internship opportunity operations in the system.
+ * Manages creation, approval, visibility, and filtering of internship opportunities.
+ * Company representatives can create up to 5 opportunities with maximum 10 slots each.
+ * Students can view and apply to internships based on their major and year of study.
+ * Career staff approve or reject internship opportunities before they become visible to students.
+ * 
+ * @author Allen
+ * @version 1.0
+ */
 public class InternshipControl{
+    /** List of all internship opportunities in the system */
     private List<InternshipOpportunity> internshipOpportunities = new ArrayList<InternshipOpportunity>();
     
+    /** Cached list of internships for current company representative */
     private List<InternshipOpportunity> companyRepsInternshipOpps = null;
+    
+    /** Authentication controller for verifying user permissions */
     private AuthenticationControl authCtrl;
+    
+    /** Application controller for coordinating application data */
     private ApplicationControl appCtrl=null;
+    
+    /** Currently logged-in student (if applicable) */
     private Student student=null;
 
     // =========================================================
     // Constructor and Initializer
 
+    /**
+     * Constructs an InternshipControl and loads all internship opportunities from database.
+     * 
+     * @param authCtrl the authentication controller for managing user sessions
+     */
     public InternshipControl(AuthenticationControl authCtrl) {
         this.authCtrl = authCtrl;
         loadInternshipOpportunityFromDB();
     }
+    
+    /**
+     * Sets the application controller for coordination between internships and applications.
+     * 
+     * @param appCtrl the application controller
+     */
     public void setApplicationControl(ApplicationControl appCtrl) {
         this.appCtrl = appCtrl;
     }
@@ -182,6 +210,9 @@ public class InternshipControl{
             try {
                 numberOfSlots = Integer.parseInt(numberOfSlotsStr.trim());
                 if (numberOfSlots <= 0) numberOfSlots = 1;
+                if (numberOfSlots > 10) {
+                    throw new IllegalArgumentException("Maximum number of slots is 10.");
+                }
             } catch (NumberFormatException e) {
                 numberOfSlots = 1;
             }
@@ -278,6 +309,57 @@ public class InternshipControl{
     }
 
     /**
+     * Return detailed student information for a specific application (company rep only).
+     * Format: studentID=... | studentName=... | studentEmail=... | studentMajors=[...] | studentYear=... | status=...
+     */
+    public String getDetailedStudentInfoForApplication(int applicationNumber) {
+        if (!isCompanyRepLoggedIn()) {
+            throw new IllegalStateException("User not logged in or not a company representative.");
+        }
+        Application app = appCtrl.getApplicationByNumber(applicationNumber);
+        if (app == null) {
+            throw new IllegalArgumentException("Application not found.");
+        }
+        
+        // Verify this application is for one of the company rep's internships
+        String companyRepID = authCtrl.getUserID();
+        InternshipOpportunity opp = getInternshipByID(app.getInternshipID());
+        if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) {
+            throw new IllegalArgumentException("Not authorized to view this application.");
+        }
+        
+        String studentID = app.getStudentID();
+        String DELIM = " | ";
+        StringBuilder sb = new StringBuilder();
+        
+        // Read student details from CSV
+        try (BufferedReader br = new BufferedReader(new FileReader("Code/Backend/Lib/student.csv"))) {
+            String line = br.readLine(); // skip header
+            while ((line = br.readLine()) != null) {
+                String[] vals = line.split(",");
+                if (vals.length > 0 && vals[0].equals(studentID)) {
+                    String name = vals.length > 1 ? vals[1] : "";
+                    String email = vals.length > 2 ? vals[2] : "";
+                    String majorsRaw = vals.length > 3 ? vals[3] : "";
+                    String year = vals.length > 4 ? vals[4] : "";
+                    
+                    sb.append("studentID=").append(studentID);
+                    sb.append(DELIM).append("studentName=").append(name);
+                    sb.append(DELIM).append("studentEmail=").append(email);
+                    sb.append(DELIM).append("studentMajors=").append(majorsRaw);
+                    sb.append(DELIM).append("studentYear=").append(year);
+                    sb.append(DELIM).append("status=").append(app.getApplicationStatus() != null ? app.getApplicationStatus() : "pending");
+                    return sb.toString();
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading student information: " + e.getMessage());
+        }
+        
+        throw new IllegalArgumentException("Student information not found.");
+    }
+
+    /**
      * Approve application by internship ID and application number (company rep only).
      */
     /**
@@ -293,19 +375,14 @@ public class InternshipControl{
         if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) {
             throw new IllegalArgumentException("No such internship under your account or not authorized.");
         }
-        // Check if internship is already full before approving
+        // Check if internship is already full (based on students who have accepted offers)
         if (opp.isFull()) {
             throw new IllegalStateException("Cannot approve application - this internship is already full (" + 
                 opp.getAcceptedApplicationNumbers().size() + "/" + opp.getNumOfSlots() + " slots filled).");
         }
         if (appCtrl != null) {
             appCtrl.approveApplicationByNumber(applicationNumber);
-            
-            // Check if internship is now full after this approval
-            String fullMessage = checkAndRejectIfFull(opp);
-            if (fullMessage != null) {
-                return "Approved application: " + applicationNumber + "\n\n" + fullMessage;
-            }
+            // Note: Internship won't be considered full until students actually accept their offers
             return "Approved application: " + applicationNumber;
         } else {
             throw new IllegalStateException("ApplicationControl not set; cannot approve application.");
@@ -399,15 +476,38 @@ public class InternshipControl{
         return out;
     }
     
-    /** Approve an application: mark application approved and add to internship accepted list. */
+    /** Approve an application: mark application approved (but don't add to accepted list yet). */
     void approveApplicationNumberForInternship(int applicationNumber, String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         // Note: Don't check isFull() here because this is called after approval decision is made
         // The full check happens in approveApplicationForInternship before calling this
-        // move application number from pending to accepted list
+        // Remove application number from pending list (but don't add to accepted list yet)
         opp.approveApplicationNumber(applicationNumber);
         updateInternshipInDB();
+    }
+    
+    /** Called when a student accepts an approved offer - add to internship's accepted list. */
+    void studentAcceptedOfferForInternship(int applicationNumber, String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
+        
+        // Check if internship would become full after this acceptance
+        if (opp.isFull()) {
+            throw new IllegalStateException("This internship is already full. Cannot accept more offers.");
+        }
+        
+        opp.studentAcceptedOffer(applicationNumber);
+        updateInternshipInDB();
+        
+        // If internship is now full, reject all other approved applications that haven't been accepted yet
+        if (opp.isFull() && appCtrl != null) {
+            List<Integer> acceptedApps = opp.getAcceptedApplicationNumbers();
+            
+            // Ask ApplicationControl to reject all approved applications for this internship
+            // that haven't been accepted by students yet
+            appCtrl.rejectUnansweredApprovedApplicationsForInternship(internshipID, acceptedApps);
+        }
     }
 
     /** Reject an application for an internship. */
@@ -859,12 +959,39 @@ public class InternshipControl{
     /**
      * Return formatted lines for approved, visible internships applying the provided filter criteria.
      * This avoids exposing entities to the UI and centralizes approved-only logic.
+     * For students, only shows internships matching their major(s).
      */
     public List<String> getApprovedVisibleInternshipOpportunitiesForDisplay(String filterType, boolean ascending, Map<String, List<String>> filterIn) {
         List<InternshipOpportunity> Opplist = getAllVisibleInternshipOpportunities().stream()
                 .filter(opp -> "approved".equalsIgnoreCase(opp.getStatus()))
                 .collect(Collectors.toList());
         if (Opplist == null) return new ArrayList<>();
+
+        // If logged-in user is a student, filter by their major(s)
+        if (authCtrl != null && authCtrl.isLoggedIn() && "Student".equals(authCtrl.getUserIdentity())) {
+            Backend.Entity.Users.User user = authCtrl.getUser();
+            if (user instanceof Student) {
+                Student student = (Student) user;
+                List<String> studentMajors = student.getMajors();
+                if (studentMajors != null && !studentMajors.isEmpty()) {
+                    Opplist = Opplist.stream().filter(opp -> {
+                        List<String> preferredMajors = opp.getPreferredMajors();
+                        if (preferredMajors == null || preferredMajors.isEmpty()) {
+                            return true; // No preferred majors means open to all
+                        }
+                        // Check if at least one student major matches any preferred major
+                        for (String studentMajor : studentMajors) {
+                            for (String prefMajor : preferredMajors) {
+                                if (studentMajor.equalsIgnoreCase(prefMajor)) {
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    }).collect(Collectors.toList());
+                }
+            }
+        }
 
         if (filterIn != null && !filterIn.isEmpty()) {
             Map<String, List<String>> criteria = filterIn;

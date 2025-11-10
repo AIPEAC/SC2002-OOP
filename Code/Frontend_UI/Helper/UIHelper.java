@@ -4,6 +4,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
+/**
+ * Helper class providing common UI utility methods for Swing dialogs and user interactions.
+ * <p>
+ * This class provides reusable UI components such as confirmation dialogs, 
+ * multi-select lists, and logged-in user popup notifications. All methods are static
+ * for easy access from boundary classes.
+ * </p>
+ * 
+ * @author Allen
+ * @version 1.0
+ */
 public class UIHelper {
     private static volatile JFrame loggedInFrame = null;
     public static boolean showYesNo(String message) {
