@@ -52,11 +52,12 @@ public class InternshipControl{
             // Skip header
             br.readLine();
             while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
                 String[] values = line.split(",");
-                String internshipID = values[0];
-                String title = values[1];
-                String description = values[2];
-                String level = values[3];
+                String internshipID = values.length > 0 ? values[0] : "";
+                String title = values.length > 1 ? values[1] : "";
+                String description = values.length > 2 ? values[2] : "";
+                String level = values.length > 3 ? values[3] : "";
                 String pmRaw = values.length > 4 ? values[4] : "";
                 List<String> preferredMajors = new ArrayList<>();
                 if (pmRaw != null && !pmRaw.trim().isEmpty()) {
@@ -66,21 +67,42 @@ public class InternshipControl{
                         preferredMajors = Arrays.asList(pmRaw);
                     }
                 }
-                Date openingDate = new SimpleDateFormat("yyyy-MM-dd").parse(values[5]);
-                Date closeDate = new SimpleDateFormat("yyyy-MM-dd").parse(values[6]);
-                String status = values[7];
-                String companyName = values[8];
-                String companyRepInChargeID = values[9];
-                int numberOfSlots = Integer.parseInt(values[10]);
+                
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String openStr = values.length > 5 ? values[5] : "";
+                String closeStr = values.length > 6 ? values[6] : "";
+                Date openingDate = (openStr != null && !openStr.trim().isEmpty()) ? sdf.parse(openStr.trim()) : new Date();
+                Date closeDate = (closeStr != null && !closeStr.trim().isEmpty()) ? sdf.parse(closeStr.trim()) : new Date();
+                String status = values.length > 7 ? values[7] : "pending";
+                String companyName = values.length > 8 ? values[8] : "";
+                String companyRepInChargeID = values.length > 9 ? values[9] : "";
+                int numberOfSlots = 0;
+                try {
+                    numberOfSlots = values.length > 10 && values[10] != null && !values[10].trim().isEmpty()
+                            ? Integer.parseInt(values[10].trim()) : 0;
+                } catch (NumberFormatException nfe) {
+                    numberOfSlots = 0;
+                }
                 // applicationNumberList is space-separated integers
-                List<Integer> applicationNumberList = Arrays.stream(values[11].split(" "))
-                        .map(Integer::parseInt)
-                        .collect(Collectors.toList());
+                List<Integer> applicationNumberList = new ArrayList<>();
+                if (values.length > 11 && values[11] != null && !values[11].trim().isEmpty()) {
+                    applicationNumberList = Arrays.stream(values[11].trim().split("\\s+"))
+                            .filter(s -> s != null && !s.trim().isEmpty())
+                            .map(Integer::parseInt)
+                            .collect(Collectors.toList());
+                }
                 // acceptedApplicantNumbers is space-separated integers
-                List<Integer> acceptedApplicantNumbers = Arrays.stream(values[12].split(" "))
-                        .map(Integer::parseInt)
-                        .collect(Collectors.toList());
-                boolean visibility = Boolean.parseBoolean(values[13]);
+                List<Integer> acceptedApplicantNumbers = new ArrayList<>();
+                if (values.length > 12 && values[12] != null && !values[12].trim().isEmpty()) {
+                    acceptedApplicantNumbers = Arrays.stream(values[12].trim().split("\\s+"))
+                            .filter(s -> s != null && !s.trim().isEmpty())
+                            .map(Integer::parseInt)
+                            .collect(Collectors.toList());
+                }
+                boolean visibility = false;
+                if (values.length > 13 && values[13] != null && !values[13].trim().isEmpty()) {
+                    visibility = Boolean.parseBoolean(values[13].trim());
+                }
                 InternshipOpportunity opp = new InternshipOpportunity(
                         internshipID, title, description, level, preferredMajors,
                         openingDate, closeDate, status, companyName,
