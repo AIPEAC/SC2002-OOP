@@ -17,6 +17,7 @@ public class Report {
     private int reportIndex;
     private List<InternshipOpportunity> internshipOpportunities;
     private boolean filtered;
+    private Map<String, List<String>> appliedFilters;
     private int numOfInternships=0;
 
     private int numOfAdvancedInternships=0;
@@ -34,6 +35,14 @@ public class Report {
         this.reportIndex = reportIndex;
         this.internshipOpportunities = internshipOpportunities;
         this.filtered=filtered;
+        this.appliedFilters = null;
+    }
+    
+    public Report(int reportIndex,List<InternshipOpportunity> internshipOpportunities,boolean filtered, Map<String, List<String>> appliedFilters) {
+        this.reportIndex = reportIndex;
+        this.internshipOpportunities = internshipOpportunities;
+        this.filtered=filtered;
+        this.appliedFilters = appliedFilters;
     }
     
     /** Build the formatted report lines instead of printing directly. */
