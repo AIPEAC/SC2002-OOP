@@ -156,6 +156,24 @@ public class ApplicationControl {
 			}
 		}
 	}
+	
+	/**
+	 * Creates a new internship application for the logged-in student.
+	 * Performs multiple validation checks before creating the application:
+	 * - User must be logged in as a student
+	 * - Student must not have already accepted an internship offer
+	 * - Internship must be visible, not full, and not rejected
+	 * - Student must meet the internship requirements (year, major, level)
+	 * - Student must not have already applied to this internship
+	 * - Student must not have more than one approved application
+	 * - Student must not have reached the maximum of 3 active applications
+	 * 
+	 * @param internshipID the ID of the internship to apply for
+	 * @return the application number assigned to the new application
+	 * @throws IllegalStateException if user is not logged in, not a student, has accepted an offer,
+	 *         has an approved application, has reached the 3-application limit, or internship is not available
+	 * @throws IllegalArgumentException if internshipID is null or empty
+	 */
 	public int makeApplication(String internshipID) {
 		// Create a new application for the student
 		if (!authCtrl.isLoggedIn()) throw new IllegalStateException("User not logged in.");
@@ -183,6 +201,16 @@ public class ApplicationControl {
 		if (applications.stream().anyMatch(app -> app.getApplicationStatus().equals("approved"))) {
 			throw new IllegalStateException("You have an approved application.");
 		}
+		
+		// Check if student has reached the maximum of 3 active applications at once
+		long activeApplicationCount = applications.stream()
+			.filter(app -> !app.getApplicationStatus().equals("rejected")
+				&& (app.getWithdrawStatus() == null || !app.getWithdrawStatus().equals("approved")))
+			.count();
+		if (activeApplicationCount >= 3) {
+			throw new IllegalStateException("You have already applied to 3 internships. Maximum limit reached. Please withdraw an application before applying to a new one.");
+		}
+		
 		String companyName = intCtrl.getInternshipCompany(internshipID);
 		List<String> studentMajors = intCtrl.getStudentMajors();
 		int newAppNumber = getNextApplicationNumber();
