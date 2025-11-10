@@ -8,7 +8,7 @@ import java.util.Map;
 
 import Backend.Control.InternshipControl;
 import Backend.Control.LoginControl;
-import Backend.Entity.Filter;
+import Frontend_UI.Helper.Filter;
 
 /**
  * UI base class mirroring the console AbstractCLI, but using Swing dialogs.
@@ -32,7 +32,7 @@ public abstract class AbstractCLI {
 
     public void logout() {
         // Close any logged-in popup left open by the login flow
-        Frontend_UI.UIHelper.closeLoggedInPopup();
+        Frontend_UI.Helper.UIHelper.closeLoggedInPopup();
         JOptionPane.showMessageDialog(null, "Logged out (frontend).", "Logout", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -68,7 +68,7 @@ public abstract class AbstractCLI {
         if (filter != null) {
             int reuse = JOptionPane.showConfirmDialog(null, "Use previously set filter criteria?", "Filter", JOptionPane.YES_NO_OPTION);
             if (reuse == JOptionPane.YES_OPTION) {
-                renderInternshipList(intCtrl.getAllVisibleInternshipOpportunitiesForDisplay(filter));
+                renderInternshipList(intCtrl.getAllVisibleInternshipOpportunitiesForDisplay(filter.getFilterType(), filter.isAscending(), filter.getFilterIn()));
                 return;
             }
         }
@@ -81,7 +81,7 @@ public abstract class AbstractCLI {
         Map<String, List<String>> filterIn = new HashMap<>();
         // Future: collect additional filtering criteria into filterIn via dialogs.
         filter = new Filter(filterType, ascending, filterIn);
-        renderInternshipList(intCtrl.getAllVisibleInternshipOpportunitiesForDisplay(filter));
+        renderInternshipList(intCtrl.getAllVisibleInternshipOpportunitiesForDisplay(filter.getFilterType(), filter.isAscending(), filter.getFilterIn()));
     }
 
     private void renderInternshipList(List<String> lines) {

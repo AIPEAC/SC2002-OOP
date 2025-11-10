@@ -2,7 +2,7 @@ package Frontend_UI.Boundary;
 
 import javax.swing.*;
 import Backend.Control.*;
-import Frontend_UI.UIHelper;
+import Frontend_UI.Helper.UIHelper;
 
 public class LoginCLI {
     private final LoginControl loginCtrl;

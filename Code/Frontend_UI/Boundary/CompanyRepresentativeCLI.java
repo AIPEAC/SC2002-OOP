@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Backend.Control.*;
-import Frontend_UI.UIHelper;
+import Frontend_UI.Helper.UIHelper;
 
 public class CompanyRepresentativeCLI extends AbstractCLI {
     private JFrame frame;
@@ -54,7 +54,7 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
 
             JButton logout = new JButton("Logout");
             logout.addActionListener(e -> {
-                Frontend_UI.UIHelper.closeLoggedInPopup();
+                Frontend_UI.Helper.UIHelper.closeLoggedInPopup();
                 frame.dispose();
             });
             p.add(logout);
@@ -144,22 +144,88 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                 JOptionPane.showMessageDialog(frame, "No applications for the selected internship(s).");
                 return;
             }
-            JTextArea ta = new JTextArea(String.join("\n", lines));
-            ta.setEditable(false);
-            JScrollPane sp = new JScrollPane(ta);
-            sp.setPreferredSize(new Dimension(600,300));
-            JOptionPane.showMessageDialog(frame, sp, "Applications", JOptionPane.INFORMATION_MESSAGE);
+            // Group lines into blocks per application. Each block starts with a line containing "Application No.".
+            java.util.List<java.util.List<String>> blocks = new java.util.ArrayList<>();
+            java.util.List<String> cur = null;
+            for (String l : lines) {
+                if (l != null && l.contains("Application No")) {
+                    // start new block
+                    cur = new java.util.ArrayList<>();
+                    cur.add(l);
+                    blocks.add(cur);
+                } else if (cur != null) {
+                    cur.add(l);
+                } else {
+                    // if no block started yet, create one
+                    cur = new java.util.ArrayList<>();
+                    cur.add(l);
+                    blocks.add(cur);
+                }
+            }
 
-            String appNumStr = JOptionPane.showInputDialog(frame, "Enter Application Number to approve (or leave empty to cancel):");
-            if (appNumStr == null || appNumStr.trim().isEmpty()) return;
-            int appNum = Integer.parseInt(appNumStr.trim());
-            String internshipID = JOptionPane.showInputDialog(frame, "Enter Internship ID for this application:");
-            if (internshipID == null || internshipID.trim().isEmpty()) return;
-            intCtrl.approveApplicationAsCompanyRep(appNum);
-            JOptionPane.showMessageDialog(frame, "Application approved.");
+            JPanel listPanel = new JPanel();
+            listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+            for (java.util.List<String> block : blocks) {
+                String blockText = String.join("\n", block);
+                JPanel row = new JPanel(new BorderLayout(8,8));
+                JTextArea ta = new JTextArea(blockText);
+                ta.setEditable(false);
+                ta.setBackground(null);
+                ta.setBorder(null);
+                JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+                JButton approve = new JButton("Approve");
+                JButton reject = new JButton("Reject");
+                String capturedBlock = blockText;
+                approve.addActionListener(e -> {
+                    String num = parseApplicationNumber(capturedBlock);
+                    try {
+                        int n = Integer.parseInt(num);
+                        intCtrl.approveApplicationAsCompanyRep(n);
+                        JOptionPane.showMessageDialog(frame, "Approved application: " + n);
+                        approve.setEnabled(false); reject.setEnabled(false);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                });
+                reject.addActionListener(e -> {
+                    String num = parseApplicationNumber(capturedBlock);
+                    try {
+                        int n = Integer.parseInt(num);
+                        intCtrl.rejectApplicationAsCompanyRep(n);
+                        JOptionPane.showMessageDialog(frame, "Rejected application: " + n);
+                        approve.setEnabled(false); reject.setEnabled(false);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                });
+                btns.add(approve); btns.add(reject);
+                row.add(ta, BorderLayout.CENTER);
+                row.add(btns, BorderLayout.EAST);
+                listPanel.add(row);
+            }
+            JScrollPane sp = new JScrollPane(listPanel);
+            sp.setPreferredSize(new Dimension(700, Math.min(400, blocks.size()*80 + 40)));
+            JOptionPane.showMessageDialog(frame, sp, "Applications", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private String parseApplicationNumber(String blockText) {
+        if (blockText == null) return "";
+        int i = blockText.indexOf("Application No");
+        if (i >= 0) {
+            int idx = blockText.indexOf(':', i);
+            if (idx >= 0) {
+                int end = blockText.indexOf('|', idx);
+                if (end < 0) end = blockText.length();
+                return blockText.substring(idx+1, end).trim();
+            }
+        }
+        // fallback: find first integer
+        String[] toks = blockText.split("\\D+");
+        for (String t : toks) if (!t.isEmpty()) return t;
+        return "";
     }
 
     private void toggleVisibility() {

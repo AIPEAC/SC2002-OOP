@@ -12,7 +12,6 @@ import java.text.SimpleDateFormat;
 import java.util.stream.Collectors;
 
 import Backend.Entity.Application;
-import Backend.Entity.Filter;
 import Backend.Entity.InternshipOpportunity;
 import Backend.Entity.Users.Student;
 
@@ -374,73 +373,70 @@ public class InternshipControl{
         return new ArrayList<>(internshipOpportunities);
     } 
 
-    /** Return formatted lines for visible internships applying the provided filter (filter may be null). */
-    public List<String> getAllVisibleInternshipOpportunitiesForDisplay(Filter filter) {
+    /** Return formatted lines for visible internships applying the provided filter criteria.
+     *  The parameters are unpacked to keep frontend Filter types decoupled from backend.
+     *  Any of the parameters may be null (null filterIn means no criteria; empty filterType means no sorting).
+     */
+    public List<String> getAllVisibleInternshipOpportunitiesForDisplay(String filterType, boolean ascending, Map<String, List<String>> filterIn) {
         List<InternshipOpportunity> Opplist = getAllVisibleInternshipOpportunities();
         if (Opplist == null) return new ArrayList<>();
 
-        if (filter != null) {
-            Map<String, List<String>> criteria = filter.getFilterIn();
-            if (criteria != null && !criteria.isEmpty()) {
-                Opplist = Opplist.stream().filter(opp -> {
-                    for (Map.Entry<String, List<String>> e : criteria.entrySet()) {
-                        String key = e.getKey();
-                        List<String> vals = e.getValue();
-                        if (vals == null || vals.isEmpty()) continue;
-                        boolean matches = false;
-                        switch (key) {
-                            case "companyName":
-                                for (String v : vals) if (opp.getCompanyName() != null && opp.getCompanyName().equalsIgnoreCase(v)) matches = true;
-                                break;
-                            case "internshipLevel":
-                                for (String v : vals) if (opp.getInternshipLevel() != null && opp.getInternshipLevel().equalsIgnoreCase(v)) matches = true;
-                                break;
-                            case "preferredMajors":
-                                if (opp.getPreferredMajors() != null) {
-                                    for (String v : vals) if (opp.getPreferredMajors().contains(v)) { matches = true; break; }
-                                }
-                                break;
-                            case "internshipID":
-                                for (String v : vals) if (opp.getInternshipID() != null && opp.getInternshipID().equalsIgnoreCase(v)) matches = true;
-                                break;
-                            case "internshipTitle":
-                                for (String v : vals) if (opp.getInternshipTitle() != null && opp.getInternshipTitle().equalsIgnoreCase(v)) matches = true;
-                                break;
-                            default:
-                                matches = true;
-                        }
-                        if (!matches) return false;
+        if (filterIn != null && !filterIn.isEmpty()) {
+            Map<String, List<String>> criteria = filterIn;
+            Opplist = Opplist.stream().filter(opp -> {
+                for (Map.Entry<String, List<String>> e : criteria.entrySet()) {
+                    String key = e.getKey();
+                    List<String> vals = e.getValue();
+                    if (vals == null || vals.isEmpty()) continue;
+                    boolean matches = false;
+                    switch (key) {
+                        case "companyName":
+                            for (String v : vals) if (opp.getCompanyName() != null && opp.getCompanyName().equalsIgnoreCase(v)) matches = true;
+                            break;
+                        case "internshipLevel":
+                            for (String v : vals) if (opp.getInternshipLevel() != null && opp.getInternshipLevel().equalsIgnoreCase(v)) matches = true;
+                            break;
+                        case "preferredMajors":
+                            if (opp.getPreferredMajors() != null) {
+                                for (String v : vals) if (opp.getPreferredMajors().contains(v)) { matches = true; break; }
+                            }
+                            break;
+                        case "internshipID":
+                            for (String v : vals) if (opp.getInternshipID() != null && opp.getInternshipID().equalsIgnoreCase(v)) matches = true;
+                            break;
+                        case "internshipTitle":
+                            for (String v : vals) if (opp.getInternshipTitle() != null && opp.getInternshipTitle().equalsIgnoreCase(v)) matches = true;
+                            break;
+                        default:
+                            matches = true;
                     }
-                    return true;
-                }).collect(Collectors.toList());
-            }
+                    if (!matches) return false;
+                }
+                return true;
+            }).collect(Collectors.toList());
         }
 
         // Sorting
-        if (filter != null) {
-            String filterType = filter.getFilterType();
-            boolean ascending = filter.isAscending();
-            if (filterType != null && !filterType.isEmpty()) {
-                Comparator<InternshipOpportunity> cmp = null;
-                switch (filterType) {
-                    case "title":
-                        cmp = Comparator.comparing(InternshipOpportunity::getInternshipTitle, Comparator.nullsLast(String::compareToIgnoreCase));
-                        break;
-                    case "companyName":
-                        cmp = Comparator.comparing(InternshipOpportunity::getCompanyName, Comparator.nullsLast(String::compareToIgnoreCase));
-                        break;
-                    case "openDate":
-                        cmp = Comparator.comparing(InternshipOpportunity::getOpeningDate, Comparator.nullsLast(Comparator.naturalOrder()));
-                        break;
-                    case "numberOfSlots":
-                        cmp = Comparator.comparingInt(InternshipOpportunity::getNumOfSlots);
-                        break;
-                    default:
-                }
-                if (cmp != null) {
-                    if (!ascending) cmp = cmp.reversed();
-                    Opplist.sort(cmp);
-                }
+        if (filterType != null && !filterType.isEmpty()) {
+            Comparator<InternshipOpportunity> cmp = null;
+            switch (filterType) {
+                case "title":
+                    cmp = Comparator.comparing(InternshipOpportunity::getInternshipTitle, Comparator.nullsLast(String::compareToIgnoreCase));
+                    break;
+                case "companyName":
+                    cmp = Comparator.comparing(InternshipOpportunity::getCompanyName, Comparator.nullsLast(String::compareToIgnoreCase));
+                    break;
+                case "openDate":
+                    cmp = Comparator.comparing(InternshipOpportunity::getOpeningDate, Comparator.nullsLast(Comparator.naturalOrder()));
+                    break;
+                case "numberOfSlots":
+                    cmp = Comparator.comparingInt(InternshipOpportunity::getNumOfSlots);
+                    break;
+                default:
+            }
+            if (cmp != null) {
+                if (!ascending) cmp = cmp.reversed();
+                Opplist.sort(cmp);
             }
         }
 

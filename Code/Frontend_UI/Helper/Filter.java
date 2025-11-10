@@ -1,10 +1,10 @@
-package Backend.Entity;
+package Frontend_UI.Helper;
 
 import java.util.Map;
 import java.util.List;
 /*
  * This method is to save filter criteria for internship opportunity search
- * It is use
+ * 
  */
 
 public class Filter {

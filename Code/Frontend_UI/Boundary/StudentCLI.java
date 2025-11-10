@@ -5,7 +5,7 @@ import java.awt.*;
 import java.util.List;
 
 import Backend.Control.*;
-import Frontend_UI.UIHelper;
+import Frontend_UI.Helper.UIHelper;
 
 public class StudentCLI extends AbstractCLI {
     private ApplicationControl appCtrl;
@@ -44,7 +44,7 @@ public class StudentCLI extends AbstractCLI {
 
             JButton logout = new JButton("Logout");
             logout.addActionListener(e -> {
-                Frontend_UI.UIHelper.closeLoggedInPopup();
+                Frontend_UI.Helper.UIHelper.closeLoggedInPopup();
                 frame.dispose();
             });
             p.add(logout);

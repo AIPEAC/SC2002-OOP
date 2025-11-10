@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 import Backend.Control.InternshipControl;
 import Backend.Control.LoginControl;
-import Backend.Entity.Filter;
+import Frontend_Console.Helper.Filter;
 
 public abstract class AbstractCLI {
     protected Scanner sc;
@@ -53,7 +53,7 @@ public abstract class AbstractCLI {
         if (filter != null) {
             System.out.println("Do you want to use previously set filter criteria? (Enter to proceed, any other key to set new filters): ");
             if ("".equalsIgnoreCase(sc.nextLine())) {
-                List<String> lines = intCtrl.getAllVisibleInternshipOpportunitiesForDisplay(filter);
+                List<String> lines = intCtrl.getAllVisibleInternshipOpportunitiesForDisplay(filter.getFilterType(), filter.isAscending(), filter.getFilterIn());
                 for (String l : lines) System.out.println(l);
                 return;
             }
@@ -67,7 +67,7 @@ public abstract class AbstractCLI {
         // Collect additional filtering criteria from the user
         // ...
         filter = new Filter(filterType, ascending, filterIn);
-        List<String> lines = intCtrl.getAllVisibleInternshipOpportunitiesForDisplay(filter);
+        List<String> lines = intCtrl.getAllVisibleInternshipOpportunitiesForDisplay(filter.getFilterType(), filter.isAscending(), filter.getFilterIn());
         for (String l : lines) System.out.println(l);
     }
 }

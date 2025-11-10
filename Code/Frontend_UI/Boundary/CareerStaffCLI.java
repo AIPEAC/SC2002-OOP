@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import Backend.Control.*;
-import Frontend_UI.UIHelper;
+import Frontend_UI.Helper.UIHelper;
 
 public class CareerStaffCLI extends AbstractCLI {
     private ApplicationControl appCtrl;
@@ -56,7 +56,7 @@ public class CareerStaffCLI extends AbstractCLI {
 
             JButton logout = new JButton("Logout");
             logout.addActionListener(e -> {
-                Frontend_UI.UIHelper.closeLoggedInPopup();
+                Frontend_UI.Helper.UIHelper.closeLoggedInPopup();
                 frame.dispose();
             });
             p.add(logout);
@@ -73,23 +73,33 @@ public class CareerStaffCLI extends AbstractCLI {
                 JOptionPane.showMessageDialog(frame, "No pending company representative registrations.");
                 return;
             }
-            JTextArea ta = new JTextArea(String.join("\n", pending));
-            ta.setEditable(false);
-            JScrollPane sp = new JScrollPane(ta);
-            sp.setPreferredSize(new Dimension(600,300));
-            JOptionPane.showMessageDialog(frame, sp, "Pending Company Reps", JOptionPane.INFORMATION_MESSAGE);
-            // After viewing, ask if staff wants to approve/reject an ID (mirror console flow)
-            String id = JOptionPane.showInputDialog(frame, "Enter ID to approve/reject (leave blank to skip):");
-            if (id != null && !id.trim().isEmpty()) {
-                String[] opts = {"Approve","Reject","Cancel"};
-                int c = JOptionPane.showOptionDialog(frame, "Approve or reject this registration?", "Approve/Reject",
-                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opts, opts[0]);
-                if (c == 0) {
-                    approveRegister(id.trim());
-                } else if (c == 1) {
-                    rejectRegister(id.trim());
-                }
+            JPanel listPanel = new JPanel();
+            listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+            for (String line : pending) {
+                JPanel row = new JPanel(new BorderLayout(8,8));
+                JLabel lbl = new JLabel(line);
+                JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+                JButton approve = new JButton("Approve");
+                JButton reject = new JButton("Reject");
+                String capturedLine = line; // for lambda
+                approve.addActionListener(e -> {
+                    String id = parseCompanyRepID(capturedLine);
+                    try { approveRegister(id); JOptionPane.showMessageDialog(frame, "Approved: " + id); approve.setEnabled(false); reject.setEnabled(false); }
+                    catch (Exception ex) { JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); }
+                });
+                reject.addActionListener(e -> {
+                    String id = parseCompanyRepID(capturedLine);
+                    try { rejectRegister(id); JOptionPane.showMessageDialog(frame, "Rejected: " + id); approve.setEnabled(false); reject.setEnabled(false); }
+                    catch (Exception ex) { JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); }
+                });
+                btns.add(approve); btns.add(reject);
+                row.add(lbl, BorderLayout.CENTER);
+                row.add(btns, BorderLayout.EAST);
+                listPanel.add(row);
             }
+            JScrollPane sp = new JScrollPane(listPanel);
+            sp.setPreferredSize(new Dimension(700, Math.min(400, pending.size()*40 + 40)));
+            JOptionPane.showMessageDialog(frame, sp, "Pending Company Reps", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -121,23 +131,33 @@ public class CareerStaffCLI extends AbstractCLI {
                 JOptionPane.showMessageDialog(frame, "No pending internship opportunities.");
                 return;
             }
-            JTextArea ta = new JTextArea(String.join("\n", pending));
-            ta.setEditable(false);
-            JScrollPane sp = new JScrollPane(ta);
-            sp.setPreferredSize(new Dimension(600,300));
-            JOptionPane.showMessageDialog(frame, sp, "Pending Internships", JOptionPane.INFORMATION_MESSAGE);
-            // Ask for an internship ID to approve/reject (mirror console)
-            String oppId = JOptionPane.showInputDialog(frame, "Enter Internship ID to approve/reject (leave blank to skip):");
-            if (oppId != null && !oppId.trim().isEmpty()) {
-                String[] opts = {"Approve","Reject","Cancel"};
-                int c = JOptionPane.showOptionDialog(frame, "Approve or reject this internship?", "Approve/Reject",
-                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opts, opts[0]);
-                if (c == 0) {
-                    try { intCtrl.approveInternshipCreationByID(oppId.trim()); JOptionPane.showMessageDialog(frame, "Approved internship: " + oppId.trim()); } catch (Exception ex) { JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); }
-                } else if (c == 1) {
-                    try { intCtrl.rejectInternshipCreationByID(oppId.trim()); JOptionPane.showMessageDialog(frame, "Rejected internship: " + oppId.trim()); } catch (Exception ex) { JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); }
-                }
+            JPanel listPanel = new JPanel();
+            listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+            for (String line : pending) {
+                JPanel row = new JPanel(new BorderLayout(8,8));
+                JLabel lbl = new JLabel(line);
+                JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+                JButton approve = new JButton("Approve");
+                JButton reject = new JButton("Reject");
+                String capturedLine = line;
+                approve.addActionListener(e -> {
+                    String id = parseInternshipID(capturedLine);
+                    try { intCtrl.approveInternshipCreationByID(id); JOptionPane.showMessageDialog(frame, "Approved: " + id); approve.setEnabled(false); reject.setEnabled(false); }
+                    catch (Exception ex) { JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); }
+                });
+                reject.addActionListener(e -> {
+                    String id = parseInternshipID(capturedLine);
+                    try { intCtrl.rejectInternshipCreationByID(id); JOptionPane.showMessageDialog(frame, "Rejected: " + id); approve.setEnabled(false); reject.setEnabled(false); }
+                    catch (Exception ex) { JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); }
+                });
+                btns.add(approve); btns.add(reject);
+                row.add(lbl, BorderLayout.CENTER);
+                row.add(btns, BorderLayout.EAST);
+                listPanel.add(row);
             }
+            JScrollPane sp = new JScrollPane(listPanel);
+            sp.setPreferredSize(new Dimension(700, Math.min(400, pending.size()*40 + 40)));
+            JOptionPane.showMessageDialog(frame, sp, "Pending Internships", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -150,26 +170,80 @@ public class CareerStaffCLI extends AbstractCLI {
                 JOptionPane.showMessageDialog(frame, "No pending withdrawal requests.");
                 return;
             }
-            JTextArea ta = new JTextArea(String.join("\n", pending));
-            ta.setEditable(false);
-            JScrollPane sp = new JScrollPane(ta);
-            sp.setPreferredSize(new Dimension(600,300));
-            JOptionPane.showMessageDialog(frame, sp, "Pending Withdrawals", JOptionPane.INFORMATION_MESSAGE);
-            // Ask for application number to approve/reject (mirror console flow)
-            String appNumStr = JOptionPane.showInputDialog(frame, "Enter Application Number to approve/reject (leave blank to skip):");
-            if (appNumStr != null && !appNumStr.trim().isEmpty()) {
-                String[] opts = {"Approve","Reject","Cancel"};
-                int c = JOptionPane.showOptionDialog(frame, "Approve or reject this withdrawal?", "Approve/Reject",
-                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opts, opts[0]);
-                if (c == 0) {
-                    approveWithdrawal(appNumStr.trim());
-                } else if (c == 1) {
-                    rejectWithdrawal(appNumStr.trim());
-                }
+            JPanel listPanel = new JPanel();
+            listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+            for (String line : pending) {
+                JPanel row = new JPanel(new BorderLayout(8,8));
+                JLabel lbl = new JLabel(line);
+                JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+                JButton approve = new JButton("Approve");
+                JButton reject = new JButton("Reject");
+                String capturedLine = line;
+                approve.addActionListener(e -> {
+                    String num = parseApplicationNumber(capturedLine);
+                    try { approveWithdrawal(num); JOptionPane.showMessageDialog(frame, "Approved: " + num); approve.setEnabled(false); reject.setEnabled(false); }
+                    catch (Exception ex) { JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); }
+                });
+                reject.addActionListener(e -> {
+                    String num = parseApplicationNumber(capturedLine);
+                    try { rejectWithdrawal(num); JOptionPane.showMessageDialog(frame, "Rejected: " + num); approve.setEnabled(false); reject.setEnabled(false); }
+                    catch (Exception ex) { JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); }
+                });
+                btns.add(approve); btns.add(reject);
+                row.add(lbl, BorderLayout.CENTER);
+                row.add(btns, BorderLayout.EAST);
+                listPanel.add(row);
             }
+            JScrollPane sp = new JScrollPane(listPanel);
+            sp.setPreferredSize(new Dimension(700, Math.min(400, pending.size()*40 + 40)));
+            JOptionPane.showMessageDialog(frame, sp, "Pending Withdrawals", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    // --- Parsing helpers for lines produced by backend list methods ---
+    private String parseCompanyRepID(String line) {
+        // Expected format: "ID: <userID> | ..."
+        if (line == null) return "";
+        int i = line.indexOf("ID:");
+        if (i >= 0) {
+            int start = i + 3;
+            int end = line.indexOf('|', start);
+            if (end < 0) end = line.length();
+            return line.substring(start, end).trim();
+        }
+        // fallback: take first token
+        String[] parts = line.split("\\s+");
+        return parts.length > 0 ? parts[0] : "";
+    }
+
+    private String parseInternshipID(String line) {
+        // Expected format starts with "<internshipID> | ..." per backend
+        if (line == null) return "";
+        int end = line.indexOf('|');
+        if (end > 0) return line.substring(0, end).trim();
+        // fallback: first token
+        String[] parts = line.split("\\s+");
+        return parts.length > 0 ? parts[0] : "";
+    }
+
+    private String parseApplicationNumber(String line) {
+        // Expected format: "Application No: <num> | ..."
+        if (line == null) return "";
+        int i = line.indexOf("Application No:");
+        if (i >= 0) {
+            int start = i + "Application No:".length();
+            int end = line.indexOf('|', start);
+            if (end < 0) end = line.length();
+            return line.substring(start, end).trim();
+        }
+        // fallback: parse first integer found
+        String[] toks = line.split("\\D+");
+        for (String t : toks) {
+            if (!t.isEmpty()) return t;
+        }
+        return "";
     }
 
     private void generateReportChoice() {
