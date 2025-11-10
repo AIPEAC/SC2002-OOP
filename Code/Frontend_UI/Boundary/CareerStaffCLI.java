@@ -4,6 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import Backend.Control.*;
 import Frontend_UI.Helper.UIHelper;
@@ -165,6 +168,8 @@ public class CareerStaffCLI extends AbstractCLI {
 
     private void viewPendingWithdrawal() {
         try {
+            // Load all applications first so staff can see pending withdrawals
+            appCtrl.loadAllApplicationsFromDB();
             List<String> pending = appCtrl.getPendingWithdrawals();
             if (pending == null || pending.isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "No pending withdrawal requests.");
@@ -254,11 +259,145 @@ public class CareerStaffCLI extends AbstractCLI {
             boolean save = UIHelper.showYesNo("Save report to file?");
             generateReportOverview(save);
         } else if (c == 1) {
-            // simple placeholder for filters
-            Map<String, List<String>> filters = Map.of();
+            showFilterDialog();
+        }
+    }
+    
+    private void showFilterDialog() {
+        JDialog filterDialog = new JDialog(frame, "Specific Report Filters", true);
+        filterDialog.setLayout(new BorderLayout(10, 10));
+        filterDialog.setSize(700, 600);
+        filterDialog.setLocationRelativeTo(frame);
+        
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        
+        // Title
+        JLabel titleLabel = new JLabel("Select Filters for Report Generation", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        mainPanel.add(titleLabel, BorderLayout.NORTH);
+        
+        // Filter options panel
+        JPanel filtersPanel = new JPanel();
+        filtersPanel.setLayout(new BoxLayout(filtersPanel, BoxLayout.Y_AXIS));
+        
+        // Get available companies and majors from backend
+        List<String> availableCompanies = reportCtrl.getAllCompanyNames();
+        List<String> availableMajors = reportCtrl.getAllMajors();
+        
+        // Company Name Filter - Multi-select list
+        JPanel companyPanel = new JPanel(new BorderLayout(5, 5));
+        companyPanel.setBorder(BorderFactory.createTitledBorder("Filter by Company (Ctrl+Click for multiple)"));
+        JList<String> companyList = new JList<>(availableCompanies.toArray(new String[0]));
+        companyList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        companyList.setVisibleRowCount(5);
+        JScrollPane companyScroll = new JScrollPane(companyList);
+        companyScroll.setPreferredSize(new Dimension(600, 100));
+        companyPanel.add(new JLabel("Select Companies:"), BorderLayout.NORTH);
+        companyPanel.add(companyScroll, BorderLayout.CENTER);
+        filtersPanel.add(companyPanel);
+        filtersPanel.add(Box.createVerticalStrut(10));
+        
+        // Level Filter
+        JPanel levelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        levelPanel.setBorder(BorderFactory.createTitledBorder("Filter by Level"));
+        JCheckBox basicCheck = new JCheckBox("Basic");
+        JCheckBox intermediateCheck = new JCheckBox("Intermediate");
+        JCheckBox advancedCheck = new JCheckBox("Advanced");
+        levelPanel.add(basicCheck);
+        levelPanel.add(intermediateCheck);
+        levelPanel.add(advancedCheck);
+        filtersPanel.add(levelPanel);
+        filtersPanel.add(Box.createVerticalStrut(10));
+        
+        // Major Filter - Multi-select list
+        JPanel majorPanel = new JPanel(new BorderLayout(5, 5));
+        majorPanel.setBorder(BorderFactory.createTitledBorder("Filter by Major (Ctrl+Click for multiple)"));
+        JList<String> majorList = new JList<>(availableMajors.toArray(new String[0]));
+        majorList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        majorList.setVisibleRowCount(5);
+        JScrollPane majorScroll = new JScrollPane(majorList);
+        majorScroll.setPreferredSize(new Dimension(600, 100));
+        majorPanel.add(new JLabel("Select Majors:"), BorderLayout.NORTH);
+        majorPanel.add(majorScroll, BorderLayout.CENTER);
+        filtersPanel.add(majorPanel);
+        filtersPanel.add(Box.createVerticalStrut(10));
+        
+        // Date Filter
+        JPanel datePanel = new JPanel(new BorderLayout(5, 5));
+        datePanel.setBorder(BorderFactory.createTitledBorder("Filter by Opening Date"));
+        JTextField dateField = new JTextField();
+        dateField.setToolTipText("Enter start date in format YYYY-MM-DD (e.g., 2025-01-01)");
+        JLabel dateLabel = new JLabel("From Date (YYYY-MM-DD):");
+        datePanel.add(dateLabel, BorderLayout.WEST);
+        datePanel.add(dateField, BorderLayout.CENTER);
+        filtersPanel.add(datePanel);
+        
+        JScrollPane scrollPane = new JScrollPane(filtersPanel);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        // Buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton generateButton = new JButton("Generate Report");
+        JButton clearButton = new JButton("Clear All");
+        JButton cancelButton = new JButton("Cancel");
+        
+        generateButton.addActionListener(e -> {
+            Map<String, List<String>> filters = new HashMap<>();
+            
+            // Collect company filter from list selection
+            List<String> selectedCompanies = companyList.getSelectedValuesList();
+            if (!selectedCompanies.isEmpty()) {
+                filters.put("CompanyName", selectedCompanies);
+            }
+            
+            // Collect level filter
+            List<String> levels = new ArrayList<>();
+            if (basicCheck.isSelected()) levels.add("Basic");
+            if (intermediateCheck.isSelected()) levels.add("Intermediate");
+            if (advancedCheck.isSelected()) levels.add("Advanced");
+            if (!levels.isEmpty()) {
+                filters.put("Level", levels);
+            }
+            
+            // Collect major filter from list selection
+            List<String> selectedMajors = majorList.getSelectedValuesList();
+            if (!selectedMajors.isEmpty()) {
+                filters.put("Major", selectedMajors);
+            }
+            
+            // Collect date filter
+            String date = dateField.getText().trim();
+            if (!date.isEmpty()) {
+                filters.put("StartDate", Arrays.asList(date));
+            }
+            
+            filterDialog.dispose();
+            
+            // Ask if user wants to save
             boolean save = UIHelper.showYesNo("Save report to file?");
             generateReportSpecific(save, filters);
-        }
+        });
+        
+        clearButton.addActionListener(e -> {
+            companyList.clearSelection();
+            majorList.clearSelection();
+            basicCheck.setSelected(false);
+            intermediateCheck.setSelected(false);
+            advancedCheck.setSelected(false);
+            dateField.setText("");
+        });
+        
+        cancelButton.addActionListener(e -> filterDialog.dispose());
+        
+        buttonPanel.add(generateButton);
+        buttonPanel.add(clearButton);
+        buttonPanel.add(cancelButton);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        filterDialog.add(mainPanel);
+        filterDialog.setVisible(true);
     }
 
     private void approveWithdrawal(String appNum) {

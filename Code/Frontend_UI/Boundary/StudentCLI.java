@@ -156,7 +156,10 @@ public class StudentCLI extends AbstractCLI {
                         if (confirm == JOptionPane.YES_OPTION) {
                             try {
                                 acceptInternshipOpportunity(Integer.parseInt(finalAppNum));
-                                JOptionPane.showMessageDialog(frame, "Internship accepted! Please refresh to see updated status.");
+                                // Disable buttons immediately to prevent double-clicking
+                                acceptBtn.setEnabled(false);
+                                rejectBtn.setEnabled(false);
+                                JOptionPane.showMessageDialog(frame, "Internship accepted! Close this window and reopen to see updated status.");
                             } catch (Exception ex) {
                                 JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                             }
@@ -165,7 +168,10 @@ public class StudentCLI extends AbstractCLI {
                     rejectBtn.addActionListener(e -> {
                         try {
                             rejectInternshipOpportunity(Integer.parseInt(finalAppNum));
-                            JOptionPane.showMessageDialog(frame, "Offer rejected. Please refresh to see updated status.");
+                            // Disable buttons immediately to prevent double-clicking
+                            acceptBtn.setEnabled(false);
+                            rejectBtn.setEnabled(false);
+                            JOptionPane.showMessageDialog(frame, "Offer rejected. Close this window and reopen to see updated status.");
                         } catch (Exception ex) {
                             JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                         }

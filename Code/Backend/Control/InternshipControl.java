@@ -274,7 +274,11 @@ public class InternshipControl{
     /**
      * Approve application by internship ID and application number (company rep only).
      */
-    public void approveApplicationForInternship(String internshipID, int applicationNumber) {
+    /**
+     * Approve application and return a status message.
+     * Returns additional notification if internship becomes full.
+     */
+    public String approveApplicationForInternship(String internshipID, int applicationNumber) {
         if (!isCompanyRepLoggedIn()) {
             throw new IllegalStateException("User not logged in or not a company representative.");
         }
@@ -283,11 +287,59 @@ public class InternshipControl{
         if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) {
             throw new IllegalArgumentException("No such internship under your account or not authorized.");
         }
+        // Check if internship is already full before approving
+        if (opp.isFull()) {
+            throw new IllegalStateException("Cannot approve application - this internship is already full (" + 
+                opp.getAcceptedApplicationNumbers().size() + "/" + opp.getNumOfSlots() + " slots filled).");
+        }
         if (appCtrl != null) {
             appCtrl.approveApplicationByNumber(applicationNumber);
+            
+            // Check if internship is now full after this approval
+            String fullMessage = checkAndRejectIfFull(opp);
+            if (fullMessage != null) {
+                return "Approved application: " + applicationNumber + "\n\n" + fullMessage;
+            }
+            return "Approved application: " + applicationNumber;
         } else {
             throw new IllegalStateException("ApplicationControl not set; cannot approve application.");
         }
+    }
+    
+    /**
+     * Check if the internship has reached its capacity. If so, reject all remaining pending applications.
+     * Returns a message if internship is full, null otherwise.
+     */
+    private String checkAndRejectIfFull(InternshipOpportunity opp) {
+        if (opp == null) return null;
+        
+        List<Integer> acceptedApps = opp.getAcceptedApplicationNumbers();
+        int numAccepted = (acceptedApps != null) ? acceptedApps.size() : 0;
+        int numSlots = opp.getNumOfSlots();
+        
+        if (numAccepted >= numSlots) {
+            // Internship is full - reject all other pending applications
+            List<Integer> pendingApps = opp.getApplicationNumberList();
+            if (pendingApps != null && !pendingApps.isEmpty()) {
+                int rejectedCount = 0;
+                for (Integer appNum : pendingApps) {
+                    if (appCtrl != null) {
+                        try {
+                            appCtrl.rejectApplicationByNumber(appNum);
+                            rejectedCount++;
+                        } catch (Exception e) {
+                            // Continue rejecting others even if one fails
+                        }
+                    }
+                }
+                if (rejectedCount > 0) {
+                    return "⚠ This internship is now FULL (" + numAccepted + "/" + numSlots + " slots filled).\n" + rejectedCount + " other pending application(s) have been automatically rejected.";
+                }
+            }
+            // If no pending apps to reject, just notify that it's full
+            return "⚠ This internship is now FULL (" + numAccepted + "/" + numSlots + " slots filled).";
+        }
+        return null;
     }
 
     /**
@@ -345,7 +397,8 @@ public class InternshipControl{
     void approveApplicationNumberForInternship(int applicationNumber, String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
-        if (opp.isFull()) throw new IllegalStateException("Cannot approve; internship is already full.");
+        // Note: Don't check isFull() here because this is called after approval decision is made
+        // The full check happens in approveApplicationForInternship before calling this
         // move application number from pending to accepted list
         opp.approveApplicationNumber(applicationNumber);
         updateInternshipInDB();
@@ -891,11 +944,47 @@ public class InternshipControl{
                 return false;
             }
             String sid = authCtrl.getUserID();
-            // Both visibility/slot/status and student fits requirements must be true
-            return isVisibleAndNotFullAndNotRejected(internshipID) && studentFitsRequirements(sid, internshipID);
+            // Check: visibility, slots, status, student requirements, AND date range
+            return isVisibleAndNotFullAndNotRejected(internshipID) 
+                && studentFitsRequirements(sid, internshipID)
+                && isInternshipOpen(internshipID);
         } catch (Exception e) {
             // On any error, be conservative and return false
             return false;
+        }
+    }
+    
+    /**
+     * Check if the internship is currently open based on opening and closing dates.
+     * Returns true if today's date is between opening date (inclusive) and closing date (inclusive).
+     */
+    private boolean isInternshipOpen(String internshipID) {
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp == null) return false;
+        
+        Date now = new Date();
+        Date openDate = opp.getOpeningDate();
+        Date closeDate = opp.getCloseDate();
+        
+        if (openDate == null || closeDate == null) return true; // If dates not set, allow application
+        
+        // Strip time component for date-only comparison
+        // Set all times to start of day (00:00:00) for fair comparison
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            String nowStr = sdf.format(now);
+            String openStr = sdf.format(openDate);
+            String closeStr = sdf.format(closeDate);
+            
+            Date nowDateOnly = sdf.parse(nowStr);
+            Date openDateOnly = sdf.parse(openStr);
+            Date closeDateOnly = sdf.parse(closeStr);
+            
+            // Check if now is within [openDate, closeDate] inclusive
+            return !nowDateOnly.before(openDateOnly) && !nowDateOnly.after(closeDateOnly);
+        } catch (ParseException e) {
+            // If parsing fails, fall back to original comparison
+            return !now.before(openDate) && !now.after(closeDate);
         }
     }
     /** Return logged-in student year (3/4 gating logic for level filter) or null if not a student / not found. */

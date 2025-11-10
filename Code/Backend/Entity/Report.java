@@ -56,7 +56,7 @@ public class Report {
         }
         statistifyTheNumbers(internshipOpportunities);
         String md = buildMarkdownReport();
-        File dir = new File("Output_report");
+        File dir = new File("Code/Output_report");
         if (!dir.exists()){
             dir.mkdirs();
         }

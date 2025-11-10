@@ -231,11 +231,21 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                 approve.addActionListener(e -> {
                     try {
                         int num = Integer.parseInt(finalAppNum);
-                        intCtrl.approveApplicationForInternship(internshipID, num);
-                        JOptionPane.showMessageDialog(frame, "Approved application: " + num);
+                        String message = intCtrl.approveApplicationForInternship(internshipID, num);
+                        // Check if message contains "FULL" notification
+                        if (message != null && message.contains("FULL")) {
+                            JOptionPane.showMessageDialog(frame, message, "Application Approved", JOptionPane.WARNING_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(frame, message != null ? message : "Application approved successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        }
                         approve.setEnabled(false); reject.setEnabled(false);
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        ex.printStackTrace(); // Print full stack trace for debugging
+                        String errorMsg = ex.getMessage();
+                        if (errorMsg == null || errorMsg.trim().isEmpty()) {
+                            errorMsg = "An error occurred: " + ex.getClass().getSimpleName();
+                        }
+                        JOptionPane.showMessageDialog(frame, errorMsg, "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 });
                 reject.addActionListener(e -> {

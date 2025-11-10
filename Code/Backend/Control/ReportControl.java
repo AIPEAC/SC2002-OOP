@@ -180,7 +180,7 @@ public class ReportControl {
     private int getNumberOfReports(){
         // Count files in the Output_report directory matching Report####.md
         try {
-            File dir = new File("Output_report");
+            File dir = new File("Code/Output_report");
             if (!dir.exists() || !dir.isDirectory()) return 0;
             String[] files = dir.list((d, name) -> name.matches("Report\\d{4}\\.md"));
             return files == null ? 0 : files.length;
@@ -188,6 +188,45 @@ public class ReportControl {
             // If we cannot access the directory, treat as zero
             return 0;
         }
+    }
+    
+    /** Get list of unique company names from all internship opportunities */
+    public List<String> getAllCompanyNames() {
+        Set<String> companies = new HashSet<>();
+        for (InternshipOpportunity opp : allOpplist) {
+            List<Object> details = opp.getDetailsForReport();
+            if (details.size() > 5) {
+                String companyName = (String) details.get(5);
+                if (companyName != null && !companyName.trim().isEmpty()) {
+                    companies.add(companyName);
+                }
+            }
+        }
+        List<String> sortedCompanies = new ArrayList<>(companies);
+        sortedCompanies.sort(String::compareTo);
+        return sortedCompanies;
+    }
+    
+    /** Get list of unique majors from all internship opportunities */
+    public List<String> getAllMajors() {
+        Set<String> majors = new HashSet<>();
+        for (InternshipOpportunity opp : allOpplist) {
+            List<Object> details = opp.getDetailsForReport();
+            if (details.size() > 2) {
+                @SuppressWarnings("unchecked")
+                List<String> oppMajors = (List<String>) details.get(2);
+                if (oppMajors != null) {
+                    for (String major : oppMajors) {
+                        if (major != null && !major.trim().isEmpty()) {
+                            majors.add(major);
+                        }
+                    }
+                }
+            }
+        }
+        List<String> sortedMajors = new ArrayList<>(majors);
+        sortedMajors.sort(String::compareTo);
+        return sortedMajors;
     }
     
 }
