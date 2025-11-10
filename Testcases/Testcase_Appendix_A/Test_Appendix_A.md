@@ -4,7 +4,7 @@
 
 | Index | Test Case | Expected Behavior | Failure Indicator | Pass (Y/N) |
 |-------|-----------|-------------------|-------------------|------------|
-| 1 | Valid User Login | User should be able to access their dashboard based on their roles | User cannot log in or receive incorrect error messages | |
+| 1 | Valid User Login | User should be able to access their dashboard based on their roles | User cannot log in or receive incorrect error messages | Y |
 | 2 | Invalid ID | User receives a notification about incorrect ID | User is allowed to log in with an invalid ID or fail to provide meaningful error message | |
 | 3 | Incorrect Password | System should deny access and alert the user to incorrect password | User logs in successfully with a wrong password or fail to provide meaningful error message | |
 | 4 | Password Change Functionality | System updates password, prompt re-login and allows login with new credentials | System does not update the password or denies access with the new password | |
@@ -22,20 +22,26 @@
 ### Test Case 1: Valid User Login
 - **Test Case:** Valid User Login
 - **Expected Behavior:** User should be able to access their dashboard based on their roles
-- **Actual Result:** 
+- **Actual Result:** Successfully logged in to Staff/Student/CompanyRep's respective Interface upon enter the correct username and password.
 - **Failure Indicator:** User cannot log in or receive incorrect error messages
+- **Pass:** Yes
 - **Screenshots:** 
-- **Pass:** 
 
+| Career Staff | Student | Company Rep |
+| ---------- | ----------- | -------------- | 
+| ![login staff](Testcase1_Staff.png) | ![login Student](Testcase1_Student.png) |![login CompRep](Testcase1_CompanyRep.png)|
+|  |
 ---
+
 
 ### Test Case 2: Invalid ID
 - **Test Case:** Invalid ID
 - **Expected Behavior:** User receives a notification about incorrect ID
 - **Actual Result:** 
 - **Failure Indicator:** User is allowed to log in with an invalid ID or fail to provide meaningful error message
+- **Pass:**
 - **Screenshots:** 
-- **Pass:** 
+ 
 
 ---
 
@@ -44,8 +50,8 @@
 - **Expected Behavior:** System should deny access and alert the user to incorrect password
 - **Actual Result:** 
 - **Failure Indicator:** User logs in successfully with a wrong password or fail to provide meaningful error message
-- **Screenshots:** 
 - **Pass:** 
+- **Screenshots:** 
 
 ---
 
@@ -54,8 +60,8 @@
 - **Expected Behavior:** System updates password, prompt re-login and allows login with new credentials
 - **Actual Result:** 
 - **Failure Indicator:** System does not update the password or denies access with the new password
-- **Screenshots:** 
 - **Pass:** 
+- **Screenshots:** 
 
 ---
 
@@ -64,8 +70,8 @@
 - **Expected Behavior:** A new Company Representative should only be able to log in to their account after it has been approved by a Career Center Staff
 - **Actual Result:** 
 - **Failure Indicator:** Company Representative staff can log in without any authorization
-- **Screenshots:** 
 - **Pass:** 
+- **Screenshots:** 
 
 ---
 
@@ -74,8 +80,8 @@
 - **Expected Behavior:** Internship opportunities are visible to students based on their year of study, major, internship level eligibility, and the visibility setting
 - **Actual Result:** 
 - **Failure Indicator:** Students see internship opportunities not relevant to their profile (wrong major, wrong level for their year) or when visibility is off
-- **Screenshots:** 
 - **Pass:** 
+- **Screenshots:** 
 
 ---
 
@@ -84,8 +90,8 @@
 - **Expected Behavior:** Students can only apply for internship opportunities relevant to their profile (correct major preference, appropriate level for their year of study) and when visibility is on
 - **Actual Result:** 
 - **Failure Indicator:** Students can apply for internship opportunities not relevant to their profile (wrong major preference, Basic-level students applying for Intermediate/Advanced opportunities) or when visibility is off
-- **Screenshots:** 
 - **Pass:** 
+- **Screenshots:** 
 
 ---
 
@@ -94,8 +100,8 @@
 - **Expected Behavior:** Students continue to have access to their application details regardless of internship opportunities' visibility
 - **Actual Result:** 
 - **Failure Indicator:** Application details become inaccessible once visibility is off
-- **Screenshots:** 
 - **Pass:** 
+- **Screenshots:** 
 
 ---
 
@@ -104,8 +110,8 @@
 - **Expected Behavior:** -
 - **Actual Result:** 
 - **Failure Indicator:** -
-- **Screenshots:** 
 - **Pass:** 
+- **Screenshots:** 
 
 ---
 
@@ -114,8 +120,8 @@
 - **Expected Behavior:** System allows accepting one internship placement and automatically withdraws all other applications once a placement is accepted
 - **Actual Result:** 
 - **Failure Indicator:** Student can accept more than one internship placement, or other applications remain active after accepting
-- **Screenshots:** 
 - **Pass:** 
+- **Screenshots:** 
 
 ---
 
