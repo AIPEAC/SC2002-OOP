@@ -56,6 +56,20 @@ public class StudentCLI extends AbstractCLI {
 
     // changePassword and viewFilteredInternshipOpportunities inherited from AbstractCLI
 
+    @Override
+    protected void onApply(String internshipID) {
+        if (internshipID == null || internshipID.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Invalid Internship ID.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        try {
+            int appNum = appCtrl.makeApplication(internshipID);
+            JOptionPane.showMessageDialog(frame, "Application submitted successfully. Application Number: " + appNum);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void submitApplication() {
         String id = JOptionPane.showInputDialog(frame, "Enter Internship ID:");
         if (id == null || id.trim().isEmpty()) return;

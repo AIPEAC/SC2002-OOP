@@ -208,10 +208,84 @@ public abstract class AbstractCLI {
             JOptionPane.showMessageDialog(null, "No internships found.");
             return;
         }
-        JTextArea ta = new JTextArea(String.join("\n", lines));
-        ta.setEditable(false);
-        JScrollPane sp = new JScrollPane(ta);
-        sp.setPreferredSize(new Dimension(600,300));
+        JPanel listPanel = new JPanel();
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+        for (String line : lines) {
+            String id = parseFieldByPrefix(line, "internshipID", false);
+            String title = parseField(line, "internshipTitle");
+            String company = parseField(line, "companyName");
+            String majors = parseField(line, "preferredMajors");
+
+            String summary = String.format("%s | %s | %s | Majors: %s",
+                    id != null ? id : "",
+                    title != null ? title : "",
+                    company != null ? company : "",
+                    majors != null ? majors : "");
+
+            JPanel row = new JPanel(new BorderLayout());
+            row.add(new JLabel(summary), BorderLayout.CENTER);
+            JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton details = new JButton("View Details");
+            String finalId = id;
+            details.addActionListener(e -> showInternshipDetails(finalId));
+            JButton applyBtn = new JButton("Apply");
+            applyBtn.addActionListener(e -> onApply(finalId));
+            actions.add(details);
+            actions.add(applyBtn);
+            row.add(actions, BorderLayout.EAST);
+            row.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.LIGHT_GRAY));
+            listPanel.add(row);
+        }
+        JScrollPane sp = new JScrollPane(listPanel);
+        sp.setPreferredSize(new Dimension(700,400));
         JOptionPane.showMessageDialog(null, sp, "Internships", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // Default no-op apply handler (subclasses like StudentCLI should override)
+    protected void onApply(String internshipID) {
+        JOptionPane.showMessageDialog(null, "Applying is not available here.", "Not available", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void showInternshipDetails(String internshipID) {
+        if (internshipID == null || internshipID.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Unable to determine Internship ID for details.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        try {
+            List<String> details = intCtrl.getInternshipDetails(internshipID);
+            if (details == null || details.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "No details found.");
+                return;
+            }
+            JTextArea ta = new JTextArea(String.join("\n", details));
+            ta.setWrapStyleWord(true); ta.setLineWrap(true); ta.setEditable(false);
+            JScrollPane sp = new JScrollPane(ta);
+            sp.setPreferredSize(new Dimension(600, 350));
+            JOptionPane.showMessageDialog(null, sp, "Internship Details", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Parsing helpers from toString() line format
+    private String parseField(String line, String key) {
+        // pattern like "key=value, "
+        String marker = key + "=";
+        int idx = line.indexOf(marker);
+        if (idx < 0) return null;
+        int start = idx + marker.length();
+        int end = line.indexOf(", ", start);
+        if (end < 0) end = line.length();
+        return line.substring(start, end).trim();
+    }
+    private String parseFieldByPrefix(String line, String key, boolean includeEquals) {
+        // handles the internshipID prefix without '=' in toString()
+        String marker = key + (includeEquals ? "=" : "");
+        int idx = line.indexOf(marker);
+        if (idx < 0) return null;
+        int start = idx + marker.length();
+        int end = line.indexOf(", ", start);
+        if (end < 0) end = line.length();
+        return line.substring(start, end).trim();
     }
 }

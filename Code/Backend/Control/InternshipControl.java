@@ -129,7 +129,7 @@ public class InternshipControl{
         return visible;
     }
     /** Return details for display (labelled strings) for a given internship ID. */
-    List<String> getInternshipDetails(String internshipID) {
+    public List<String> getInternshipDetails(String internshipID) {
         if (!authCtrl.isLoggedIn()) throw new IllegalStateException("Please login to view internship details.");
         InternshipOpportunity opp = getInternshipByID(internshipID);
         List<String> out = new ArrayList<>();
