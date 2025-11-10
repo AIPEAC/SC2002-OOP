@@ -210,6 +210,11 @@ public abstract class AbstractCLI {
         }
         JPanel listPanel = new JPanel();
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+
+    // Determine if current user may apply (only students)
+        boolean canApply = false;
+        try { canApply = intCtrl.getLoggedInStudentYear() != null; } catch (Exception ex) { canApply = false; }
+
         for (String line : lines) {
             String id = parseFieldByPrefix(line, "internshipID", false);
             String title = parseField(line, "internshipTitle");
@@ -230,6 +235,8 @@ public abstract class AbstractCLI {
             details.addActionListener(e -> showInternshipDetails(finalId));
             JButton applyBtn = new JButton("Apply");
             applyBtn.addActionListener(e -> onApply(finalId));
+            applyBtn.setEnabled(canApply);
+            if (!canApply) applyBtn.setToolTipText("Log in as a student to apply");
             actions.add(details);
             actions.add(applyBtn);
             row.add(actions, BorderLayout.EAST);

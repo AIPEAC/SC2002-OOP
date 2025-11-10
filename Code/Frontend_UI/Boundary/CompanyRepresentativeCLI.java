@@ -5,8 +5,8 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
 import Backend.Control.*;
 import Frontend_UI.Helper.UIHelper;
@@ -54,7 +54,7 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
 
             JButton logout = new JButton("Logout");
             logout.addActionListener(e -> {
-                Frontend_UI.Helper.UIHelper.closeLoggedInPopup();
+                UIHelper.closeLoggedInPopup();
                 frame.dispose();
             });
             p.add(logout);
@@ -145,19 +145,19 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                 return;
             }
             // Group lines into blocks per application. Each block starts with a line containing "Application No.".
-            java.util.List<java.util.List<String>> blocks = new java.util.ArrayList<>();
-            java.util.List<String> cur = null;
+            List<List<String>> blocks = new ArrayList<>();
+            List<String> cur = null;
             for (String l : lines) {
                 if (l != null && l.contains("Application No")) {
                     // start new block
-                    cur = new java.util.ArrayList<>();
+                    cur = new ArrayList<>();
                     cur.add(l);
                     blocks.add(cur);
                 } else if (cur != null) {
                     cur.add(l);
                 } else {
                     // if no block started yet, create one
-                    cur = new java.util.ArrayList<>();
+                    cur = new ArrayList<>();
                     cur.add(l);
                     blocks.add(cur);
                 }
