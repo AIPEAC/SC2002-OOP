@@ -1,0 +1,732 @@
+package Backend.Control;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.ArrayList;
+import java.util.List;
+
+import Backend.Entity.Users.*;
+
+import java.util.Arrays;
+
+
+
+public class UserLoginDirectoryControl{
+    private List<String[]> loginList;
+    private String[] StudentInfoList;
+    private String[] StaffInfoList;
+    private String[] CompanyRepInfoList;
+    private boolean haveInitialized=false;
+    private AuthenticationControl authCtrl;
+    
+    public UserLoginDirectoryControl(AuthenticationControl authCtrl){
+        this.authCtrl=authCtrl;
+        loadUsersFromExamplesToDB();
+        loadLoginListFromDB();
+    }
+
+    private void loadLoginListFromDB(){
+        String csvFile = "Code/Backend/Lib/login_list.csv";
+        File file = new File(csvFile);
+        String line = "";
+        String csvSplitBy = ",";
+        loginList = new ArrayList<>();
+
+        try {
+            if (!file.exists()) {
+                file.getParentFile().mkdirs(); 
+                file.createNewFile();
+                try (FileWriter writer = new FileWriter(file)) {
+                    writer.append("identity,userID,passwordHash,salt,status\n");
+                }
+            }
+
+            try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+                br.readLine(); // Skip header
+                while ((line = br.readLine()) != null) {
+                    String[] loginData = line.split(csvSplitBy);
+                    // Normalize legacy rows to 5 columns (identity,userID,passwordHash,salt,status)
+                    if (loginData.length < 5) {
+                        String[] expanded = new String[5];
+                        for (int i = 0; i < loginData.length; i++) expanded[i] = loginData[i];
+                        for (int i = loginData.length; i < 5; i++) expanded[i] = "";
+                        loginData = expanded;
+                    }
+                    // Repair case where status was mistakenly written into salt (legacy bug)
+                    if ("CompanyRepresentative".equals(loginData[0])) {
+                        String maybeSalt = loginData[3];
+                        if (maybeSalt != null) {
+                            String v = maybeSalt.trim().toLowerCase();
+                            if ("approved".equals(v) || "rejected".equals(v) || "pending".equals(v)) {
+                                // move value to status column, clear salt
+                                loginData[4] = loginData[3];
+                                loginData[3] = "";
+                            }
+                        }
+                    }
+                    loginList.add(loginData);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private void loadStudent(String userID){
+        String csvFile = "Code/Backend/Lib/student.csv";
+        File file = new File(csvFile);
+        String line = "";
+        String csvSplitBy = ",";
+
+        try {
+            if (!file.exists()) {
+                throw new Exception("bug: UserLoginDirectoryControl.loadStudent(): The data file is not found. Initialization fail or data file deleted.");
+            }
+
+            try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+                br.readLine(); // Skip header
+                while ((line = br.readLine()) != null) {
+                    String[] StudentData = line.split(csvSplitBy);
+                    if (StudentData[0].equals(userID)) {
+                        StudentInfoList = StudentData;
+                        break;
+                    }
+                }
+                if (StudentInfoList == null) {
+                    throw new Exception("bug: UserLoginDirectoryControl.loadStudent(): Student not found. code for login is wrong.");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+    private void loadStaff(String userID){
+        String csvFile = "Code/Backend/Lib/staff.csv";
+        File file = new File(csvFile);
+        String line = "";
+        String csvSplitBy = ",";
+
+        try {
+            if (!file.exists()) {
+                throw new Exception("bug: UserLoginDirectoryControl.loadStaff(): The data file is not found. Initialization fail or data file deleted.");
+            }
+
+            try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+                br.readLine(); // Skip header
+                while ((line = br.readLine()) != null) {
+                    String[] StaffData = line.split(csvSplitBy);
+                    if (StaffData[0].equals(userID)) {
+                        StaffInfoList = StaffData;
+                        break;
+                    }
+                }
+                if (StaffInfoList == null) {
+                    throw new Exception("bug: UserLoginDirectoryControl.loadStaff(): Staff not found. code for login is wrong.");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+    private void loadCompanyRep(String userID){
+        String csvFile = "Code/Backend/Lib/company_representative.csv";
+        File file = new File(csvFile);
+        String line = "";
+        String csvSplitBy = ",";
+
+        try {
+            if (!file.exists()) {
+                throw new Exception("bug: UserLoginDirectoryControl.loadCompanyRep(): The data file is not found. Initialization fail or data file deleted.");
+            }
+
+            try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+                br.readLine(); // Skip header
+                while ((line = br.readLine()) != null) {
+                    String[] CompanyRepData = line.split(csvSplitBy);
+                    // Normalize to 7 columns: userID,name,email,position,accountStatus,companyName,department
+                    if (CompanyRepData.length < 7) {
+                        String[] expanded = new String[7];
+                        for (int i = 0; i < CompanyRepData.length; i++) expanded[i] = CompanyRepData[i];
+                        for (int i = CompanyRepData.length; i < 7; i++) expanded[i] = "";
+                        CompanyRepData = expanded;
+                    }
+                    if (CompanyRepData[0].equals(userID)) {
+                        CompanyRepInfoList = CompanyRepData;
+                        break;
+                    }
+                }
+                if (CompanyRepInfoList == null) {
+                    throw new Exception("bug: UserLoginDirectoryControl.loadCompanyRep(): Company Representative not found. code for login is wrong.");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }  
+    
+    String verifyUser(String userID, String password){
+        for (String[] loginData : loginList) {
+            String identity = loginData[0];
+            if (loginData[1].equals(userID)) {
+                String salt = "";
+                if (loginData.length > 3 && loginData[3] != null) salt = loginData[3];
+                if (!loginData[2].equals(hashPassword(password, salt))) {
+                    // password mismatch
+                    continue;
+                }
+                if (identity.equals("CompanyRepresentative")) {
+                    loadCompanyRep(userID);
+                    if (CompanyRepInfoList != null) {
+                        String status = CompanyRepInfoList[4];
+                        CompanyRepInfoList = null;
+                        switch (status) {
+                            case "approved":
+                                return identity;
+                            case "pending":
+                                return "pending";
+                            case "rejected":
+                                return "rejected";
+                            default:
+                                return null; // Or some other error status
+                        }
+                    }
+                }
+                return identity;
+            }
+        }
+        return null;
+    }
+     
+    
+    // New: SHA-256 hash with salt. If salt is empty string, behaves like previous hashPassword.
+    private static String hashPassword(String password, String salt) {
+        if (password == null) return null;
+        String input = (salt == null || salt.isEmpty()) ? password : salt + password;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedBytes = md.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashedBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Hashing algorithm not found", e);
+        }
+    }
+
+    // Generate a random salt encoded in base64-url without padding
+    private static String generateSalt() {
+        byte[] salt = new byte[16];
+        new SecureRandom().nextBytes(salt);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(salt);
+    }
+    User createUser(String userID, String identity){
+        switch(identity){
+            case "Student":
+                loadStudent(userID);
+                List<String> majors = null;
+                if (StudentInfoList[3] != null && !StudentInfoList[3].isEmpty()) {
+                    majors = Arrays.asList(StudentInfoList[3].split(" "));
+                }
+                Student student=new Student(StudentInfoList[0],
+                    StudentInfoList[1],
+                    StudentInfoList[2],
+                    majors,
+                    Integer.parseInt(StudentInfoList[4]),
+                    Boolean.parseBoolean(StudentInfoList[5]));
+                StudentInfoList=null;
+                return student;
+            case "Staff":
+                loadStaff(userID);
+                CareerStaff staff = new CareerStaff(StaffInfoList[0],
+                    StaffInfoList[1],
+                    StaffInfoList[2],
+                    StaffInfoList[3],
+                    StaffInfoList[4]);
+                StaffInfoList=null;
+                return staff;
+            case "CompanyRepresentative":
+                loadCompanyRep(userID);
+                CompanyRepresentative companyRep = new CompanyRepresentative(CompanyRepInfoList[0],
+                    CompanyRepInfoList[1],
+                    CompanyRepInfoList[2],
+                    CompanyRepInfoList[3],
+                    CompanyRepInfoList[4],
+                    CompanyRepInfoList[5],
+                    CompanyRepInfoList[6]);
+                CompanyRepInfoList=null;
+                return companyRep;
+            default:
+                throw new IllegalArgumentException("bug: UserLoginDirectory.createUser(): wrong identity, possibly wrongly written into login_list.csv");
+        }
+    }
+    String getCompanyRepsCompany(String userID){
+        if (authCtrl.isLoggedIn()) {
+            loadCompanyRep(userID);
+            String companyName=CompanyRepInfoList[5];
+            CompanyRepInfoList=null;
+            return companyName;
+        }
+        throw new IllegalStateException("UserLoginDirectoryControl.getCompanyRepsCompany(): no logged in user when getting a CompanyRep's company");
+    }
+    
+
+    void changePassword(String userID, String newPassword){
+        if (!authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("UserLoginDirectoryControl.changePassword(): no logged in user when changing password");
+        }
+        for (String[] loginData : loginList) {
+            if (loginData[1].equals(userID)) {
+                String newSalt = generateSalt();
+                // ensure array length to 5 (identity,userID,passwordHash,salt,status)
+                for (int i = 0; i < loginList.size(); i++) {
+                    String[] row = loginList.get(i);
+                    if (row.length > 1 && row[1].equals(userID)) {
+                        if (row.length < 5) {
+                            String[] expanded = new String[5];
+                            for (int j = 0; j < row.length; j++) expanded[j] = row[j];
+                            for (int j = row.length; j < 5; j++) expanded[j] = "";
+                            row = expanded;
+                        }
+                        row[3] = newSalt; // salt
+                        row[2] = hashPassword(newPassword, newSalt);
+                        loginList.set(i, row);
+                        break;
+                    }
+                }
+            }
+        }
+
+    String csvFile = "Code/Backend/Lib/login_list.csv";
+    File inputFile = new File(csvFile);
+    File tempFile = new File("Code/Backend/Lib/login_list.tmp");
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+             FileWriter writer = new FileWriter(tempFile)) {
+
+            writer.append("identity,userID,passwordHash,salt,status\n");
+            for (String[] loginData : loginList) {
+                // normalize to 5 columns
+                String[] out = new String[] {"", "", "", "", ""};
+                for (int k = 0; k < loginData.length && k < 5; k++) {
+                    out[k] = (loginData[k] == null) ? "" : loginData[k];
+                }
+                writer.append(String.join(",", out));
+                writer.append("\n");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        inputFile.delete();
+        tempFile.renameTo(inputFile);
+    }
+    
+    String requestRegisterCompanyRep(String name,String companyName,String department,String postion,String email){
+        // Validate inputs: require at least 3 characters for companyName and name
+        if (companyName == null || companyName.trim().length() < 3) {
+            throw new IllegalArgumentException("Company name must be at least 3 characters.");
+        }
+        if (name == null || name.trim().length() < 3) {
+            throw new IllegalArgumentException("Name must be at least 3 characters.");
+        }
+
+        // Check duplicates: existing company representative names or company names should not duplicate
+        String csvFile = "Code/Backend/Lib/company_representative.csv";
+        File file = new File(csvFile);
+        if (file.exists()) {
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                br.readLine(); // skip header
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts.length >= 2) {
+                        String existingName = parts[1] != null ? parts[1].trim() : "";
+                        String existingCompany = parts.length > 5 && parts[5] != null ? parts[5].trim() : "";
+                        if (!existingName.isEmpty() && existingName.equalsIgnoreCase(name.trim())) {
+                            throw new IllegalArgumentException("A company representative with the same name already exists: " + existingName);
+                        }
+                        if (!existingCompany.isEmpty() && existingCompany.equalsIgnoreCase(companyName.trim())) {
+                            throw new IllegalArgumentException("A company with the same name already exists: " + existingCompany);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        String assignedID=assignIDToCompanyRep();
+
+        try (FileWriter writer = new FileWriter("Code/Backend/Lib/company_representative.csv", true)) {
+            writer.append(String.join(",", assignedID, name, email, postion, "pending", companyName, department));
+            writer.append("\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        try (FileWriter writer = new FileWriter("Code/Backend/Lib/login_list.csv", true)) {
+            String salt = generateSalt();
+            // store status as pending in the 5th column
+            writer.append(String.join(",", "CompanyRepresentative", assignedID, hashPassword("password", salt), salt, "pending"));
+            writer.append("\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        loadLoginListFromDB();
+
+        return assignedID;
+    }
+    private String assignIDToCompanyRep(){
+        List<String> allUserIDs = new ArrayList<>();
+        String[] csvFiles = {"Code/Backend/Lib/company_representative.csv", "Code/Backend/Lib/student.csv", "Code/Backend/Lib/staff.csv"};
+
+        for (String csvFile : csvFiles) {
+            File file = new File(csvFile);
+            if (!file.exists()) {
+                try {
+                    file.getParentFile().mkdirs();
+                    file.createNewFile();
+                    try (FileWriter writer = new FileWriter(file)) {
+                        String header = "";
+                        if (csvFile.equals("Code/Backend/Lib/company_representative.csv")) {
+                            header = "userID,name,email,position,accountStatus,companyName,department";
+                        } else if (csvFile.equals("Code/Backend/Lib/student.csv")) {
+                            header = "userID,name,email,major,year,hasAcceptedInternshipOpportunity";
+                        } else if (csvFile.equals("Code/Backend/Lib/staff.csv")) {
+                            header = "userID,name,email,department,role";
+                        }
+                        writer.append(header);
+                        writer.append("\n");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                br.readLine(); // Skip header
+                while ((line = br.readLine()) != null) {
+                    String[] data = line.split(",");
+                    if (data.length > 0) {
+                        allUserIDs.add(data[0]);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        int maxID = 0;
+        for (String userID : allUserIDs) {
+            if (userID.startsWith("comprep")) {
+                try {
+                    int idNum = Integer.parseInt(userID.substring(7));
+                    if (idNum > maxID) {
+                        maxID = idNum;
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignore IDs that don't have a valid number format
+                    continue;
+                }
+            }
+        }
+
+        return String.format("comprep%04d", maxID + 1);
+    }
+
+    void approveCompanyRep(String userID){
+        if (!authCtrl.isLoggedIn()) throw new IllegalStateException("UserLoginDirectoryControl.approveCompanyRep(): no logged in user when approving a CompanyRep");
+        if (userID == null) throw new IllegalArgumentException("UserLoginDirectoryControl.approveCompanyRep(): null userID");
+        updateCompanyRepStatusInLogin(userID, "approved");
+        updateCompanyRepStatusInCompanyRepCSV(userID, "approved");
+    }
+    void rejectCompanyRep(String userID){
+        updateCompanyRepStatusInLogin(userID, "rejected");
+        updateCompanyRepStatusInCompanyRepCSV(userID, "rejected");
+    }
+    // Update the status field (stored in the 5th column) for a CompanyRepresentative in login_list.csv
+    private void updateCompanyRepStatusInLogin(String userID, String status) {
+        boolean updated = false;
+
+        // Ensure in-memory list is present
+        if (loginList == null) {
+            loadLoginListFromDB();
+        }
+
+        // Update the in-memory row first
+        for (int i = 0; i < loginList.size(); i++) {
+            String[] row = loginList.get(i);
+            if (row.length >= 2
+                && "CompanyRepresentative".equals(row[0])
+                && userID.equals(row[1])) {
+                // Ensure row has at least 4 columns
+                if (row.length < 5) {
+                    String[] expanded = new String[5];
+                    for (int j = 0; j < row.length; j++) expanded[j] = row[j];
+                    for (int j = row.length; j < 5; j++) expanded[j] = "";
+                    row = expanded;
+                }
+                // store status in the 5th column (index 4)
+                row[4] = status;
+                loginList.set(i, row);
+                updated = true;
+                break;
+            }
+        }
+
+        // Persist changes back to CSV if updated
+        if (updated) {
+            String csvFile = "Code/Backend/Lib/login_list.csv";
+            File inputFile = new File(csvFile);
+            File tempFile = new File("Code/Backend/Lib/login_list.tmp");
+
+            try (FileWriter writer = new FileWriter(tempFile)) {
+                // Write header (with status column)
+                writer.append("identity,userID,passwordHash,salt,status\n");
+                // Write rows
+                for (String[] data : loginList) {
+                    // Normalize to 5 columns when writing
+                    String[] out = new String[] {"", "", "", "", ""};
+                    for (int k = 0; k < data.length && k < 5; k++) {
+                        out[k] = (data[k] == null) ? "" : data[k];
+                    }
+                    writer.append(String.join(",", out)).append("\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+
+            // Replace original with temp
+            if (inputFile.exists()) inputFile.delete();
+            tempFile.renameTo(inputFile);
+
+            // Reload in-memory state
+            loadLoginListFromDB();
+        } else {
+            throw new IllegalArgumentException("UserLoginDirectoryControl.updateCompanyRepStatusInLogin(): CompanyRepresentative not found for userID=" + userID);
+        }
+    }
+    private void updateCompanyRepStatusInCompanyRepCSV(String userID, String status) {
+    String csvFile = "Code/Backend/Lib/company_representative.csv";
+        File inputFile = new File(csvFile);
+        File tempFile = new File("Code/Backend/Lib/company_representative.tmp");
+        boolean updated = false;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+             FileWriter writer = new FileWriter(tempFile)) {
+
+            String header = reader.readLine();
+            // ensure header present and write normalized header with 7 columns
+            if (header == null || header.trim().isEmpty()) {
+                writer.append("userID,name,email,position,accountStatus,companyName,department").append("\n");
+            } else {
+                writer.append(header).append("\n");
+            }
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+                // normalize to 7 columns
+                if (data.length < 7) {
+                    String[] expanded = new String[7];
+                    for (int j = 0; j < data.length; j++) expanded[j] = data[j];
+                    for (int j = data.length; j < 7; j++) expanded[j] = "";
+                    data = expanded;
+                }
+                if (data.length > 0 && data[0].equals(userID)) {
+                    // Update status (5th column, index 4)
+                    data[4] = status;
+                    updated = true;
+                }
+                writer.append(String.join(",", data)).append("\n");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        if (updated) {
+            inputFile.delete();
+            tempFile.renameTo(inputFile);
+        } else {
+            tempFile.delete();
+            throw new IllegalArgumentException("UserLoginDirectoryControl.updateCompanyRepStatusInLogin(): CompanyRepresentative not found for userID=" + userID);
+        }
+    }
+
+
+
+    //intialization related methods
+    private void checkHaveInitialized() {
+        String csvFile = "Code/Backend/Lib/have_initialized.csv";
+        File file = new File(csvFile);
+        String line = "";
+        String csvSplitBy = ",";
+
+        try {
+            if (!file.exists()) {
+                file.getParentFile().mkdirs(); 
+                file.createNewFile();
+                try (FileWriter writer = new FileWriter(file)) {
+                    writer.append("have_initialized\n");
+                    writer.append("false\n");
+                }
+            }
+
+            try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+                br.readLine(); // Skip header
+                if ((line = br.readLine()) != null) {
+                    String[] data = line.split(csvSplitBy);
+                    haveInitialized = Boolean.parseBoolean(data[0]);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private void setHaveInitialized(boolean status) {
+        String csvFile = "Code/Backend/Lib/have_initialized.csv";
+        File inputFile = new File(csvFile);
+        File tempFile = new File("Code/Backend/Lib/have_initialized.tmp");
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+             FileWriter writer = new FileWriter(tempFile)) {
+
+            String header = reader.readLine();
+            writer.append(header).append("\n");
+            writer.append(Boolean.toString(status)).append("\n");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        inputFile.delete();
+        tempFile.renameTo(inputFile);
+        haveInitialized = status;
+    }
+    private void loadUsersFromExamplesToDB(){
+        checkHaveInitialized();
+        if (haveInitialized) {
+            return;
+        }
+        String filePathExampleStaff = "Code/Backend/Lib_example/sample_staff_list.csv";
+        String filePathExampleStudent = "Code/Backend/Lib_example/sample_student_list.csv";
+        String filePathExampleCompanyRep = "Code/Backend/Lib_example/sample_company_representative_list.csv";
+    String filePathDBLogin = "Code/Backend/Lib/login_list.csv";
+        String filePathDBStaffString = "Code/Backend/Lib/staff.csv";
+        String filePathDBStudentString = "Code/Backend/Lib/student.csv";
+        
+        BufferedReader br = null;
+        String line;
+        try {
+            // Ensure DB CSVs exist with headers and end with newline to avoid concatenation
+            ControlUtils.ensureCsvPrepared(filePathDBLogin, "identity,userID,passwordHash,salt,status");
+            ControlUtils.ensureCsvPrepared(filePathDBStaffString, "userID,name,email,department,role");
+            ControlUtils.ensureCsvPrepared(filePathDBStudentString, "userID,name,email,major,year,hasAcceptedInternshipOpportunity");
+            ControlUtils.ensureCsvPrepared("Code/Backend/Lib/company_representative.csv", "userID,name,email,position,accountStatus,companyName,department");
+            // Load Staff - map sample to DB header: userID,name,email,department,role
+            br = new BufferedReader(new FileReader(filePathExampleStaff));
+            br.readLine(); // Skip header
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                String staffID = values.length > 0 ? values[0] : "";
+                String staffName = values.length > 1 ? values[1] : "";
+                String staffRole = values.length > 2 ? values[2] : "";
+                String staffDept = values.length > 3 ? values[3] : "";
+                String staffEmail = values.length > 4 ? values[4] : "";
+                String[] outStaff = new String[] {staffID, staffName, staffEmail, staffDept, staffRole};
+                try (FileWriter writer = new FileWriter(filePathDBStaffString, true)) {
+                    writer.append(String.join(",", outStaff));
+                    writer.append("\n");
+                }
+                try (FileWriter writer = new FileWriter(filePathDBLogin, true)) {
+                    String salt = generateSalt();
+                    // Staff have no status column value
+                    writer.append(String.join(",", "Staff", staffID, hashPassword("password", salt), salt, ""));
+                    writer.append("\n");
+                }
+            }
+            br.close();
+
+            // Load Students - map sample (StudentID,Name,Major,Year,Email) to DB header: userID,name,email,major,year,hasAcceptedInternshipOpportunity
+            br = new BufferedReader(new FileReader(filePathExampleStudent));
+            br.readLine(); // Skip header
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                String studentID = values.length > 0 ? values[0] : "";
+                String studentName = values.length > 1 ? values[1] : "";
+                String studentMajor = values.length > 2 ? values[2] : "";
+                String studentYear = values.length > 3 ? values[3] : "";
+                String studentEmail = values.length > 4 ? values[4] : "";
+                String[] outStudent = new String[] {studentID, studentName, studentEmail, studentMajor, studentYear, "false"};
+                try (FileWriter writer = new FileWriter(filePathDBStudentString, true)) {
+                    writer.append(String.join(",", outStudent));
+                    writer.append("\n");
+                }
+                try (FileWriter writer = new FileWriter(filePathDBLogin, true)) {
+                    String salt = generateSalt();
+                    // Students have no status column value
+                    writer.append(String.join(",", "Student", studentID, hashPassword("password", salt), salt, ""));
+                    writer.append("\n");
+                }
+            }
+            br.close();
+
+            // Load Company Representatives - map sample to DB header: userID,name,email,position,accountStatus,companyName,department
+            br = new BufferedReader(new FileReader(filePathExampleCompanyRep));
+            br.readLine(); // Skip header
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                String compID = values.length > 0 ? values[0] : "";
+                String compName = values.length > 1 ? values[1] : "";
+                String compCompanyName = values.length > 2 ? values[2] : "";
+                String compDept = values.length > 3 ? values[3] : "";
+                String compPosition = values.length > 4 ? values[4] : "";
+                String compEmail = values.length > 5 ? values[5] : "";
+                String compStatus = values.length > 6 ? values[6] : "";
+                String[] outComp = new String[] {compID, compName, compEmail, compPosition, compStatus, compCompanyName, compDept};
+                try (FileWriter writer = new FileWriter("Code/Backend/Lib/company_representative.csv", true)) {
+                    writer.append(String.join(",", outComp));
+                    writer.append("\n");
+                }
+                try (FileWriter writer = new FileWriter(filePathDBLogin, true)) {
+                    String salt = generateSalt();
+                    // Preserve the status from the example data
+                    writer.append(String.join(",", "CompanyRepresentative", compID, hashPassword("password", salt), salt, compStatus));
+                    writer.append("\n");
+                }
+            }
+            br.close();
+
+            setHaveInitialized(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+

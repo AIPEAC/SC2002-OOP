@@ -1,0 +1,5 @@
+ApplicationNumber,InternshipID,StudentID,Company,Status,Acceptance,WithdrawStatus,StudentMajor
+1,#INT0001,U2310002B,alo,approved,yes,approved,Data Science & AI
+2,#INT0003,U2310002B,alo,rejected,,approved,Data Science & AI
+3,#INT0003,U2310004D,alo,rejected,,,Information Engineering & Media
+4,#INT0001,U2310004D,alo,rejected,,,Information Engineering & Media
