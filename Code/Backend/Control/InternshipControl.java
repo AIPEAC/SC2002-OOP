@@ -194,7 +194,7 @@ public class InternshipControl{
     }
     /** Return a list of formatted internship lines for display to the company representative. */
     public List<String> getInternshipStatus() {
-        if (!authCtrl.isLoggedIn() || !"Company Representative".equals(authCtrl.getUserIdentity())) {
+        if (!isCompanyRepLoggedIn()) {
             throw new IllegalStateException("User not logged in or not a company representative.");
         }
         String companyRepID = authCtrl.getUserID();
@@ -208,9 +208,110 @@ public class InternshipControl{
         }
         return out;
     }
+
+    /**
+     * Return company rep's internships formatted for UI table with status.
+     * Format: internshipID=... | internshipTitle=... | internshipLevel=... | companyName=... | preferredMajors=[...] | status=...
+     */
+    public List<String> getMyInternshipsWithStatus() {
+        if (!isCompanyRepLoggedIn()) {
+            throw new IllegalStateException("User not logged in or not a company representative.");
+        }
+        String companyRepID = authCtrl.getUserID();
+        List<InternshipOpportunity> myOpps = getInternshipsByCompanyRepID(companyRepID);
+        List<String> out = new ArrayList<>();
+        String DELIM = " | ";
+        for (InternshipOpportunity opp : myOpps) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("internshipID=").append(opp.getInternshipID() != null ? opp.getInternshipID() : "");
+            sb.append(DELIM).append("internshipTitle=").append(opp.getInternshipTitle() != null ? opp.getInternshipTitle() : "");
+            sb.append(DELIM).append("internshipLevel=").append(opp.getInternshipLevel() != null ? opp.getInternshipLevel() : "");
+            sb.append(DELIM).append("companyName=").append(opp.getCompanyName() != null ? opp.getCompanyName() : "");
+            sb.append(DELIM).append("preferredMajors=").append(formatPreferredMajorsForDisplay(opp.getPreferredMajors()));
+            sb.append(DELIM).append("status=").append(opp.getStatus() != null ? opp.getStatus() : "");
+            out.add(sb.toString());
+        }
+        return out;
+    }
+
+    /**
+     * Return applications for a given internship (company rep only).
+     * Format per line: applicationNumber=... | studentMajors=[major1, major2] | status=...
+     * Does NOT include student name or ID.
+     */
+    public List<String> getApplicationsForInternship(String internshipID) {
+        if (!isCompanyRepLoggedIn()) {
+            throw new IllegalStateException("User not logged in or not a company representative.");
+        }
+        String companyRepID = authCtrl.getUserID();
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) {
+            throw new IllegalArgumentException("No such internship under your account or not authorized.");
+        }
+        List<Integer> applicationNumbers = opp.getApplicationNumberList();
+        List<String> out = new ArrayList<>();
+        if (applicationNumbers == null || applicationNumbers.isEmpty()) {
+            return out;
+        }
+        String DELIM = " | ";
+        for (Integer appNum : applicationNumbers) {
+            Application app = appCtrl.getApplicationByNumber(appNum);
+            if (app == null) continue;
+            StringBuilder sb = new StringBuilder();
+            sb.append("applicationNumber=").append(appNum);
+            sb.append(DELIM).append("studentMajors=");
+            if (app.getStudentMajors() != null && !app.getStudentMajors().isEmpty()) {
+                sb.append("[").append(String.join(", ", app.getStudentMajors())).append("]");
+            } else {
+                sb.append("[]");
+            }
+            sb.append(DELIM).append("status=").append(app.getApplicationStatus() != null ? app.getApplicationStatus() : "pending");
+            out.add(sb.toString());
+        }
+        return out;
+    }
+
+    /**
+     * Approve application by internship ID and application number (company rep only).
+     */
+    public void approveApplicationForInternship(String internshipID, int applicationNumber) {
+        if (!isCompanyRepLoggedIn()) {
+            throw new IllegalStateException("User not logged in or not a company representative.");
+        }
+        String companyRepID = authCtrl.getUserID();
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) {
+            throw new IllegalArgumentException("No such internship under your account or not authorized.");
+        }
+        if (appCtrl != null) {
+            appCtrl.approveApplicationByNumber(applicationNumber);
+        } else {
+            throw new IllegalStateException("ApplicationControl not set; cannot approve application.");
+        }
+    }
+
+    /**
+     * Reject application by internship ID and application number (company rep only).
+     */
+    public void rejectApplicationForInternship(String internshipID, int applicationNumber) {
+        if (!isCompanyRepLoggedIn()) {
+            throw new IllegalStateException("User not logged in or not a company representative.");
+        }
+        String companyRepID = authCtrl.getUserID();
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) {
+            throw new IllegalArgumentException("No such internship under your account or not authorized.");
+        }
+        if (appCtrl != null) {
+            appCtrl.rejectApplicationByNumber(applicationNumber);
+        } else {
+            throw new IllegalStateException("ApplicationControl not set; cannot reject application.");
+        }
+    }
+
     /** Return a list of formatted application lines for display to the company representative. */
     public List<String> viewApplications(String internshipID) {
-        if (!authCtrl.isLoggedIn() || !"Company Representative".equals(authCtrl.getUserIdentity())) {
+        if (!isCompanyRepLoggedIn()) {
             throw new IllegalStateException("User not logged in or not a company representative.");
         }
         List<String> out = new ArrayList<>();
@@ -569,7 +670,7 @@ public class InternshipControl{
     private String autoAssignInternshipID(){
         // the internships will have IDs like #INT0001, #INT0002, ...
         String prefix = "#INT";
-        String filePath = "Lib/internship_opportunity_list.csv";
+        String filePath = "Code/Backend/Lib/internship_opportunity_list.csv";
         int maxID = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -618,6 +719,14 @@ public class InternshipControl{
                 .distinct()
                 .sorted(String::compareToIgnoreCase)
                 .collect(Collectors.toList());
+    }
+
+    private boolean isCompanyRepLoggedIn() {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) return false;
+        String identity = authCtrl.getUserIdentity();
+        if (identity == null) return false;
+        if ("CompanyRepresentative".equals(identity)) return true;
+        return "Company Representative".equals(identity);
     }
 
     /** Parse a raw preferred majors field from CSV into a cleaned List<String>.

@@ -44,10 +44,6 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
             checkStatus.addActionListener(e -> checkMyInternshipOppStatus());
             p.add(checkStatus);
 
-            JButton approveApp = new JButton("Approve/Reject Applications");
-            approveApp.addActionListener(e -> approveApplication());
-            p.add(approveApp);
-
             JButton toggleVis = new JButton("Toggle Visibility by ID");
             toggleVis.addActionListener(e -> toggleVisibility());
             p.add(toggleVis);
@@ -121,111 +117,163 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
 
     private void checkMyInternshipOppStatus() {
         try {
-            List<String> lines = intCtrl.getInternshipStatus();
+            List<String> lines = intCtrl.getMyInternshipsWithStatus();
             if (lines.isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "No internship opportunities found for this company representative.");
                 return;
             }
-            JTextArea ta = new JTextArea(String.join("\n", lines));
-            ta.setEditable(false);
-            JScrollPane sp = new JScrollPane(ta);
-            sp.setPreferredSize(new Dimension(600,300));
+            JPanel listPanel = new JPanel();
+            listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+
+            // Header row
+            JPanel header = new JPanel(new GridBagLayout());
+            header.setBackground(new Color(240,240,240));
+            GridBagConstraints hgb = new GridBagConstraints();
+            hgb.insets = new Insets(4,6,4,6);
+            hgb.gridy = 0;
+            hgb.gridx = 0; hgb.weightx = 0; hgb.fill = GridBagConstraints.NONE; header.add(new JLabel("Actions", SwingConstants.CENTER), hgb);
+            hgb.gridx = 1; hgb.weightx = 0.15; hgb.fill = GridBagConstraints.HORIZONTAL; header.add(new JLabel("ID", SwingConstants.CENTER), hgb);
+            hgb.gridx = 2; hgb.weightx = 0.25; header.add(new JLabel("Title", SwingConstants.CENTER), hgb);
+            hgb.gridx = 3; hgb.weightx = 0.1; header.add(new JLabel("Level", SwingConstants.CENTER), hgb);
+            hgb.gridx = 4; hgb.weightx = 0.15; header.add(new JLabel("Company", SwingConstants.CENTER), hgb);
+            hgb.gridx = 5; hgb.weightx = 0.2; header.add(new JLabel("Preferred Majors", SwingConstants.CENTER), hgb);
+            hgb.gridx = 6; hgb.weightx = 0.15; header.add(new JLabel("Status", SwingConstants.CENTER), hgb);
+            header.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.GRAY));
+            listPanel.add(header);
+
+            for (String line : lines) {
+                String id = parseFieldValue(line, "internshipID");
+                String title = parseFieldValue(line, "internshipTitle");
+                String level = parseFieldValue(line, "internshipLevel");
+                String company = parseFieldValue(line, "companyName");
+                String majorsRaw = parseFieldValue(line, "preferredMajors");
+                String majors = formatMajorsSimple(majorsRaw);
+                String status = parseFieldValue(line, "status");
+
+                JPanel row = new JPanel(new GridBagLayout());
+                GridBagConstraints r = new GridBagConstraints();
+                r.insets = new Insets(6,6,6,6);
+                r.gridy = 0;
+
+                // Actions column
+                r.gridx = 0; r.weightx = 0; r.fill = GridBagConstraints.NONE;
+                JButton checkApps = new JButton("Check Applications");
+                String finalId = id;
+                String finalStatus = status;
+                checkApps.addActionListener(e -> showApplicationsForInternship(finalId));
+                // Only enable if approved and has applications
+                checkApps.setEnabled("approved".equalsIgnoreCase(finalStatus));
+                JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+                actionsPanel.add(checkApps);
+                actionsPanel.setPreferredSize(new Dimension(180, 28));
+                row.add(actionsPanel, r);
+
+                r.gridx = 1; r.weightx = 0.15; r.fill = GridBagConstraints.HORIZONTAL; row.add(new JLabel(id != null ? id : ""), r);
+                r.gridx = 2; r.weightx = 0.25; row.add(new JLabel(title != null ? title : ""), r);
+                r.gridx = 3; r.weightx = 0.1; row.add(new JLabel(level != null ? level : ""), r);
+                r.gridx = 4; r.weightx = 0.15; row.add(new JLabel(company != null ? company : ""), r);
+                r.gridx = 5; r.weightx = 0.2; row.add(new JLabel(majors), r);
+                r.gridx = 6; r.weightx = 0.15; row.add(new JLabel(status != null ? status : ""), r);
+                row.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.LIGHT_GRAY));
+                listPanel.add(row);
+            }
+
+            JScrollPane sp = new JScrollPane(listPanel);
+            sp.setPreferredSize(new Dimension(1000, 400));
             JOptionPane.showMessageDialog(frame, sp, "My Internships", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void approveApplication() {
-        String oppId = JOptionPane.showInputDialog(frame, "Enter Internship ID to view applications (leave empty to view all):");
+    private void showApplicationsForInternship(String internshipID) {
         try {
-            List<String> lines = intCtrl.viewApplications(oppId == null ? "" : oppId);
+            List<String> lines = intCtrl.getApplicationsForInternship(internshipID);
             if (lines.isEmpty()) {
-                JOptionPane.showMessageDialog(frame, "No applications for the selected internship(s).");
+                JOptionPane.showMessageDialog(frame, "No pending applications for this internship.");
                 return;
             }
-            // Group lines into blocks per application. Each block starts with a line containing "Application No.".
-            List<List<String>> blocks = new ArrayList<>();
-            List<String> cur = null;
-            for (String l : lines) {
-                if (l != null && l.contains("Application No")) {
-                    // start new block
-                    cur = new ArrayList<>();
-                    cur.add(l);
-                    blocks.add(cur);
-                } else if (cur != null) {
-                    cur.add(l);
-                } else {
-                    // if no block started yet, create one
-                    cur = new ArrayList<>();
-                    cur.add(l);
-                    blocks.add(cur);
-                }
-            }
-
             JPanel listPanel = new JPanel();
             listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
-            for (java.util.List<String> block : blocks) {
-                String blockText = String.join("\n", block);
+
+            for (String line : lines) {
+                String appNumStr = parseFieldValue(line, "applicationNumber");
+                String majors = parseFieldValue(line, "studentMajors");
+                String appStatus = parseFieldValue(line, "status");
+
                 JPanel row = new JPanel(new BorderLayout(8,8));
-                JTextArea ta = new JTextArea(blockText);
-                ta.setEditable(false);
-                ta.setBackground(null);
-                ta.setBorder(null);
+                String rowText = "Application #" + appNumStr + " | Student Majors: " + majors + " | Status: " + appStatus;
+                JLabel label = new JLabel(rowText);
+                row.add(label, BorderLayout.CENTER);
+
                 JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT));
                 JButton approve = new JButton("Approve");
                 JButton reject = new JButton("Reject");
-                String capturedBlock = blockText;
+
+                // Disable if already approved/rejected
+                boolean isPending = "pending".equalsIgnoreCase(appStatus);
+                approve.setEnabled(isPending);
+                reject.setEnabled(isPending);
+
+                String finalAppNum = appNumStr;
                 approve.addActionListener(e -> {
-                    String num = parseApplicationNumber(capturedBlock);
                     try {
-                        int n = Integer.parseInt(num);
-                        intCtrl.approveApplicationAsCompanyRep(n);
-                        JOptionPane.showMessageDialog(frame, "Approved application: " + n);
+                        int num = Integer.parseInt(finalAppNum);
+                        intCtrl.approveApplicationForInternship(internshipID, num);
+                        JOptionPane.showMessageDialog(frame, "Approved application: " + num);
                         approve.setEnabled(false); reject.setEnabled(false);
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 });
                 reject.addActionListener(e -> {
-                    String num = parseApplicationNumber(capturedBlock);
                     try {
-                        int n = Integer.parseInt(num);
-                        intCtrl.rejectApplicationAsCompanyRep(n);
-                        JOptionPane.showMessageDialog(frame, "Rejected application: " + n);
+                        int num = Integer.parseInt(finalAppNum);
+                        intCtrl.rejectApplicationForInternship(internshipID, num);
+                        JOptionPane.showMessageDialog(frame, "Rejected application: " + num);
                         approve.setEnabled(false); reject.setEnabled(false);
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 });
-                btns.add(approve); btns.add(reject);
-                row.add(ta, BorderLayout.CENTER);
+
+                btns.add(approve);
+                btns.add(reject);
                 row.add(btns, BorderLayout.EAST);
+                row.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.LIGHT_GRAY));
                 listPanel.add(row);
             }
+
             JScrollPane sp = new JScrollPane(listPanel);
-            sp.setPreferredSize(new Dimension(700, Math.min(400, blocks.size()*80 + 40)));
-            JOptionPane.showMessageDialog(frame, sp, "Applications", JOptionPane.INFORMATION_MESSAGE);
+            sp.setPreferredSize(new Dimension(700, Math.min(400, lines.size()*60 + 40)));
+            JOptionPane.showMessageDialog(frame, sp, "Applications for " + internshipID, JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private String parseApplicationNumber(String blockText) {
-        if (blockText == null) return "";
-        int i = blockText.indexOf("Application No");
-        if (i >= 0) {
-            int idx = blockText.indexOf(':', i);
-            if (idx >= 0) {
-                int end = blockText.indexOf('|', idx);
-                if (end < 0) end = blockText.length();
-                return blockText.substring(idx+1, end).trim();
-            }
+    private String parseFieldValue(String line, String key) {
+        String marker = key + "=";
+        int idx = line.indexOf(marker);
+        if (idx < 0) return null;
+        int start = idx + marker.length();
+        String DELIM = " | ";
+        int end = line.indexOf(DELIM, start);
+        if (end < 0) end = line.length();
+        return line.substring(start, end).trim();
+    }
+
+    private String formatMajorsSimple(String raw) {
+        if (raw == null) return "[]";
+        String r = raw.trim();
+        if (r.isEmpty()) return "[]";
+        while (r.startsWith("[[") && r.endsWith("]]")) {
+            r = r.substring(1, r.length()-1).trim();
         }
-        // fallback: find first integer
-        String[] toks = blockText.split("\\D+");
-        for (String t : toks) if (!t.isEmpty()) return t;
-        return "";
+        if (r.startsWith("[") && r.endsWith("]")) {
+            return r;
+        }
+        return "[" + r + "]";
     }
 
     private void toggleVisibility() {
