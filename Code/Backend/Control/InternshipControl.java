@@ -152,6 +152,16 @@ public class InternshipControl{
             throw new IllegalStateException("User not logged in.");
         }
 
+        // Get company representative information first
+        String companyRepID = authCtrl.getUserID();
+        String companyName = authCtrl.getCompanyName();
+        
+        // Check if company representative already has 5 or more internship opportunities
+        List<InternshipOpportunity> existingOpportunities = getInternshipsByCompanyRepID(companyRepID);
+        if (existingOpportunities.size() >= 5) {
+            throw new IllegalStateException("Cannot create more internship opportunities. Maximum limit of 5 internship opportunities per company representative has been reached.");
+        }
+
         // Parse dates and slots here (backend handles conversions)
         Date openDate = new Date();
         Date closeDate = new Date();
@@ -179,9 +189,6 @@ public class InternshipControl{
                 numberOfSlots = 1;
             }
         }
-
-        String companyName = authCtrl.getCompanyName();
-        String companyRepID = authCtrl.getUserID();
         String internshipID = autoAssignInternshipID();
         InternshipOpportunity newOpp = new InternshipOpportunity(
             internshipID, internshipTitle, description, 
