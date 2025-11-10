@@ -8,20 +8,18 @@ import java.util.Map;
 import Backend.Control.*;
 import Frontend_UI.UIHelper;
 
-public class CareerStaffCLI {
+public class CareerStaffCLI extends AbstractCLI {
     private ApplicationControl appCtrl;
     private ReportControl reportCtrl;
     private UserControl userCtrl;
-    private LoginControl loginCtrl;
-    private InternshipControl intCtrl;
     private JFrame frame;
 
     public CareerStaffCLI(ApplicationControl appCtrl, InternshipControl intCtrl, ReportControl reportCtrl, UserControl userCtrl, LoginControl loginCtrl) {
+        super(intCtrl);
         this.appCtrl = appCtrl;
         this.reportCtrl = reportCtrl;
         this.userCtrl = userCtrl;
-        this.loginCtrl = loginCtrl;
-        this.intCtrl = intCtrl;
+        setLoginControl(loginCtrl);
     }
 
     public void show() {
@@ -57,31 +55,15 @@ public class CareerStaffCLI {
             p.add(genReport);
 
             JButton logout = new JButton("Logout");
-            logout.addActionListener(e -> frame.dispose());
+            logout.addActionListener(e -> {
+                Frontend_UI.UIHelper.closeLoggedInPopup();
+                frame.dispose();
+            });
             p.add(logout);
 
             frame.setContentPane(p);
             frame.setVisible(true);
         });
-    }
-
-    private void changePassword() {
-        JPanel panel = new JPanel(new GridLayout(0,1));
-        JPasswordField oldP = new JPasswordField();
-        JPasswordField newP = new JPasswordField();
-        panel.add(new JLabel("Original Password:"));
-        panel.add(oldP);
-        panel.add(new JLabel("New Password:"));
-        panel.add(newP);
-        int res = JOptionPane.showConfirmDialog(frame, panel, "Change Password", JOptionPane.OK_CANCEL_OPTION);
-        if (res == JOptionPane.OK_OPTION) {
-            try {
-                loginCtrl.changePassword(new String(oldP.getPassword()), new String(newP.getPassword()));
-                JOptionPane.showMessageDialog(frame, "Password changed.");
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
     }
 
     private void viewCompanyRepRegisterList() {
@@ -101,22 +83,6 @@ public class CareerStaffCLI {
         }
     }
 
-    private void viewFilteredInternshipOpportunities() {
-        try {
-            List<String> lines = intCtrl.getAllVisibleInternshipOpportunitiesForDisplay(null);
-            if (lines == null || lines.isEmpty()) {
-                JOptionPane.showMessageDialog(frame, "No internships found.");
-                return;
-            }
-            JTextArea ta = new JTextArea(String.join("\n", lines));
-            ta.setEditable(false);
-            JScrollPane sp = new JScrollPane(ta);
-            sp.setPreferredSize(new Dimension(600,300));
-            JOptionPane.showMessageDialog(frame, sp, "Internships", JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
 
     private void approveRegister(String id) {
         try {

@@ -7,16 +7,14 @@ import java.util.List;
 import Backend.Control.*;
 import Frontend_UI.UIHelper;
 
-public class StudentCLI {
+public class StudentCLI extends AbstractCLI {
     private ApplicationControl appCtrl;
-    private InternshipControl intCtrl;
-    private LoginControl loginCtrl;
     private JFrame frame;
 
     public StudentCLI(ApplicationControl appCtrl, InternshipControl intCtrl, LoginControl loginCtrl) {
+        super(intCtrl);
         this.appCtrl = appCtrl;
-        this.intCtrl = intCtrl;
-        this.loginCtrl = loginCtrl;
+        setLoginControl(loginCtrl);
         appCtrl.loadStudentApplicationFromDB();
     }
 
@@ -45,7 +43,10 @@ public class StudentCLI {
             p.add(check);
 
             JButton logout = new JButton("Logout");
-            logout.addActionListener(e -> frame.dispose());
+            logout.addActionListener(e -> {
+                Frontend_UI.UIHelper.closeLoggedInPopup();
+                frame.dispose();
+            });
             p.add(logout);
 
             frame.setContentPane(p);
@@ -53,37 +54,7 @@ public class StudentCLI {
         });
     }
 
-    private void changePassword() {
-        JPanel panel = new JPanel(new GridLayout(0,1));
-        JPasswordField oldP = new JPasswordField();
-        JPasswordField newP = new JPasswordField();
-        panel.add(new JLabel("Original Password:"));
-        panel.add(oldP);
-        panel.add(new JLabel("New Password:"));
-        panel.add(newP);
-        int res = JOptionPane.showConfirmDialog(frame, panel, "Change Password", JOptionPane.OK_CANCEL_OPTION);
-        if (res == JOptionPane.OK_OPTION) {
-            try {
-                loginCtrl.changePassword(new String(oldP.getPassword()), new String(newP.getPassword()));
-                JOptionPane.showMessageDialog(frame, "Password changed.");
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
-    private void viewFilteredInternshipOpportunities() {
-        List<String> lines = intCtrl.getAllVisibleInternshipOpportunitiesForDisplay(null);
-        if (lines == null || lines.isEmpty()) {
-            JOptionPane.showMessageDialog(frame, "No internships found.");
-            return;
-        }
-        JTextArea ta = new JTextArea(String.join("\n", lines));
-        ta.setEditable(false);
-        JScrollPane sp = new JScrollPane(ta);
-        sp.setPreferredSize(new Dimension(600,300));
-        JOptionPane.showMessageDialog(frame, sp, "Internships", JOptionPane.INFORMATION_MESSAGE);
-    }
+    // changePassword and viewFilteredInternshipOpportunities inherited from AbstractCLI
 
     private void submitApplication() {
         String id = JOptionPane.showInputDialog(frame, "Enter Internship ID:");
