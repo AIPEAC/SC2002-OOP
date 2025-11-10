@@ -116,20 +116,24 @@ public abstract class AbstractCLI {
         gbc.gridx = 1;
         filterBlock.add(companyCombo, gbc);
 
-        // Internship Level dropdown (restricted by student year)
+        // Internship Level dropdown (allow all; show note for Y1/2 students)
         gbc.gridx = 0; gbc.gridy++;
         JComboBox<String> levelCombo = new JComboBox<>();
         Integer studentYear = null;
         try { studentYear = intCtrl.getLoggedInStudentYear(); } catch (Exception ex) { /* ignore */ }
-        if (studentYear == null || studentYear < 3) {
-            levelCombo.addItem("Basic"); // fixed for early years
-            levelCombo.setEnabled(false);
-        } else {
-            levelCombo.addItem("(Any)");
-            levelCombo.addItem("Basic");
-            levelCombo.addItem("Intermediate");
-            levelCombo.addItem("Advanced");
+        if (studentYear != null && studentYear < 3) {
+            // Show eligibility note for Y1/2 students
+            gbc.gridwidth = 2;
+            JLabel note = new JLabel("Note: Y1/2 are not eligible for Intermediate or Advanced internships.");
+            note.setForeground(new Color(120, 0, 0));
+            filterBlock.add(note, gbc);
+            gbc.gridy++;
+            gbc.gridwidth = 1;
         }
+        levelCombo.addItem("(Any)");
+        levelCombo.addItem("Basic");
+        levelCombo.addItem("Intermediate");
+        levelCombo.addItem("Advanced");
         filterBlock.add(new JLabel("Internship Level:"), gbc);
         gbc.gridx = 1;
         filterBlock.add(levelCombo, gbc);
@@ -174,11 +178,8 @@ public abstract class AbstractCLI {
                 filterIn.put("companyName", List.of(companySel));
             }
             String levelSel = (String) levelCombo.getSelectedItem();
-            if (levelCombo.isEnabled() && levelSel != null && !levelSel.equals("(Any)")) {
+            if (levelSel != null && !levelSel.equals("(Any)")) {
                 filterIn.put("internshipLevel", List.of(levelSel));
-            } else if (!levelCombo.isEnabled()) {
-                // forced Basic for year 1/2
-                filterIn.put("internshipLevel", List.of("Basic"));
             }
         }
 
