@@ -17,8 +17,19 @@ import Backend.Entity.Users.*;
 
 import java.util.Arrays;
 
-
-
+/**
+ * Control class for managing user login credentials and user registration.
+ * <p>
+ * This class handles user authentication, password management, and company representative
+ * registration. It maintains the login directory, validates credentials using hashed passwords
+ * with salt, and enforces business rules such as email validation for company representatives.
+ * The class supports initialization of user data from sample CSV files and manages the
+ * persistent storage of login credentials.
+ * </p>
+ * 
+ * @author Allen
+ * @version 1.0
+ */
 public class UserLoginDirectoryControl{
     private List<String[]> loginList;
     private String[] StudentInfoList;
@@ -27,6 +38,12 @@ public class UserLoginDirectoryControl{
     private boolean haveInitialized=false;
     private AuthenticationControl authCtrl;
     
+    /**
+     * Constructs a UserLoginDirectoryControl with the specified authentication control.
+     * Initializes user data from example files and loads the login list from database.
+     * 
+     * @param authCtrl The authentication control instance for coordinating user authentication
+     */
     public UserLoginDirectoryControl(AuthenticationControl authCtrl){
         this.authCtrl=authCtrl;
         loadUsersFromExamplesToDB();
