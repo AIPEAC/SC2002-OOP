@@ -18,17 +18,23 @@ import Backend.Entity.Users.*;
 import java.util.Arrays;
 
 /**
- * Control class for managing user login credentials and user registration.
+ * Manages user authentication and user account operations for the system.
+ * This class handles login verification, password management with SHA-256 hashing and salting,
+ * and company representative registration with email-based identification.
  * <p>
- * This class handles user authentication, password management, and company representative
- * registration. It maintains the login directory, validates credentials using hashed passwords
- * with salt, and enforces business rules such as email validation for company representatives.
  * The class supports initialization of user data from sample CSV files and manages the
- * persistent storage of login credentials.
+ * login directory, which stores credentials for all user types (Students, Staff, Company Representatives).
+ * Each user type has a separate CSV data file containing their detailed information.
+ * </p>
+ * <p>
+ * All CSV read/write operations use proper field escaping to handle special characters
+ * (commas, quotes, newlines) in user names, company names, departments, and positions,
+ * ensuring data integrity. Sample files are read in simple CSV format and converted to
+ * properly escaped format when written to the database.
  * </p>
  * 
  * @author Allen
- * @version 1.0
+ * @version 2.0
  */
 public class UserLoginDirectoryControl{
     private List<String[]> loginList;
@@ -54,7 +60,6 @@ public class UserLoginDirectoryControl{
         String csvFile = "Code/Backend/Lib/login_list.csv";
         File file = new File(csvFile);
         String line = "";
-        String csvSplitBy = ",";
         loginList = new ArrayList<>();
 
         try {
@@ -69,25 +74,11 @@ public class UserLoginDirectoryControl{
             try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
                 br.readLine(); // Skip header
                 while ((line = br.readLine()) != null) {
-                    String[] loginData = line.split(csvSplitBy);
-                    // Normalize legacy rows to 5 columns (identity,userID,passwordHash,salt,status)
-                    if (loginData.length < 5) {
-                        String[] expanded = new String[5];
-                        for (int i = 0; i < loginData.length; i++) expanded[i] = loginData[i];
-                        for (int i = loginData.length; i < 5; i++) expanded[i] = "";
-                        loginData = expanded;
-                    }
-                    // Repair case where status was mistakenly written into salt (legacy bug)
-                    if ("CompanyRepresentative".equals(loginData[0])) {
-                        String maybeSalt = loginData[3];
-                        if (maybeSalt != null) {
-                            String v = maybeSalt.trim().toLowerCase();
-                            if ("approved".equals(v) || "rejected".equals(v) || "pending".equals(v)) {
-                                // move value to status column, clear salt
-                                loginData[4] = loginData[3];
-                                loginData[3] = "";
-                            }
-                        }
+                    // Use proper CSV parsing that respects quoted fields
+                    String[] loginData = ControlUtils.splitCsvLine(line);
+                    // Unescape fields
+                    for (int i = 0; i < loginData.length; i++) {
+                        loginData[i] = ControlUtils.unescapeCsvField(loginData[i]);
                     }
                     loginList.add(loginData);
                 }
@@ -100,7 +91,6 @@ public class UserLoginDirectoryControl{
         String csvFile = "Code/Backend/Lib/student.csv";
         File file = new File(csvFile);
         String line = "";
-        String csvSplitBy = ",";
 
         try {
             if (!file.exists()) {
@@ -110,7 +100,11 @@ public class UserLoginDirectoryControl{
             try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
                 br.readLine(); // Skip header
                 while ((line = br.readLine()) != null) {
-                    String[] StudentData = line.split(csvSplitBy);
+                    String[] StudentData = ControlUtils.splitCsvLine(line);
+                    // Unescape fields
+                    for (int i = 0; i < StudentData.length; i++) {
+                        StudentData[i] = ControlUtils.unescapeCsvField(StudentData[i]);
+                    }
                     if (StudentData[0].equals(userID)) {
                         StudentInfoList = StudentData;
                         break;
@@ -130,7 +124,6 @@ public class UserLoginDirectoryControl{
         String csvFile = "Code/Backend/Lib/staff.csv";
         File file = new File(csvFile);
         String line = "";
-        String csvSplitBy = ",";
 
         try {
             if (!file.exists()) {
@@ -140,7 +133,11 @@ public class UserLoginDirectoryControl{
             try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
                 br.readLine(); // Skip header
                 while ((line = br.readLine()) != null) {
-                    String[] StaffData = line.split(csvSplitBy);
+                    String[] StaffData = ControlUtils.splitCsvLine(line);
+                    // Unescape fields
+                    for (int i = 0; i < StaffData.length; i++) {
+                        StaffData[i] = ControlUtils.unescapeCsvField(StaffData[i]);
+                    }
                     if (StaffData[0].equals(userID)) {
                         StaffInfoList = StaffData;
                         break;
@@ -160,7 +157,6 @@ public class UserLoginDirectoryControl{
         String csvFile = "Code/Backend/Lib/company_representative.csv";
         File file = new File(csvFile);
         String line = "";
-        String csvSplitBy = ",";
 
         try {
             if (!file.exists()) {
@@ -170,7 +166,11 @@ public class UserLoginDirectoryControl{
             try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
                 br.readLine(); // Skip header
                 while ((line = br.readLine()) != null) {
-                    String[] CompanyRepData = line.split(csvSplitBy);
+                    String[] CompanyRepData = ControlUtils.splitCsvLine(line);
+                    // Unescape fields
+                    for (int i = 0; i < CompanyRepData.length; i++) {
+                        CompanyRepData[i] = ControlUtils.unescapeCsvField(CompanyRepData[i]);
+                    }
                     // Normalize to 7 columns: userID,name,email,position,accountStatus,companyName,department
                     if (CompanyRepData.length < 7) {
                         String[] expanded = new String[7];
@@ -339,12 +339,18 @@ public class UserLoginDirectoryControl{
 
             writer.append("identity,userID,passwordHash,salt,status\n");
             for (String[] loginData : loginList) {
-                // normalize to 5 columns
+                // normalize to 5 columns and escape each field
                 String[] out = new String[] {"", "", "", "", ""};
                 for (int k = 0; k < loginData.length && k < 5; k++) {
                     out[k] = (loginData[k] == null) ? "" : loginData[k];
                 }
-                writer.append(String.join(",", out));
+                // Escape all fields when writing
+                writer.append(String.join(",",
+                    ControlUtils.escapeCsvField(out[0]),
+                    ControlUtils.escapeCsvField(out[1]),
+                    ControlUtils.escapeCsvField(out[2]),
+                    ControlUtils.escapeCsvField(out[3]),
+                    ControlUtils.escapeCsvField(out[4])));
                 writer.append("\n");
             }
 
@@ -355,7 +361,19 @@ public class UserLoginDirectoryControl{
         inputFile.delete();
         tempFile.renameTo(inputFile);
     }
-    
+    /**
+     * Request to register a new company representative account.
+     * All text fields (name, company name, department, position) are properly escaped
+     * to handle special characters like commas and quotes when stored in CSV.
+     * 
+     * @param name the representative's name (can contain commas, titles like "Dr., PhD")
+     * @param companyName the company name (can contain commas like "Smith, Johnson & Co.")
+     * @param department the department (can contain commas and special characters)
+     * @param postion the position title (can contain commas like "VP, Engineering")
+     * @param email the email address (used as userID)
+     * @return the assigned user ID (email) or null if registration fails
+     * @throws IllegalArgumentException if validation fails or duplicates exist
+     */
     String requestRegisterCompanyRep(String name,String companyName,String department,String postion,String email){
         // Validate inputs: require at least 3 characters for companyName and name
         if (companyName == null || companyName.trim().length() < 3) {
@@ -383,7 +401,11 @@ public class UserLoginDirectoryControl{
                 br.readLine(); // skip header
                 String line;
                 while ((line = br.readLine()) != null) {
-                    String[] parts = line.split(",");
+                    String[] parts = ControlUtils.splitCsvLine(line);
+                    // Unescape fields
+                    for (int i = 0; i < parts.length; i++) {
+                        parts[i] = ControlUtils.unescapeCsvField(parts[i]);
+                    }
                     if (parts.length >= 2) {
                         String existingName = parts[1] != null ? parts[1].trim() : "";
                         String existingCompany = parts.length > 5 && parts[5] != null ? parts[5].trim() : "";
@@ -411,7 +433,15 @@ public class UserLoginDirectoryControl{
         }
 
         try (FileWriter writer = new FileWriter("Code/Backend/Lib/company_representative.csv", true)) {
-            writer.append(String.join(",", assignedID, name, email, postion, "pending", companyName, department));
+            // Escape fields to handle commas properly
+            writer.append(String.join(",", 
+                ControlUtils.escapeCsvField(assignedID), 
+                ControlUtils.escapeCsvField(name), 
+                ControlUtils.escapeCsvField(email), 
+                ControlUtils.escapeCsvField(postion), 
+                ControlUtils.escapeCsvField("pending"), 
+                ControlUtils.escapeCsvField(companyName), 
+                ControlUtils.escapeCsvField(department)));
             writer.append("\n");
         } catch (IOException e) {
             e.printStackTrace();
@@ -421,7 +451,13 @@ public class UserLoginDirectoryControl{
         try (FileWriter writer = new FileWriter("Code/Backend/Lib/login_list.csv", true)) {
             String salt = generateSalt();
             // store status as pending in the 5th column
-            writer.append(String.join(",", "CompanyRepresentative", assignedID, hashPassword("password", salt), salt, "pending"));
+            // Escape fields to handle commas properly
+            writer.append(String.join(",", 
+                ControlUtils.escapeCsvField("CompanyRepresentative"), 
+                ControlUtils.escapeCsvField(assignedID), 
+                ControlUtils.escapeCsvField(hashPassword("password", salt)), 
+                ControlUtils.escapeCsvField(salt), 
+                ControlUtils.escapeCsvField("pending")));
             writer.append("\n");
         } catch (IOException e) {
             e.printStackTrace();
@@ -547,7 +583,13 @@ public class UserLoginDirectoryControl{
                     for (int k = 0; k < data.length && k < 5; k++) {
                         out[k] = (data[k] == null) ? "" : data[k];
                     }
-                    writer.append(String.join(",", out)).append("\n");
+                    // Escape all fields when writing
+                    writer.append(String.join(",",
+                        ControlUtils.escapeCsvField(out[0]),
+                        ControlUtils.escapeCsvField(out[1]),
+                        ControlUtils.escapeCsvField(out[2]),
+                        ControlUtils.escapeCsvField(out[3]),
+                        ControlUtils.escapeCsvField(out[4]))).append("\n");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -583,7 +625,11 @@ public class UserLoginDirectoryControl{
 
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] data = line.split(",");
+                String[] data = ControlUtils.splitCsvLine(line);
+                // Unescape fields
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = ControlUtils.unescapeCsvField(data[i]);
+                }
                 // normalize to 7 columns
                 if (data.length < 7) {
                     String[] expanded = new String[7];
@@ -596,7 +642,15 @@ public class UserLoginDirectoryControl{
                     data[4] = status;
                     updated = true;
                 }
-                writer.append(String.join(",", data)).append("\n");
+                // Escape all fields when writing back
+                writer.append(String.join(",",
+                    ControlUtils.escapeCsvField(data[0]),
+                    ControlUtils.escapeCsvField(data[1]),
+                    ControlUtils.escapeCsvField(data[2]),
+                    ControlUtils.escapeCsvField(data[3]),
+                    ControlUtils.escapeCsvField(data[4]),
+                    ControlUtils.escapeCsvField(data[5]),
+                    ControlUtils.escapeCsvField(data[6]))).append("\n");
             }
 
         } catch (IOException e) {
@@ -694,15 +748,25 @@ public class UserLoginDirectoryControl{
                 String staffRole = values.length > 2 ? values[2] : "";
                 String staffDept = values.length > 3 ? values[3] : "";
                 String staffEmail = values.length > 4 ? values[4] : "";
-                String[] outStaff = new String[] {staffID, staffName, staffEmail, staffDept, staffRole};
                 try (FileWriter writer = new FileWriter(filePathDBStaffString, true)) {
-                    writer.append(String.join(",", outStaff));
+                    // Escape all fields when writing to DB
+                    writer.append(String.join(",", 
+                        ControlUtils.escapeCsvField(staffID),
+                        ControlUtils.escapeCsvField(staffName),
+                        ControlUtils.escapeCsvField(staffEmail),
+                        ControlUtils.escapeCsvField(staffDept),
+                        ControlUtils.escapeCsvField(staffRole)));
                     writer.append("\n");
                 }
                 try (FileWriter writer = new FileWriter(filePathDBLogin, true)) {
                     String salt = generateSalt();
-                    // Staff have no status column value
-                    writer.append(String.join(",", "Staff", staffID, hashPassword("password", salt), salt, ""));
+                    // Staff have no status column value - escape all fields
+                    writer.append(String.join(",", 
+                        ControlUtils.escapeCsvField("Staff"),
+                        ControlUtils.escapeCsvField(staffID),
+                        ControlUtils.escapeCsvField(hashPassword("password", salt)),
+                        ControlUtils.escapeCsvField(salt),
+                        ControlUtils.escapeCsvField("")));
                     writer.append("\n");
                 }
             }
@@ -718,15 +782,26 @@ public class UserLoginDirectoryControl{
                 String studentMajor = values.length > 2 ? values[2] : "";
                 String studentYear = values.length > 3 ? values[3] : "";
                 String studentEmail = values.length > 4 ? values[4] : "";
-                String[] outStudent = new String[] {studentID, studentName, studentEmail, studentMajor, studentYear, "false"};
                 try (FileWriter writer = new FileWriter(filePathDBStudentString, true)) {
-                    writer.append(String.join(",", outStudent));
+                    // Escape all fields when writing to DB
+                    writer.append(String.join(",",
+                        ControlUtils.escapeCsvField(studentID),
+                        ControlUtils.escapeCsvField(studentName),
+                        ControlUtils.escapeCsvField(studentEmail),
+                        ControlUtils.escapeCsvField(studentMajor),
+                        ControlUtils.escapeCsvField(studentYear),
+                        ControlUtils.escapeCsvField("false")));
                     writer.append("\n");
                 }
                 try (FileWriter writer = new FileWriter(filePathDBLogin, true)) {
                     String salt = generateSalt();
-                    // Students have no status column value
-                    writer.append(String.join(",", "Student", studentID, hashPassword("password", salt), salt, ""));
+                    // Students have no status column value - escape all fields
+                    writer.append(String.join(",",
+                        ControlUtils.escapeCsvField("Student"),
+                        ControlUtils.escapeCsvField(studentID),
+                        ControlUtils.escapeCsvField(hashPassword("password", salt)),
+                        ControlUtils.escapeCsvField(salt),
+                        ControlUtils.escapeCsvField("")));
                     writer.append("\n");
                 }
             }
@@ -744,15 +819,27 @@ public class UserLoginDirectoryControl{
                 String compPosition = values.length > 4 ? values[4] : "";
                 String compEmail = values.length > 5 ? values[5] : "";
                 String compStatus = values.length > 6 ? values[6] : "";
-                String[] outComp = new String[] {compID, compName, compEmail, compPosition, compStatus, compCompanyName, compDept};
                 try (FileWriter writer = new FileWriter("Code/Backend/Lib/company_representative.csv", true)) {
-                    writer.append(String.join(",", outComp));
+                    // Escape all fields when writing to DB
+                    writer.append(String.join(",",
+                        ControlUtils.escapeCsvField(compID),
+                        ControlUtils.escapeCsvField(compName),
+                        ControlUtils.escapeCsvField(compEmail),
+                        ControlUtils.escapeCsvField(compPosition),
+                        ControlUtils.escapeCsvField(compStatus),
+                        ControlUtils.escapeCsvField(compCompanyName),
+                        ControlUtils.escapeCsvField(compDept)));
                     writer.append("\n");
                 }
                 try (FileWriter writer = new FileWriter(filePathDBLogin, true)) {
                     String salt = generateSalt();
-                    // Preserve the status from the example data
-                    writer.append(String.join(",", "CompanyRepresentative", compID, hashPassword("password", salt), salt, compStatus));
+                    // Preserve the status from the example data - escape all fields
+                    writer.append(String.join(",",
+                        ControlUtils.escapeCsvField("CompanyRepresentative"),
+                        ControlUtils.escapeCsvField(compID),
+                        ControlUtils.escapeCsvField(hashPassword("password", salt)),
+                        ControlUtils.escapeCsvField(salt),
+                        ControlUtils.escapeCsvField(compStatus)));
                     writer.append("\n");
                 }
             }
@@ -763,5 +850,21 @@ public class UserLoginDirectoryControl{
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Loads user data from sample CSV files and initializes the database.
+     * <p>
+     * This method reads from unquoted sample CSV files in Lib_example/ and writes
+     * properly escaped CSV data to the database files in Lib/. All text fields
+     * are escaped to handle special characters (commas, quotes) that may appear
+     * in names, company names, departments, positions, etc.
+     * </p>
+     * <p>
+     * Sample file format (simple CSV): field1,field2,field3<br>
+     * Database file format (escaped CSV): "field1","field2","field3"
+     * </p>
+     * 
+     * @implNote Only runs once - checks have_initialized.csv flag before execution
+     */
 }
 

@@ -16,9 +16,13 @@ import Backend.Entity.Application;
  * Manages student applications for internships, including submission, approval/rejection,
  * acceptance decisions, and withdrawal requests. Coordinates with InternshipControl
  * to update internship slot availability.
+ * <p>
+ * All CSV operations use proper field escaping to handle special characters in
+ * application data, ensuring data integrity across the application lifecycle.
+ * </p>
  * 
  * @author Allen
- * @version 1.0
+ * @version 2.0
  */
 public class ApplicationControl {
 	/** List of applications currently loaded in memory */
@@ -73,7 +77,11 @@ public class ApplicationControl {
 			br.readLine();
 			while ((line = br.readLine()) != null) {
 				if (line.trim().isEmpty()) continue;
-				String[] values = line.split(",");
+				String[] values = ControlUtils.splitCsvLine(line);
+				// Unescape fields
+				for (int i = 0; i < values.length; i++) {
+					values[i] = ControlUtils.unescapeCsvField(values[i]);
+				}
 				if (values.length >= 5) {
 					int applicationNumber = Integer.parseInt(values[0]);
 					String internshipID = values[1];
@@ -629,14 +637,15 @@ public class ApplicationControl {
 		try (FileWriter writer = new FileWriter(CSV_FILE)) {
 			writer.append("ApplicationNumber,InternshipID,StudentID,Company,Status,Acceptance,WithdrawStatus,StudentMajor\n");
 			for (Application app : allApplications) {
-				writer.append(String.valueOf(app.getApplicationNumber())).append(",")
-					.append(app.getInternshipID()).append(",")
-					.append(app.getStudentID()).append(",")
-					.append(app.getCompany() != null ? app.getCompany() : "").append(",")
-					.append(app.getApplicationStatus() != null ? app.getApplicationStatus() : "pending").append(",")
-					.append(app.getAcceptance() != null ? app.getAcceptance() : "").append(",")
-					.append(app.getWithdrawStatus() != null ? app.getWithdrawStatus() : "").append(",")
-					.append(app.getStudentMajors() != null ? String.join(" ", app.getStudentMajors()) : "")
+				// Escape all fields to handle commas properly
+				writer.append(ControlUtils.escapeCsvField(String.valueOf(app.getApplicationNumber()))).append(",")
+					.append(ControlUtils.escapeCsvField(app.getInternshipID())).append(",")
+					.append(ControlUtils.escapeCsvField(app.getStudentID())).append(",")
+					.append(ControlUtils.escapeCsvField(app.getCompany() != null ? app.getCompany() : "")).append(",")
+					.append(ControlUtils.escapeCsvField(app.getApplicationStatus() != null ? app.getApplicationStatus() : "pending")).append(",")
+					.append(ControlUtils.escapeCsvField(app.getAcceptance() != null ? app.getAcceptance() : "")).append(",")
+					.append(ControlUtils.escapeCsvField(app.getWithdrawStatus() != null ? app.getWithdrawStatus() : "")).append(",")
+					.append(ControlUtils.escapeCsvField(app.getStudentMajors() != null ? String.join(" ", app.getStudentMajors()) : ""))
 					.append("\n");
 			}
 		} catch (IOException e) {
@@ -665,7 +674,11 @@ public class ApplicationControl {
 			// Read student data
 			while ((line = br.readLine()) != null) {
 				if (line.trim().isEmpty()) continue;
-				String[] values = line.split(",", -1);
+				String[] values = ControlUtils.splitCsvLine(line);
+				// Unescape fields
+				for (int i = 0; i < values.length; i++) {
+					values[i] = ControlUtils.unescapeCsvField(values[i]);
+				}
 				
 				// Check if this is the student we're looking for
 				if (values.length > 0 && values[0].equals(studentID)) {
@@ -700,7 +713,11 @@ public class ApplicationControl {
 			// Read and update student data
 			while ((line = br.readLine()) != null) {
 				if (line.trim().isEmpty()) continue;
-				String[] values = line.split(",", -1); // -1 to preserve empty fields
+				String[] values = ControlUtils.splitCsvLine(line);
+				// Unescape fields
+				for (int i = 0; i < values.length; i++) {
+					values[i] = ControlUtils.unescapeCsvField(values[i]);
+				}
 				
 				// Check if this is the student we're looking for
 				if (values.length > 0 && values[0].equals(studentID)) {
@@ -717,7 +734,13 @@ public class ApplicationControl {
 						newValues[5] = String.valueOf(hasAccepted);
 						values = newValues;
 					}
-					line = String.join(",", values);
+					// Rebuild line with escaped fields
+					StringBuilder sb = new StringBuilder();
+					for (int i = 0; i < values.length; i++) {
+						if (i > 0) sb.append(",");
+						sb.append(ControlUtils.escapeCsvField(values[i]));
+					}
+					line = sb.toString();
 				}
 				allLines.add(line);
 			}
