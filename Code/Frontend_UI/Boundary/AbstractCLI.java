@@ -330,7 +330,7 @@ public abstract class AbstractCLI {
         JOptionPane.showMessageDialog(null, "Applying is not available here.", "Not available", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void showInternshipDetails(String internshipID) {
+    protected void showInternshipDetails(String internshipID) {
         if (internshipID == null || internshipID.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Unable to determine Internship ID for details.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
