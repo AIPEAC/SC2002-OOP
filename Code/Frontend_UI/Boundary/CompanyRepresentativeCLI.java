@@ -177,6 +177,9 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                 // Only enable if approved and has applications
                 checkApps.setEnabled("approved".equalsIgnoreCase(finalStatus));
                 
+                JButton detailsBtn = new JButton("Details");
+                detailsBtn.addActionListener(e -> showInternshipDetails(finalId));
+                
                 JButton toggleVis = new JButton("Toggle Visibility");
                 toggleVis.addActionListener(e -> {
                     try {
@@ -193,8 +196,9 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                 
                 JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
                 actionsPanel.add(checkApps);
+                actionsPanel.add(detailsBtn);
                 actionsPanel.add(toggleVis);
-                actionsPanel.setPreferredSize(new Dimension(300, 28));
+                actionsPanel.setPreferredSize(new Dimension(400, 28));
                 row.add(actionsPanel, r);
 
                 r.gridx = 1; r.weightx = 0.15; r.fill = GridBagConstraints.HORIZONTAL; row.add(new JLabel(id != null ? id : ""), r);
