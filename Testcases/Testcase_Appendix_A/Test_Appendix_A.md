@@ -113,7 +113,7 @@
 
 | Career Staff | Student | Company Rep |
 | ---------- | ----------- | -------------- | 
-| ![Company Representative Register](Testcase5_CompRepRegister.png) | ![New Company Representative Registered](Testcase5_RegisteredConfirmation.png) |![Unauthorised Login](Testcase5_UnauthorisedLogin.png) |
+| ![All Internship Opportunities](Testcase6_AllIntOp.png) | ![Y1 Student Info major View](Testcase6_Y1StudentInfo.png) |![Y](Testcase5_UnauthorisedLogin.png) |
 ---
 
 ### Test Case 7: Internship Application Eligibility
