@@ -19,7 +19,7 @@ This is a desktop application built in Java that helps manage internship opportu
 ## Main Features
 
 ### For Students
-- **Browse Internships**: View available internship opportunities with filtering options
+- **Browse Internships**: View available internship opportunities matching your major
 - **Apply for Internships**: Submit applications to internships that match your major
 - **Track Applications**: See the status of your applications (pending, approved, rejected)
 - **Accept/Reject Offers**: Once approved, you can accept or decline the internship offer
@@ -64,6 +64,7 @@ This is a desktop application built in Java that helps manage internship opportu
 ### Data Storage
 - All information is stored in CSV files on your computer
 - Includes separate files for users, internships, applications, and majors
+- Uses escaping and unescaping methods to deal with special cases contain quotes and commas
 - Reports are generated as Markdown files with tables and statistics
 
 ### Smart Features
@@ -95,6 +96,6 @@ The application uses Java Swing with simple button-based menus:
 - **Role-based access**: Each user type sees only relevant features
 - **Real-time validation**: Prevents common errors like double-applications or overbooking
 - **Detailed reporting**: Staff can analyze trends and generate professional reports
-- **User-friendly**: Simple interface that doesn't require training to use
+- **User-friendly**: Simple GUI interface.
 
 This system replaces manual processes like email chains and spreadsheets with an organized, automated solution that reduces errors and saves time for everyone involved.
