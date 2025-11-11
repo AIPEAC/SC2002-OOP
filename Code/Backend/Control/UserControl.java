@@ -54,15 +54,17 @@ public class UserControl {
 			String line;
 			br.readLine(); // skip header
 			while ((line = br.readLine()) != null) {
-				String[] parts = line.split(",");
+				if (line.trim().isEmpty()) continue;
+				// Use proper CSV parsing that respects quoted fields
+				String[] parts = ControlUtils.splitCsvLine(line);
 				if (parts.length >= 5) {
-					String userID = parts[0];
-					String name = parts.length > 1 ? parts[1] : "";
-					//String email = parts.length > 2 ? parts[2] : "";
-					//String position = parts.length > 3 ? parts[3] : "";
-					String status = parts.length > 4 ? parts[4] : "";
-					String companyName = parts.length > 5 ? parts[5] : "";
-					String department = parts.length > 6 ? parts[6] : "";
+					String userID = ControlUtils.unescapeCsvField(parts[0]);
+					String name = parts.length > 1 ? ControlUtils.unescapeCsvField(parts[1]) : "";
+					//String email = parts.length > 2 ? ControlUtils.unescapeCsvField(parts[2]) : "";
+					//String position = parts.length > 3 ? ControlUtils.unescapeCsvField(parts[3]) : "";
+					String status = parts.length > 4 ? ControlUtils.unescapeCsvField(parts[4]) : "";
+					String companyName = parts.length > 5 ? ControlUtils.unescapeCsvField(parts[5]) : "";
+					String department = parts.length > 6 ? ControlUtils.unescapeCsvField(parts[6]) : "";
 					if ("pending".equalsIgnoreCase(status)) {
 						out.add("ID: " + userID + " | Name: " + name + " | Company: " + companyName + " | Dept: " + department);
 					}

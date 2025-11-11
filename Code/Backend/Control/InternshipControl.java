@@ -26,12 +26,20 @@ import java.io.FileWriter;
  * Students can view and apply to internships based on their major and year of study.
  * Career staff approve or reject internship opportunities before they become visible to students.
  * <p>
- * All CSV operations use proper field escaping to handle special characters (commas, quotes)
- * in internship titles, descriptions, and company names, ensuring data integrity.
+ * All CSV read and write operations use proper field escaping via {@link ControlUtils#escapeCsvField(String)}
+ * and {@link ControlUtils#splitCsvLine(String)} to handle special characters (commas, quotes, newlines)
+ * in internship titles, descriptions, company names, and preferred majors, ensuring data integrity
+ * across the application lifecycle. This prevents CSV injection and parsing errors when fields contain
+ * special characters.
+ * </p>
+ * <p>
+ * Student major matching uses proper CSV parsing to support majors with commas and semicolons.
+ * Internship ID generation (e.g., #INT0001, #INT0002) uses proper CSV parsing to correctly identify
+ * the highest existing ID number, even when CSV fields contain special characters.
  * </p>
  * 
  * @author Allen
- * @version 2.0
+ * @version 2.1
  */
 public class InternshipControl{
     /** List of all internship opportunities in the system */
@@ -425,6 +433,8 @@ public class InternshipControl{
     }
     
     /**
+     * @deprecated Use approveApplicationForInternship which returns status message instead.
+     *
      * Check if the internship has reached its capacity. If so, reject all remaining pending applications.
      * Returns a message if internship is full, null otherwise.
      */
@@ -451,11 +461,11 @@ public class InternshipControl{
                     }
                 }
                 if (rejectedCount > 0) {
-                    return "⚠ This internship is now FULL (" + numAccepted + "/" + numSlots + " slots filled).\n" + rejectedCount + " other pending application(s) have been automatically rejected.";
+                    return "This internship is now FULL (" + numAccepted + "/" + numSlots + " slots filled).\n" + rejectedCount + " other pending application(s) have been automatically rejected.";
                 }
             }
             // If no pending apps to reject, just notify that it's full
-            return "⚠ This internship is now FULL (" + numAccepted + "/" + numSlots + " slots filled).";
+            return "This internship is now FULL (" + numAccepted + "/" + numSlots + " slots filled).";
         }
         return null;
     }
@@ -573,6 +583,15 @@ public class InternshipControl{
 
     // =========================================================
     // Student methods
+    
+    /**
+     * Loads student data from the student.csv database file.
+     * Uses proper CSV parsing to handle fields containing special characters
+     * such as majors with commas (e.g., "Accountancy (Sustainability Management and Analytics)").
+     * Supports multiple majors separated by semicolons or spaces.
+     * 
+     * @param studentID the student ID to load
+     */
     private void loadStudentFromDB(String studentID) {
         if (student != null && student.getUserID().equals(studentID)) {
             return; // Already loaded
@@ -584,14 +603,34 @@ public class InternshipControl{
             // Skip header
             br.readLine();
             while ((line = br.readLine()) != null) {
-                if (!line.startsWith(studentID)) continue;
-                String[] values = line.split(",");
-                String name = values[1];
-                String email = values[2];
-                List<String> majors = Arrays.asList(values[3].split(" "));
-                boolean hasAcceptedInternshipOpportunity = Boolean.parseBoolean(values[5]);
-                int year = Integer.parseInt(values[4]);
+                if (line.trim().isEmpty()) continue;
+                // Use proper CSV parsing that respects quoted fields
+                String[] values = ControlUtils.splitCsvLine(line);
+                if (values.length < 6) continue;
+                
+                String id = ControlUtils.unescapeCsvField(values[0]);
+                if (!id.equals(studentID)) continue;
+                
+                String name = ControlUtils.unescapeCsvField(values[1]);
+                String email = ControlUtils.unescapeCsvField(values[2]);
+                String majorRaw = ControlUtils.unescapeCsvField(values[3]);
+                // Majors are separated by semicolons or spaces
+                List<String> majors = new ArrayList<>();
+                if (majorRaw.contains(";")) {
+                    for (String part : majorRaw.split(";")) {
+                        String t = part.trim();
+                        if (!t.isEmpty()) majors.add(t);
+                    }
+                } else {
+                    for (String part : majorRaw.split("\\s+")) {
+                        String t = part.trim();
+                        if (!t.isEmpty()) majors.add(t);
+                    }
+                }
+                int year = Integer.parseInt(ControlUtils.unescapeCsvField(values[4]));
+                boolean hasAcceptedInternshipOpportunity = Boolean.parseBoolean(ControlUtils.unescapeCsvField(values[5]));
                 student = new Student(studentID, name, email, majors, year, hasAcceptedInternshipOpportunity);
+                break;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -889,6 +928,15 @@ public class InternshipControl{
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Auto-generates a sequential internship ID in the format #INT0001, #INT0002, etc.
+     * Uses proper CSV parsing to handle fields with special characters, ensuring accurate
+     * ID extraction even when CSV contains commas, quotes, or other special characters in
+     * title, description, or other fields.
+     * 
+     * @return the next available internship ID (e.g., "#INT0004" if highest existing is #INT0003)
+     */
     private String autoAssignInternshipID(){
         // the internships will have IDs like #INT0001, #INT0002, ...
         String prefix = "#INT";
@@ -960,7 +1008,7 @@ public class InternshipControl{
         return "Company Representative".equals(identity);
     }
 
-    /** Parse a raw preferred majors field from CSV into a cleaned List<String>.
+    /** Parse a raw preferred majors field from CSV into a cleaned List&lt;String&gt;.
      *  Accepts formats like: "a;b;c" or "a, b, c" or "[a, b]" or single value. Does not split on spaces.
      */
     private List<String> parsePreferredMajorsRaw(String pmRaw) {
@@ -1165,7 +1213,15 @@ public class InternshipControl{
             return !now.before(openDate) && !now.after(closeDate);
         }
     }
-    /** Return logged-in student year (3/4 gating logic for level filter) or null if not a student / not found. */
+    
+    /**
+     * Returns the logged-in student's year of study (used for eligibility filtering).
+     * Year 3/4 students are eligible for Intermediate and Advanced internships,
+     * while Year 1/2 students can only apply to Basic level internships.
+     * Uses proper CSV parsing to handle fields with special characters.
+     * 
+     * @return the student's year (1-4) or null if user is not a student or not found
+     */
     public Integer getLoggedInStudentYear() {
         if (authCtrl == null || !authCtrl.isLoggedIn() || !"Student".equals(authCtrl.getUserIdentity())) {
             return null;
@@ -1174,9 +1230,18 @@ public class InternshipControl{
         try (BufferedReader br = new BufferedReader(new FileReader("Code/Backend/Lib/student.csv"))) {
             String line = br.readLine(); // header
             while ((line = br.readLine()) != null) {
-                String[] vals = line.split(",");
-                if (vals.length > 4 && vals[0].equals(studentID)) {
-                    try { return Integer.parseInt(vals[4]); } catch (NumberFormatException ex) { return null; }
+                if (line.trim().isEmpty()) continue;
+                // Use proper CSV parsing that respects quoted fields
+                String[] vals = ControlUtils.splitCsvLine(line);
+                if (vals.length > 4) {
+                    String id = ControlUtils.unescapeCsvField(vals[0]);
+                    if (id.equals(studentID)) {
+                        try { 
+                            return Integer.parseInt(ControlUtils.unescapeCsvField(vals[4])); 
+                        } catch (NumberFormatException ex) { 
+                            return null; 
+                        }
+                    }
                 }
             }
         } catch (IOException ioe) {

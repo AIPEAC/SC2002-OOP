@@ -367,7 +367,7 @@ public class UserLoginDirectoryControl{
      * to handle special characters like commas and quotes when stored in CSV.
      * 
      * @param name the representative's name (can contain commas, titles like "Dr., PhD")
-     * @param companyName the company name (can contain commas like "Smith, Johnson & Co.")
+     * @param companyName the company name (can contain commas like "Smith, Johnson &amp; Co.")
      * @param department the department (can contain commas and special characters)
      * @param postion the position title (can contain commas like "VP, Engineering")
      * @param email the email address (used as userID)
@@ -468,6 +468,20 @@ public class UserLoginDirectoryControl{
 
         return assignedID;
     }
+    
+    /**
+     * @deprecated This method is no longer used. Company representatives now use their email
+     * addresses as userIDs instead of auto-generated "comprep####" format.
+     * See {@link #requestRegisterCompanyRep(String, String, String, String, String)} which
+     * directly uses email as the userID.
+     * 
+     * Legacy method that auto-generates sequential company representative IDs in the format
+     * "comprep0001", "comprep0002", etc. This functionality has been replaced with email-based
+     * identification for better traceability and to avoid ID collision issues.
+     * 
+     * @return a formatted string like "comprep0001" (never called in current implementation)
+     */
+    @Deprecated
     private String assignIDToCompanyRep(){
         List<String> allUserIDs = new ArrayList<>();
         String[] csvFiles = {"Code/Backend/Lib/company_representative.csv", "Code/Backend/Lib/student.csv", "Code/Backend/Lib/staff.csv"};
@@ -499,9 +513,11 @@ public class UserLoginDirectoryControl{
                 String line;
                 br.readLine(); // Skip header
                 while ((line = br.readLine()) != null) {
-                    String[] data = line.split(",");
+                    if (line.trim().isEmpty()) continue;
+                    // Use proper CSV parsing that respects quoted fields
+                    String[] data = ControlUtils.splitCsvLine(line);
                     if (data.length > 0) {
-                        allUserIDs.add(data[0]);
+                        allUserIDs.add(ControlUtils.unescapeCsvField(data[0]));
                     }
                 }
             } catch (IOException e) {
