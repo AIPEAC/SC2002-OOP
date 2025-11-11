@@ -2,5 +2,3 @@ userID,name,email,position,accountStatus,companyName,department
 "example_comp_mail@mail.com","Hello World","example_comp_mail@mail.com","","approved","World",""
 "NewComp@gmail.com","NewCompRep","NewComp@gmail.com","NewPosition","approved","NewComp","NewDepartment"
 "NewComp2@gmail.com","NewCompRep2","NewComp2@gmail.com","NewPosition2","approved","NewComp2","NewDepartment2"
-"NewComp3@gmail.com","NewCompRep3","NewComp3@gmail.com","NewPosition3","approved","NewComp3","NewDepartment3"
-"NewComp4@gmail.com","NewCompRep4","NewComp4@gmail.com","NewPosition4","approved","NewComp4","NewDepartment4"

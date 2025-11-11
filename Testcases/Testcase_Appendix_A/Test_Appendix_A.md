@@ -139,12 +139,12 @@
 - **Expected Behavior:** System allows accepting one internship placement and automatically withdraws all other applications once a placement is accepted
 - **Actual Result:** 
 - **Failure Indicator:** Student can accept more than one internship placement, or other applications remain active after accepting
-- **Pass:** 
+- **Pass:** Yes
 - **Screenshots:** 
 
-| Multiple Internship Opportunity | Student Accept First | Student Try To Accept Second |
-| ------------------------------- | -------------------- | ---------------------------- | 
-| ![Student View Multiple Internship Op](Testcase9_MultIntOp.png) | ![First Internship Op Accept](Testcase9_FirstAccept.png) | ![Second Internship Op Accept](Testcase9_SecondAccept.png) |
+| Multiple Internship Opportunity | Student Accept First | Updated Status (Note Second Internship Withdrawn Status Is Now Approved) | Student Try To Accept Second |
+| ------------------------------- | -------------------- | ---------------------------- | -----------------------|
+| ![Student View Multiple Internship Op](Testcase9_MultIntOp.png) | ![First Internship Op Accept](Testcase9_FirstAccept.png) | ![Updated Status](Testcase9_UpdatedStatus.png) | ![Second Internship Op Accept](Testcase9_SecondAccept.png) |
 ---
 
 ### Test Case 10: Company Representative Internship Opportunity Creation
@@ -178,9 +178,12 @@
 - **Expected Behavior:** Company Representatives can always access full details of internship opportunities they created, regardless of visibility setting
 - **Actual Result:** 
 - **Failure Indicator:** Opportunity details become inaccessible when visibility is toggled off for their own opportunities
-- **Pass:** 
+- **Pass:** Yes
 - **Screenshots:** 
 
+| Details Always Visible (Details and Visibility Seperate Option) |
+| --------------------------------------------------------------- | 
+| ![Details Visible](Testcase12_DetailsVisible.png) |
 ---
 
 ### Test Case 13: Restriction on Editing Approved Opportunities
@@ -198,12 +201,12 @@
 - **Expected Behavior:** Company Representatives retrieve correct student applications, and update slot availability accurately
 - **Actual Result:** 
 - **Failure Indicator:** Incorrect application retrieval, or slot counts not updating properly
-- **Pass:** 
+- **Pass:** Yes
 - **Screenshots:** 
 
-| Student Applies | Application Retreival | Retrieving when full slot |
-| --------------------- | ------------------------- |
-| ![Application Retrieval](Testcase14_StudentApplication.png) | ![Full Slot]() |
+| Student 1 Applies | Student 2 Applies | Company Representative Retrieve Application | Not Full | Approving Both Student | Student 1 Accept | Student 2 Cannot Accept (Auto Reject)| Full Slot (Because only 1 slot allowed)|
+| --------------------- | ------------ | ------------- | --------- | -------- | --------- | --------- | -------- |
+| ![Student 1 Applies](Testcase14_StudentApplication.png) | ![Student 2 Applies](Testcase14_Student2Application.png) | ![Application Retrieval](Testcase14_AppRetrieval.png) | ![Not Full](Testcase14_NotFull.png) | ![Approving Both Student](Testcase14_Approve1.png) | ![Student 1 Accept](Testcase14_Student1Accept.png) | ![Student 2 Cannot Accept](Testcase14_CannotAccept.png) | ![Full Slot](Testcase14_FullSlot.png)
 ---
 
 ### Test Case 15: Internship Placement Confirmation Status Update
@@ -211,9 +214,11 @@
 - **Expected Behavior:** Placement confirmation status is updated to reflect the actual confirmation condition
 - **Actual Result:** 
 - **Failure Indicator:** System fails to update or incorrectly records the placement confirmation status
-- **Pass:** 
+- **Pass:** Yes
 - **Screenshots:** 
-
+| Student Accept Internship Opportunity | Placement Confirmation Status |
+| ------------------------------------- | ----------------------------- |
+| ![Student Accept](Testcase15_StudentAccept.png) | ![Placement Confirmation Status](Testcase15_AppStatusConfirmed.png) |
 ---
 
 ### Test Case 16: Create, Edit, and Delete Internship Opportunity Listings
@@ -251,7 +256,6 @@
 | All NewComp Internship Opportunity | Student Viewing Internship Opportunity |
 | ---------------------------------- | -------------------------------------- |
 | ![NewComp Internship Op](Testcase18_AllIntOp.png) | ![Student View](Testcase18_StudentView.png) |
-
 ---
 
 ### Test Case 19: Career Center Staff Internship Opportunity Management Withdrawal
@@ -259,9 +263,12 @@
 - **Expected Behavior:** Withdrawal approvals and rejections are processed correctly, with system updates to reflect the decision and slot availability changes
 - **Actual Result:** 
 - **Failure Indicator:** Incorrect or failed processing of withdrawal requests or slot counts not updating properly
-- **Pass:** 
+- **Pass:** Yes
 - **Screenshots:** 
 
+| Student 1 Withdraw From Full Internship Opportunity | Staff Rejects | Withdraw Reject Status Update | Slot still Full | Student 2 Withdraw From Full Internship Opportunity | Staff Approves | Withdraw Approve Status Update | Slot No Longer Full |
+| ---------------------------------- | -------------------------------------- |
+| ![Student 1 Withdraw From Full](Testcase19_StudWithdrawFull.png) | ![Staff Rejects](Testcase19_Reject.png) | ![Withdraw Reject Status](Testcase19_WithdrawRejected.png) | ![Slot Still Full](Testcase19_Full.png) | ![Student 2 WIthdraw From Full](Testcase19_Stud2WithdrawFull.png) | ![Staff Approves](Testcase19_Approve.png) | ![Withdraw Approve Status](Testcase19_WithdrawApproved.png) | ![Slot Not Full](Testcase19_NotFull.png) |
 ---
 
 ### Test Case 20: Generate and Filter Internship Opportunities
@@ -269,9 +276,12 @@
 - **Expected Behavior:** Accurate report generation with options to filter by placement status, major, company, level, and other specified categories
 - **Actual Result:** 
 - **Failure Indicator:** Reports are inaccurate, incomplete, or filtering does not work as expected
-- **Pass:** 
+- **Pass:** Yes
 - **Screenshots:** 
 
+| NewComp Internship List (3 Full)| NewComp2 Internship List (0 Full)| Generated Overview Report (No Filter) | NewComp filtered Report | Basic Internship Level Report | Info and CS Major Filtered Report | Added 2026 Internship Opportunity | 2026 Internship Report | Filter Panel (For Upcoming image) |2025, Only CS or Civil Engineering or Chinese Majors, Advanced Level, From NewComp2 |
+| ------------------------------------- |
+| ![NewComp Internship List](Testcase20_NewCompInternList.png) | ![NewComp2 Internship List](Testcase20_NewComp2InternList.png) | ![Generated Overview Report](Testcase20_OverviewReport.png) | ![NewComp Report](Testcase20_NewCompReport.png) | ![Basic Internship Level Report](Testcase20_BasicInternLevelReport.png) | ![Info and CS Major Filtered Report](Testcase20_InfoAndCSMajorReport.png) | ![Added 2026 Internship Opportunity](Testcase20_Added2026InternOp.png) | ![2026 Internship Report](Testcase20_2026Report.png) | ![Filter Panel](Testcase20_FilterPanel.png) | ![Assorted Filters](Testcase20_Filtered.png) |
 ---
 
 ## Notes
