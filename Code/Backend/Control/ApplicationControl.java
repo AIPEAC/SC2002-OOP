@@ -51,7 +51,13 @@ public class ApplicationControl {
 	//=========================================================
 	// Both Student and Career Staff methods
 
-	/** Return application lines for display by the boundary. */
+	/**
+	 * Gets formatted application strings for display in the UI.
+	 * Returns all applications currently loaded in memory (either student-specific
+	 * or all applications depending on which load method was called).
+	 * 
+	 * @return list of formatted application strings using {@link Application#toString()}
+	 */
 	public List<String> getApplicationsForDisplay() {
 		List<String> out = new ArrayList<>();
 		for (Application app : applications) {
@@ -64,7 +70,15 @@ public class ApplicationControl {
 	//=========================================================
 	// Staff methods
 	
-	/** Load all applications from database (for Career Staff to review withdrawals, etc.) */
+	/**
+	 * Loads all applications from the database regardless of student.
+	 * Used by Career Staff to review all applications, handle withdrawals,
+	 * and perform system-wide application management.
+	 * Uses proper CSV parsing to handle fields with special characters.
+	 * Clears existing applications before loading.
+	 * 
+	 * @see #loadStudentApplicationFromDB() for student-specific loading
+	 */
 	public void loadAllApplicationsFromDB() {
 		applications.clear();
 		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
@@ -132,15 +146,28 @@ public class ApplicationControl {
 			// Skip header
 			br.readLine();
 			while ((line = br.readLine()) != null) {
-				String[] values = line.split(",");
-				if (values.length >= 5 && values[2].equals(studentID)) {
-					int applicationNumber = Integer.parseInt(values[0]);
-					String internshipID = values[1];
-					String company = values.length > 3 ? values[3] : null;
-					String status = values.length > 4 ? values[4] : "pending";
-					String acceptance = (values.length > 5 && !values[5].isEmpty()) ? values[5] : null;
-					String withdrawStatus = (values.length > 6 && !values[6].isEmpty()) ? values[6] : null;
-					List<String> studentMajors = (values.length > 7 && !values[7].isEmpty()) ? Arrays.asList(values[7].split(" ")) : null;
+				if (line.trim().isEmpty()) continue;
+				// Use proper CSV parsing that respects quoted fields
+				String[] values = ControlUtils.splitCsvLine(line);
+				if (values.length >= 5) {
+					String sid = ControlUtils.unescapeCsvField(values[2]);
+					if (!sid.equals(studentID)) continue;
+					
+					int applicationNumber = Integer.parseInt(ControlUtils.unescapeCsvField(values[0]));
+					String internshipID = ControlUtils.unescapeCsvField(values[1]);
+					String company = values.length > 3 ? ControlUtils.unescapeCsvField(values[3]) : null;
+					String status = values.length > 4 ? ControlUtils.unescapeCsvField(values[4]) : "pending";
+					String acceptance = (values.length > 5 && !ControlUtils.unescapeCsvField(values[5]).isEmpty()) ? ControlUtils.unescapeCsvField(values[5]) : null;
+					String withdrawStatus = (values.length > 6 && !ControlUtils.unescapeCsvField(values[6]).isEmpty()) ? ControlUtils.unescapeCsvField(values[6]) : null;
+					String majorRaw = values.length > 7 ? ControlUtils.unescapeCsvField(values[7]) : "";
+					List<String> studentMajors = null;
+					if (!majorRaw.isEmpty()) {
+						studentMajors = new ArrayList<>();
+						for (String part : majorRaw.split("\\s+")) {
+							String t = part.trim();
+							if (!t.isEmpty()) studentMajors.add(t);
+						}
+					}
 					Application app = new Application(
 						applicationNumber,
 						internshipID,
@@ -232,6 +259,13 @@ public class ApplicationControl {
 		// Ditched: use getApplicationsForDisplay() instead
 		return;
 	}
+	
+	/**
+	 * Checks if the logged-in student has accepted any internship offer.
+	 * Looks for applications where acceptance is set to "yes".
+	 * 
+	 * @return true if student has accepted at least one offer, false otherwise
+	 */
 	public boolean hasAcceptedOffer() {
 		for (Application app : applications) {
 			if (app.getAcceptance() != null && app.getAcceptance().equals("yes")) {
@@ -240,6 +274,14 @@ public class ApplicationControl {
 		}
 		return false;
 	}
+	
+	/**
+	 * Checks if the logged-in student has any approved applications.
+	 * Used to enforce the rule that students can only have one approved application
+	 * before deciding to accept or reject the offer.
+	 * 
+	 * @return true if student has at least one approved application, false otherwise
+	 */
 	public boolean hasApprovedApplication() {
 		for (Application app : applications) {
 			if (app.getApplicationStatus().equals("approved")) {
@@ -248,6 +290,13 @@ public class ApplicationControl {
 		}
 		return false;
 	}
+	
+	/**
+	 * Gets a list of company names and internship IDs for all approved applications.
+	 * Used to display to students which offers they need to respond to.
+	 * 
+	 * @return list of strings in format "CompanyName (ID: InternshipID)" for each approved application
+	 */
 	public List<String> getApprovedApplicationInternshipCompaniesAndIDs() {
 		List<String> out = new ArrayList<>();
 		for (Application app : applications) {
@@ -257,6 +306,16 @@ public class ApplicationControl {
 		}
 		return out;
 	}
+	
+	/**
+	 * Accepts an approved internship offer on behalf of the logged-in student.
+	 * Updates the application status, student's acceptance status in the database,
+	 * adds the student to the internship's accepted list, and automatically withdraws
+	 * other applications from the same student.
+	 * 
+	 * @param appNum the application number to accept
+	 * @throws IllegalArgumentException if application is not found or not approved
+	 */
 	public void acceptOffer(int appNum) {
 		Application app = getApplicationByNumber(appNum);
 		if (app == null || !app.getApplicationStatus().equals("approved")) {
@@ -272,6 +331,15 @@ public class ApplicationControl {
 		}
 		withdrawOtherApplicationsOfApprovedStudent(app.getStudentID());
 	}
+	
+	/**
+	 * Rejects an approved internship offer on behalf of the logged-in student.
+	 * Updates the application's acceptance status to "no". Does not update the
+	 * student's overall acceptance status as they may have other pending offers.
+	 * 
+	 * @param appNum the application number to reject
+	 * @throws IllegalArgumentException if application is not found or not approved
+	 */
 	public void rejectOffer(int appNum) {
 		Application app = getApplicationByNumber(appNum);
 		if (app == null || !app.getApplicationStatus().equals("approved")) {
@@ -282,6 +350,16 @@ public class ApplicationControl {
 		// Note: Don't set hasAcceptedInternshipOpportunity to false here
 		// Student might have other approved applications they haven't responded to yet
 	}
+	
+	/**
+	 * Submits a withdrawal request for an application.
+	 * Sets the withdraw status to "pending" for staff review.
+	 * Cannot withdraw if a previous withdrawal was rejected or already approved.
+	 * 
+	 * @param appNum the application number to request withdrawal for
+	 * @throws IllegalArgumentException if application is not found
+	 * @throws IllegalStateException if withdrawal already approved, pending, or previously rejected
+	 */
 	public void requestWithdrawApplication(int appNum) {
 		Application app = getApplicationByNumber(appNum);
 		if (app == null) throw new IllegalArgumentException("Application not found.");
@@ -298,6 +376,13 @@ public class ApplicationControl {
 		app.setApplicationWithdrawRequested();
 		saveApplicationsToDB();
 	}
+	
+	/**
+	 * Gets detailed information about all internships the student has applied to.
+	 * Includes application number and full internship details for each application.
+	 * 
+	 * @return list of formatted strings with application and internship details
+	 */
 	public List<String> viewInternshipsAppliedTo() {
 		List<String> out = new ArrayList<>();
 		for (Application app : applications) {
@@ -309,7 +394,12 @@ public class ApplicationControl {
 		return out;
 	}
 
-	/** Return applications with internship details in structured format for table display */
+	/**
+	 * Gets applications with internship details in structured format for table display.
+	 * Returns pipe-delimited strings with all relevant application and internship fields.
+	 * 
+	 * @return list of formatted strings suitable for parsing into UI table rows
+	 */
 	public List<String> getApplicationsWithInternshipDetails() {
 		List<String> out = new ArrayList<>();
 		for (Application app : applications) {
@@ -333,7 +423,12 @@ public class ApplicationControl {
 		return out;
 	}
 
-	/** Return applications which have a pending withdrawal request */
+	/**
+	 * Gets all applications that have pending withdrawal requests.
+	 * Used by Career Staff to review and approve/reject withdrawal requests.
+	 * 
+	 * @return list of formatted strings for each pending withdrawal application
+	 */
 	public List<String> getPendingWithdrawals() {
 		List<String> pending = new ArrayList<>();
 		for (Application app : applications) {
@@ -344,6 +439,13 @@ public class ApplicationControl {
 		return pending;
 	}
 
+	/**
+	 * Rejects a withdrawal request for the specified application.
+	 * Marks the withdrawal status as rejected.
+	 * 
+	 * @param appNum the application number to reject withdrawal for
+	 * @throws IllegalArgumentException if application is not found
+	 */
 	void rejectWithdrawalByNumber(int appNum) {
 		Application app = getApplicationByNumber(appNum);
 		if (app == null) throw new IllegalArgumentException("Application not found: " + appNum);
@@ -351,7 +453,13 @@ public class ApplicationControl {
 		saveApplicationsToDB();
 	}
 
-	/** UI-friendly wrapper: accepts application number as String, parses and delegates */
+	/**
+	 * Approves a withdrawal request (UI-friendly wrapper accepting String).
+	 * Parses the application number string and delegates to the int version.
+	 * 
+	 * @param appNumStr the application number as a string
+	 * @throws IllegalArgumentException if application number is invalid or not parseable
+	 */
 	public void approveWithdrawal(String appNumStr) {
 		if (appNumStr == null || appNumStr.isEmpty()) {
 			throw new IllegalArgumentException("Invalid application number.");
@@ -378,7 +486,11 @@ public class ApplicationControl {
 	}
 
 	/**
-	 * Wrapper that accepts an application number string and a decision string (approve/reject-like)
+	 * Handles a withdrawal decision with string inputs.
+	 * 
+	 * @param appNumStr the application number as a string
+	 * @param decisionStr the decision as a string (approve/reject, y/n, etc.)
+	 * @throws IllegalArgumentException if inputs are invalid
 	 */
 	void handleWithdrawalDecision(String appNumStr, String decisionStr) {
 		if (appNumStr == null || appNumStr.isEmpty()) {
@@ -398,8 +510,11 @@ public class ApplicationControl {
 	// =========================================================
 	// Company Representative / Staff helpers
 
-	/** Approve an application by application number (called by Company Rep via InternshipControl)
-	 * This will set the application status to approved and persist applications.
+	/**
+	 * Approves an application by application number.
+	 * 
+	 * @param appNum the application number to approve
+	 * @throws IllegalArgumentException if application is not found
 	 */
 	void approveApplicationByNumber(int appNum) {
 		Application app = getApplicationByNumber(appNum);
@@ -417,6 +532,14 @@ public class ApplicationControl {
 			throw new IllegalStateException("InternshipControl not set; cannot approve application.");
 		}
 	}
+	
+	/**
+	 * Rejects an application by application number.
+	 * 
+	 * @param appNum the application number to reject
+	 * @throws IllegalArgumentException if application is not found
+	 * @throws IllegalStateException if InternshipControl is not set
+	 */
 	void rejectApplicationByNumber(int appNum) {
 		Application app = getApplicationByNumber(appNum);
 		if (app == null) throw new IllegalArgumentException("Application not found: " + appNum);
@@ -435,6 +558,13 @@ public class ApplicationControl {
 
 	// =========================================================
 	// Career Staff methods
+	
+	/**
+	 * Approves a withdrawal request for an application.
+	 * 
+	 * @param appNum the application number
+	 * @throws IllegalArgumentException if application is not found
+	 */
 	void approveWithdrawal(int appNum) {
 		Application app = getApplicationByNumber(appNum);
 		if (app == null) throw new IllegalArgumentException("Application not found: " + appNum);
@@ -465,6 +595,11 @@ public class ApplicationControl {
 	// ========================================================
 	// Other methods
 
+	/**
+	 * Withdraws all other applications for a student who has accepted an offer.
+	 * 
+	 * @param studentID the student ID
+	 */
 	void withdrawOtherApplicationsOfApprovedStudent(String studentID) {
 		for (Application app : applications) {
 			if (app.getStudentID().equals(studentID) && app.getApplicationStatus().equals("approved")) {
@@ -481,6 +616,12 @@ public class ApplicationControl {
 	//=========================================================
 	// Helpers
 
+	/**
+	 * Gets an application by its number.
+	 * 
+	 * @param appNumber the application number
+	 * @return the Application object or null if not found
+	 */
 	Application getApplicationByNumber(int appNumber) {
 		// First check in loaded applications
 		for (Application app : applications) {
@@ -492,7 +633,12 @@ public class ApplicationControl {
 		return loadApplicationByNumberFromDB(appNumber);
 	}
 	
-	/** Reject all approved applications for a specific internship that haven't been accepted by students yet. */
+	/**
+	 * Rejects all approved but unanswered applications for a specific internship.
+	 * 
+	 * @param internshipID the internship ID
+	 * @param acceptedApps list of accepted application numbers to exclude
+	 */
 	void rejectUnansweredApprovedApplicationsForInternship(String internshipID, List<Integer> acceptedApps) {
 		// Load all applications from database to check for this internship
 		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
@@ -501,10 +647,14 @@ public class ApplicationControl {
 			br.readLine(); // Skip header
 			while ((line = br.readLine()) != null) {
 				if (line.trim().isEmpty()) continue;
-				String[] values = line.split(",");
-				if (values.length >= 5 && values[1].equals(internshipID)) {
-					int appNum = Integer.parseInt(values[0]);
-					String status = values[4];
+				// Use proper CSV parsing that respects quoted fields
+				String[] values = ControlUtils.splitCsvLine(line);
+				if (values.length >= 5) {
+					String iid = ControlUtils.unescapeCsvField(values[1]);
+					if (!iid.equals(internshipID)) continue;
+					
+					int appNum = Integer.parseInt(ControlUtils.unescapeCsvField(values[0]));
+					String status = ControlUtils.unescapeCsvField(values[4]);
 					String acceptance = (values.length > 5 && !values[5].isEmpty()) ? values[5] : null;
 					
 					// If approved but not accepted yet, and not in the acceptedApps list, reject it
@@ -534,10 +684,11 @@ public class ApplicationControl {
 			br.readLine(); // Skip header
 			while ((line = br.readLine()) != null) {
 				if (line.trim().isEmpty()) continue;
-				String[] values = line.split(",");
+				// Use proper CSV parsing that respects quoted fields
+				String[] values = ControlUtils.splitCsvLine(line);
 				if (values.length < 1) continue;
 				try {
-					int appNum = Integer.parseInt(values[0].trim());
+					int appNum = Integer.parseInt(ControlUtils.unescapeCsvField(values[0]).trim());
 					if (appNum > maxAppNumber) {
 						maxAppNumber = appNum;
 					}
@@ -559,21 +710,28 @@ public class ApplicationControl {
 			String line;
 			br.readLine(); // Skip header
 			while ((line = br.readLine()) != null) {
-				String[] values = line.split(",");
+				if (line.trim().isEmpty()) continue;
+				// Use proper CSV parsing that respects quoted fields
+				String[] values = ControlUtils.splitCsvLine(line);
 				if (values.length < 1) continue;
-				int appNum = Integer.parseInt(values[0].trim());
+				int appNum = Integer.parseInt(ControlUtils.unescapeCsvField(values[0]).trim());
 				if (appNum != appNumber) continue;
 				
 				// Found the application, parse it
-				String internshipID = values.length > 1 ? values[1].trim() : "";
-				String studentID = values.length > 2 ? values[2].trim() : "";
-				String company = values.length > 3 ? values[3].trim() : "";
-				String status = values.length > 4 ? values[4].trim() : "pending";
-				String acceptance = values.length > 5 ? values[5].trim() : null;
-				String withdrawStatus = values.length > 6 ? values[6].trim() : null;
+				String internshipID = values.length > 1 ? ControlUtils.unescapeCsvField(values[1]).trim() : "";
+				String studentID = values.length > 2 ? ControlUtils.unescapeCsvField(values[2]).trim() : "";
+				String company = values.length > 3 ? ControlUtils.unescapeCsvField(values[3]).trim() : "";
+				String status = values.length > 4 ? ControlUtils.unescapeCsvField(values[4]).trim() : "pending";
+				String acceptance = values.length > 5 ? ControlUtils.unescapeCsvField(values[5]).trim() : null;
+				String withdrawStatus = values.length > 6 ? ControlUtils.unescapeCsvField(values[6]).trim() : null;
+				String majorRaw = values.length > 7 ? ControlUtils.unescapeCsvField(values[7]).trim() : "";
 				List<String> studentMajors = null;
-				if (values.length > 7 && !values[7].trim().isEmpty()) {
-					studentMajors = Arrays.asList(values[7].trim().split(" "));
+				if (!majorRaw.isEmpty()) {
+					studentMajors = new ArrayList<>();
+					for (String part : majorRaw.split("\\s+")) {
+						String t = part.trim();
+						if (!t.isEmpty()) studentMajors.add(t);
+					}
 				}
 				
 				if (acceptance != null && acceptance.isEmpty()) acceptance = null;
