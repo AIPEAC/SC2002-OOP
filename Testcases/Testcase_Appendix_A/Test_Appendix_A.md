@@ -14,6 +14,20 @@
 | 8 | Viewing Application Status after Visibility Toggle Off | Students continue to have access to their application details regardless of internship opportunities' visibility | Application details become inaccessible once visibility is off | |
 | 9 | - | - | - | |
 | 10 | Single Internship Placement Acceptance per Student | System allows accepting one internship placement and automatically withdraws all other applications once a placement is accepted | Student can accept more than one internship placement, or other applications remain active after accepting | |
+| 11 | - | - | - | |
+| 12 | - | - | - | |
+| 13 | Company Representative Internship Opportunity Creation | System allows Company Representatives to create internship opportunities only when they meet system requirements | System allows creation of opportunities with invalid data or exceeds maximum allowed opportunities per representative | |
+| 14 | Internship Opportunity Approval Status | Company Representatives can view pending, approved, or rejected status updates for their submitted opportunities | Status updates are not visible, incorrect, or not properly saved in the system | |
+| 15 | Internship Detail Access for Company Representative | Company Representatives can always access full details of internship opportunities they created, regardless of visibility setting | Opportunity details become inaccessible when visibility is toggled off for their own opportunities | |
+| 16 | Restriction on Editing Approved Opportunities | Edit functionality is restricted for Company Representatives once internship opportunities are approved by Career Center Staff | Company Representatives are able to make changes to opportunity details after approval | |
+| 17 | - | - | - | |
+| 18 | Student Application Management and Placement Confirmation | Company Representatives retrieve correct student applications, update slot availability accurately, and correctly confirm placement details | Incorrect application retrieval, slot counts not updating properly, or failure to reflect placement confirmation details accurately | |
+| 19 | Internship Placement Confirmation Status Update | Placement confirmation status is updated to reflect the actual confirmation condition | System fails to update or incorrectly records the placement confirmation status | |
+| 20 | Create, Edit, and Delete Internship Opportunity Listings | Company Representatives should be able to add new opportunities, modify existing opportunity details (before approval by Career Center Staff), and remove opportunities from the system | Inability to create, edit, or delete opportunities or errors during these operations | |
+| 21 | Career Center Staff Internship Opportunity Approval | Career Center Staff can review and approve/reject internship opportunities submitted by Company Representatives | Career Center Staff cannot access submitted opportunities for review, approval/rejection actions fail to update opportunity status, or approved opportunities do not become visible to students as expected | |
+| 22 | Toggle Internship Opportunity Visibility | Changes in visibility should be reflected accurately in the internship opportunity list visible to students | Visibility settings do not update or do not affect the opportunity listing as expected | |
+| 23 | Career Center Staff Internship Opportunity Management Withdrawal | Withdrawal approvals and rejections are processed correctly, with system updates to reflect the decision and slot availability changes | Incorrect or failed processing of withdrawal requests or slot counts not updating properly | |
+| 24 | Generate and Filter Internship Opportunities | Accurate report generation with options to filter by placement status, major, company, level, and other specified categories | Reports are inaccurate, incomplete, or filtering does not work as expected | |
 
 ---
 
@@ -137,6 +151,146 @@
 - **Expected Behavior:** System allows accepting one internship placement and automatically withdraws all other applications once a placement is accepted
 - **Actual Result:** 
 - **Failure Indicator:** Student can accept more than one internship placement, or other applications remain active after accepting
+- **Pass:** 
+- **Screenshots:** 
+
+---
+
+### Test Case 11: -
+- **Test Case:** -
+- **Expected Behavior:** -
+- **Actual Result:** 
+- **Failure Indicator:** -
+- **Pass:** 
+- **Screenshots:** 
+
+---
+
+### Test Case 12: -
+- **Test Case:** -
+- **Expected Behavior:** -
+- **Actual Result:** 
+- **Failure Indicator:** -
+- **Pass:** 
+- **Screenshots:** 
+
+---
+
+### Test Case 13: Company Representative Internship Opportunity Creation
+- **Test Case:** Company Representative Internship Opportunity Creation
+- **Expected Behavior:** System allows Company Representatives to create internship opportunities only when they meet system requirements
+- **Actual Result:** 
+- **Failure Indicator:** System allows creation of opportunities with invalid data or exceeds maximum allowed opportunities per representative
+- **Pass:** 
+- **Screenshots:** 
+
+---
+
+### Test Case 14: Internship Opportunity Approval Status
+- **Test Case:** Internship Opportunity Approval Status
+- **Expected Behavior:** Company Representatives can view pending, approved, or rejected status updates for their submitted opportunities
+- **Actual Result:** 
+- **Failure Indicator:** Status updates are not visible, incorrect, or not properly saved in the system
+- **Pass:** 
+- **Screenshots:** 
+
+---
+
+### Test Case 15: Internship Detail Access for Company Representative
+- **Test Case:** Internship Detail Access for Company Representative
+- **Expected Behavior:** Company Representatives can always access full details of internship opportunities they created, regardless of visibility setting
+- **Actual Result:** 
+- **Failure Indicator:** Opportunity details become inaccessible when visibility is toggled off for their own opportunities
+- **Pass:** 
+- **Screenshots:** 
+
+---
+
+### Test Case 16: Restriction on Editing Approved Opportunities
+- **Test Case:** Restriction on Editing Approved Opportunities
+- **Expected Behavior:** Edit functionality is restricted for Company Representatives once internship opportunities are approved by Career Center Staff
+- **Actual Result:** 
+- **Failure Indicator:** Company Representatives are able to make changes to opportunity details after approval
+- **Pass:** 
+- **Screenshots:** 
+
+---
+
+### Test Case 17: -
+- **Test Case:** -
+- **Expected Behavior:** -
+- **Actual Result:** 
+- **Failure Indicator:** -
+- **Pass:** 
+- **Screenshots:** 
+
+---
+
+### Test Case 18: Student Application Management and Placement Confirmation
+- **Test Case:** Student Application Management and Placement Confirmation
+- **Expected Behavior:** Company Representatives retrieve correct student applications, update slot availability accurately, and correctly confirm placement details
+- **Actual Result:** 
+- **Failure Indicator:** Incorrect application retrieval, slot counts not updating properly, or failure to reflect placement confirmation details accurately
+- **Pass:** 
+- **Screenshots:** 
+
+---
+
+### Test Case 19: Internship Placement Confirmation Status Update
+- **Test Case:** Internship Placement Confirmation Status Update
+- **Expected Behavior:** Placement confirmation status is updated to reflect the actual confirmation condition
+- **Actual Result:** 
+- **Failure Indicator:** System fails to update or incorrectly records the placement confirmation status
+- **Pass:** 
+- **Screenshots:** 
+
+---
+
+### Test Case 20: Create, Edit, and Delete Internship Opportunity Listings
+- **Test Case:** Create, Edit, and Delete Internship Opportunity Listings
+- **Expected Behavior:** Company Representatives should be able to add new opportunities, modify existing opportunity details (before approval by Career Center Staff), and remove opportunities from the system
+- **Actual Result:** 
+- **Failure Indicator:** Inability to create, edit, or delete opportunities or errors during these operations
+- **Pass:** 
+- **Screenshots:** 
+
+---
+
+### Test Case 21: Career Center Staff Internship Opportunity Approval
+- **Test Case:** Career Center Staff Internship Opportunity Approval
+- **Expected Behavior:** Career Center Staff can review and approve/reject internship opportunities submitted by Company Representatives
+- **Actual Result:** 
+- **Failure Indicator:** Career Center Staff cannot access submitted opportunities for review, approval/rejection actions fail to update opportunity status, or approved opportunities do not become visible to students as expected
+- **Pass:** 
+- **Screenshots:** 
+
+---
+
+### Test Case 22: Toggle Internship Opportunity Visibility
+- **Test Case:** Toggle Internship Opportunity Visibility
+- **Expected Behavior:** Changes in visibility should be reflected accurately in the internship opportunity list visible to students
+- **Actual Result:** 
+- **Failure Indicator:** Visibility settings do not update or do not affect the opportunity listing as expected
+- **Pass:** 
+- **Screenshots:** 
+
+---
+
+### Test Case 23: Career Center Staff Internship Opportunity Management Withdrawal
+- **Test Case:** Career Center Staff Internship Opportunity Management Withdrawal
+- **Expected Behavior:** Withdrawal approvals and rejections are processed correctly, with system updates to reflect the decision and slot availability changes
+- **Actual Result:** 
+- **Failure Indicator:** Incorrect or failed processing of withdrawal requests or slot counts not updating properly
+- **Pass:** 
+- **Screenshots:** 
+
+---
+
+### Test Case 24: Generate and Filter Internship Opportunities
+- **Test Case:** Generate and Filter Internship Opportunities
+- **Expected Behavior:** Accurate report generation with options to filter by placement status, major, company, level, and other specified categories
+- **Actual Result:** 
+- **Failure Indicator:** Reports are inaccurate, incomplete, or filtering does not work as expected
 - **Pass:** 
 - **Screenshots:** 
 
