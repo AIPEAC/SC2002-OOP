@@ -259,7 +259,15 @@ public class UserLoginDirectoryControl{
                 loadStudent(userID);
                 List<String> majors = null;
                 if (StudentInfoList[3] != null && !StudentInfoList[3].isEmpty()) {
-                    majors = Arrays.asList(StudentInfoList[3].split(" "));
+                    // Majors are separated by semicolons only (not spaces, as major names can contain spaces)
+                    if (StudentInfoList[3].contains(";")) {
+                        majors = Arrays.asList(StudentInfoList[3].split(";"));
+                        // Trim each major
+                        majors = majors.stream().map(String::trim).filter(s -> !s.isEmpty()).collect(java.util.stream.Collectors.toList());
+                    } else {
+                        // Single major (no semicolon separator)
+                        majors = Arrays.asList(StudentInfoList[3].trim());
+                    }
                 }
                 Student student=new Student(StudentInfoList[0],
                     StudentInfoList[1],
