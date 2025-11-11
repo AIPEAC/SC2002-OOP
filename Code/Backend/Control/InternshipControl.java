@@ -899,12 +899,21 @@ public class InternshipControl{
             // Skip header
             br.readLine();
             while ((line = br.readLine()) != null) {
-                String[] values = line.split(",");
-                String internshipID = values[0];
-                if (internshipID.startsWith(prefix)) {
-                    int idNum = Integer.parseInt(internshipID.substring(prefix.length()));
-                    if (idNum > maxID) {
-                        maxID = idNum;
+                if (line.trim().isEmpty()) continue;
+                // Use proper CSV parsing that respects quoted fields
+                String[] values = ControlUtils.splitCsvLine(line);
+                if (values.length > 0) {
+                    String internshipID = ControlUtils.unescapeCsvField(values[0]);
+                    if (internshipID.startsWith(prefix)) {
+                        try {
+                            int idNum = Integer.parseInt(internshipID.substring(prefix.length()));
+                            if (idNum > maxID) {
+                                maxID = idNum;
+                            }
+                        } catch (NumberFormatException e) {
+                            // Skip invalid ID format
+                            continue;
+                        }
                     }
                 }
             }
