@@ -438,6 +438,9 @@ public class InternshipControl{
      * Check if the internship has reached its capacity. If so, reject all remaining pending applications.
      * Returns a message if internship is full, null otherwise.
      */
+    
+    @SuppressWarnings("unused")
+    @Deprecated
     private String checkAndRejectIfFull(InternshipOpportunity opp) {
         if (opp == null) return null;
         

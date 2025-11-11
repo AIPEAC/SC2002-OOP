@@ -311,7 +311,9 @@ public class ApplicationControl {
 	 * Accepts an approved internship offer on behalf of the logged-in student.
 	 * Updates the application status, student's acceptance status in the database,
 	 * adds the student to the internship's accepted list, and automatically withdraws
-	 * other applications from the same student.
+	 * (sets withdrawStatus to "approved") all other applications from the same student.
+	 * Note: Other applications retain their original status (pending/approved/rejected),
+	 * allowing students to reapply if they later withdraw the accepted offer.
 	 * 
 	 * @param appNum the application number to accept
 	 * @throws IllegalArgumentException if application is not found or not approved
@@ -602,31 +604,35 @@ public class ApplicationControl {
 	// Other methods
 
 	/**
-	 * Rejects all other applications for a student who has accepted an offer.
+	 * Withdraws all other applications for a student who has accepted an offer.
 	 * When a student accepts one internship offer, all their other applications
-	 * (both pending and approved) are automatically rejected.
+	 * are automatically withdrawn (withdrawStatus set to "approved") but their
+	 * application status (pending/approved/rejected) remains unchanged.
+	 * This allows students to reapply if they later withdraw their accepted offer.
 	 * 
 	 * @param studentID the student ID
 	 * @param acceptedAppNum the application number that was accepted (to skip)
 	 */
 	void withdrawOtherApplicationsOfApprovedStudent(String studentID, int acceptedAppNum) {
-		// Reject all other applications from this student (both pending and approved)
+		// Withdraw all other applications from this student (set withdrawStatus to "approved")
 		for (Application app : applications) {
 			// Skip the application that was just accepted
 			if (app.getApplicationNumber() == acceptedAppNum) {
 				continue;
 			}
-			// Reject all other applications from this student
+			// Withdraw all other applications from this student
 			if (app.getStudentID().equals(studentID)) {
 				String currentStatus = app.getApplicationStatus();
 				String withdrawStatus = app.getWithdrawStatus();
-				// Only process applications that are not already rejected or withdrawn
-				// Check both the application status and the withdrawal status
-				boolean alreadyWithdrawn = "approved".equals(withdrawStatus);
+				
+				// Skip applications that are already rejected or already withdrawn
 				boolean alreadyRejected = "rejected".equals(currentStatus);
+				boolean alreadyWithdrawn = "approved".equals(withdrawStatus);
 				
 				if (!alreadyRejected && !alreadyWithdrawn) {
-					app.setApplicationStatusFail(); // Set status to rejected
+					// Set withdrawal status to "approved" (automatically withdrawn)
+					app.setApplicationWithdrawn();
+					// Remove from internship's application list
 					updateInternshipsApplicationsInDB(app.getApplicationNumber(), app.getInternshipID(), "remove");
 				}
 			}
