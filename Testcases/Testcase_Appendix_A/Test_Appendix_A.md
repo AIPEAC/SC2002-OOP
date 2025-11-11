@@ -7,7 +7,7 @@
 | 1 | Valid User Login | User should be able to access their dashboard based on their roles | User cannot log in or receive incorrect error messages | Y |
 | 2 | Invalid ID | User receives a notification about incorrect ID | User is allowed to log in with an invalid ID or fail to provide meaningful error message | |
 | 3 | Incorrect Password | System should deny access and alert the user to incorrect password | User logs in successfully with a wrong password or fail to provide meaningful error message | |
-| 4 | Password Change Functionality | System updates password, prompt re-login and allows login with new credentials | System does not update the password or denies access with the new password | |
+| 4 | Password Change Functionality | System updates password, and allows login with new credentials | System does not update the password or denies access with the new password | |
 | 5 | Company Representative Account Creation | A new Company Representative should only be able to log in to their account after it has been approved by a Career Center Staff | Company Representative staff can log in without any authorization | |
 | 6 | Internship Opportunity Visibility Based on User Profile and Toggle | Internship opportunities are visible to students based on their year of study, major, internship level eligibility, and the visibility setting | Students see internship opportunities not relevant to their profile (wrong major, wrong level for their year) or when visibility is off | |
 | 7 | Internship Application Eligibility | Students can only apply for internship opportunities relevant to their profile (correct major preference, appropriate level for their year of study) and when visibility is on | Students can apply for internship opportunities not relevant to their profile (wrong major preference, Basic-level students applying for Intermediate/Advanced opportunities) or when visibility is off | |
@@ -39,10 +39,12 @@
 - **Expected Behavior:** User receives a notification about incorrect ID
 - **Actual Result:** 
 - **Failure Indicator:** User is allowed to log in with an invalid ID or fail to provide meaningful error message
-- **Pass:**
+- **Pass:** Yes
 - **Screenshots:** 
  
-
+| Career Staff or Student or Company Rep |
+| -------------------------------------- | 
+| ![Invalid ID](Testcase2_InvalidID.png) | ![Notification](Testcase2_NotificationID.png) |
 ---
 
 ### Test Case 3: Incorrect Password
@@ -50,19 +52,27 @@
 - **Expected Behavior:** System should deny access and alert the user to incorrect password
 - **Actual Result:** 
 - **Failure Indicator:** User logs in successfully with a wrong password or fail to provide meaningful error message
-- **Pass:** 
+- **Pass:** Yes
 - **Screenshots:** 
 
+| Career Staff | Student | Company Rep |
+| ---------- | ----------- | -------------- | 
+| ![PW staff](Testcase3_StaffPW.png) | ![PW Student](Testcase3_StudentPW.png) |![PW CompRep](Testcase3_CompanyRepPW.png) | ![InvalidPW](Testcase3_NotificationPW.png) |
+|  |
 ---
 
 ### Test Case 4: Password Change Functionality
 - **Test Case:** Password Change Functionality
-- **Expected Behavior:** System updates password, prompt re-login and allows login with new credentials
+- **Expected Behavior:** System updates password, and allows login with new credentials
 - **Actual Result:** 
 - **Failure Indicator:** System does not update the password or denies access with the new password
-- **Pass:** 
+- **Pass:** Yes
 - **Screenshots:** 
 
+| Career Staff | Student | Company Rep |
+| ---------- | ----------- | -------------- | 
+|![Initial Password Login](Testcase4_InitialLogin.png) |![Initial Login Success](Testcase4_InitialLoginSuccess.png) | ![Password Change](Testcase4_ChangePW.png) | ![Password Change Confirmation](Testcase4_ConfirmationChangedPW.png) | ![Final Password Login](Testcase4_FinalLogin.png) | ![Final Login Success](Testcase4_FinalLoginSuccess.png) |
+|  |
 ---
 
 ### Test Case 5: Company Representative Account Creation
@@ -70,9 +80,13 @@
 - **Expected Behavior:** A new Company Representative should only be able to log in to their account after it has been approved by a Career Center Staff
 - **Actual Result:** 
 - **Failure Indicator:** Company Representative staff can log in without any authorization
-- **Pass:** 
+- **Pass:** Yes
 - **Screenshots:** 
 
+| Career Staff | Student | Company Rep |
+| ---------- | ----------- | -------------- | 
+| ![Company Representative Register](Testcase5_CompRepRegister.png) | ![New Company Representative Registered](Testcase5_RegisteredConfirmation.png) |![Unauthorised Login](Testcase5_UnauthorisedLogin.png) |
+|  |
 ---
 
 ### Test Case 6: Internship Opportunity Visibility Based on User Profile and Toggle
@@ -80,9 +94,12 @@
 - **Expected Behavior:** Internship opportunities are visible to students based on their year of study, major, internship level eligibility, and the visibility setting
 - **Actual Result:** 
 - **Failure Indicator:** Students see internship opportunities not relevant to their profile (wrong major, wrong level for their year) or when visibility is off
-- **Pass:** 
+- **Pass:** Yes
 - **Screenshots:** 
 
+| Career Staff | Student | Company Rep |
+| ---------- | ----------- | -------------- | 
+| ![Company Representative Register](Testcase5_CompRepRegister.png) | ![New Company Representative Registered](Testcase5_RegisteredConfirmation.png) |![Unauthorised Login](Testcase5_UnauthorisedLogin.png) |
 ---
 
 ### Test Case 7: Internship Application Eligibility

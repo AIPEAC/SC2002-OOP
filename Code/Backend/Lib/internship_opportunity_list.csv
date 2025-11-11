@@ -1,1 +1,3 @@
 internshipID,title,description,level,preferredMajors,openingDate,closeDate,status,CompanyName,companyRepInCharge,numOfSlots,pendingApplicationNumberList,acceptedApplicationNumberList,visibility
+#INT0001,NewCompOpp,NewCompOpp Description,Advanced,Accountancy,2025-10-15,2025-11-29,approved,NewComp,NewComp@gmail.com,3,,,true
+#INT0002,NewCompOpp2,NewCompOpp2 Description,Basic,Accountancy (Sustainability Management and Analytics),2025-10-10,2025-12-09,approved,NewComp,NewComp@gmail.com,3,,,true
