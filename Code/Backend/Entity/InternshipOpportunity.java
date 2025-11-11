@@ -340,6 +340,8 @@ public class InternshipOpportunity {
     }
     public void removeApplicationNumberFromInternship(int applicationNumber) {
         applicationNumberList.remove(Integer.valueOf(applicationNumber));
+        // Also remove from accepted list if present (for withdrawal scenarios)
+        acceptedApplicationNumbers.remove(Integer.valueOf(applicationNumber));
     }
 
     /**
