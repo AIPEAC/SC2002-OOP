@@ -44,7 +44,6 @@
 | Career Staff | Student | Company Rep |
 | ---------- | ----------- | -------------- | 
 | ![login staff](Testcase1_Staff.png) | ![login Student](Testcase1_Student.png) |![login CompRep](Testcase1_CompanyRep.png)|
-|  |
 ---
 
 
@@ -56,8 +55,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
  
-| Career Staff or Student or Company Rep |
-| -------------------------------------- | 
+| Invid ID | Notification |
+| -------------------------------------- | -------------------------------------- | 
 | ![Invalid ID](Testcase2_InvalidID.png) | ![Notification](Testcase2_NotificationID.png) |
 ---
 
@@ -69,10 +68,9 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Career Staff | Student | Company Rep |
-| ---------- | ----------- | -------------- | 
+| Career Staff | Student | Company Rep | Invalid PW |
+| ---------- | ----------- | -------------- | -------------- | 
 | ![PW staff](Testcase3_StaffPW.png) | ![PW Student](Testcase3_StudentPW.png) |![PW CompRep](Testcase3_CompanyRepPW.png) | ![InvalidPW](Testcase3_NotificationPW.png) |
-|  |
 ---
 
 ### Test Case 4: Password Change Functionality
@@ -83,10 +81,9 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Career Staff | Student | Company Rep |
-| ---------- | ----------- | -------------- | 
+| Initial Password Login | Initial Login Success | Password Change | Password Change Confirmation | Final Password Login | Final Login Success |
+| ---------- | ----------- | -------------- | -------------- | -------------- | -------------- | 
 |![Initial Password Login](Testcase4_InitialLogin.png) |![Initial Login Success](Testcase4_InitialLoginSuccess.png) | ![Password Change](Testcase4_ChangePW.png) | ![Password Change Confirmation](Testcase4_ConfirmationChangedPW.png) | ![Final Password Login](Testcase4_FinalLogin.png) | ![Final Login Success](Testcase4_FinalLoginSuccess.png) |
-|  |
 ---
 
 ### Test Case 5: Company Representative Account Creation
@@ -97,10 +94,9 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Career Staff | Student | Company Rep |
+| Register | Notification | Unauthorised Login |
 | ---------- | ----------- | -------------- | 
 | ![Company Representative Register](Testcase5_CompRepRegister.png) | ![New Company Representative Registered](Testcase5_RegisteredConfirmation.png) |![Unauthorised Login](Testcase5_UnauthorisedLogin.png) |
-|  |
 ---
 
 ### Test Case 6: Internship Opportunity Visibility Based on User Profile and Toggle

@@ -3,9 +3,9 @@
 ## Overview
 - **Langauge**: java
 - **Contributor**:
-  - Allen: Frontend & Backend Coding Implementation, Sequence diagram
+  - Allen: Frontend & Backend.Control Coding, Sequence diagram
   - Deryl: Class diagram
-  - Hong Xun: Testing
+  - Hong Xun: Backend.Entity Coding, Testing
   - Jeremy: Report
   - Teja: Filtering Algorithm
 - **Visualization of Project**: UML diagrams
