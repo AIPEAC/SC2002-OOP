@@ -614,7 +614,7 @@ public class InternshipControl{
                 String name = ControlUtils.unescapeCsvField(values[1]);
                 String email = ControlUtils.unescapeCsvField(values[2]);
                 String majorRaw = ControlUtils.unescapeCsvField(values[3]);
-                // Majors are separated by semicolons or spaces
+                // Majors are separated by semicolons only (not spaces, as major names can contain spaces)
                 List<String> majors = new ArrayList<>();
                 if (majorRaw.contains(";")) {
                     for (String part : majorRaw.split(";")) {
@@ -622,10 +622,9 @@ public class InternshipControl{
                         if (!t.isEmpty()) majors.add(t);
                     }
                 } else {
-                    for (String part : majorRaw.split("\\s+")) {
-                        String t = part.trim();
-                        if (!t.isEmpty()) majors.add(t);
-                    }
+                    // Single major (no semicolon separator)
+                    String t = majorRaw.trim();
+                    if (!t.isEmpty()) majors.add(t);
                 }
                 int year = Integer.parseInt(ControlUtils.unescapeCsvField(values[4]));
                 boolean hasAcceptedInternshipOpportunity = Boolean.parseBoolean(ControlUtils.unescapeCsvField(values[5]));
@@ -664,18 +663,19 @@ public class InternshipControl{
             if (levelMatch) {
                 // Check if any of the student's majors are in preferred majors
                 boolean anyMatch = false;
-                if (student.getMajors() != null) {
+                if (student.getMajors() != null && !student.getMajors().isEmpty()) {
                     for (String m : student.getMajors()) {
-                        if (preferredMajors.contains(m)) {
+                        if (preferredMajors != null && preferredMajors.contains(m)) {
                             anyMatch = true;
                             break;
                         }
                     }
                 }
-                if (!anyMatch) {
-                    // Student does not meet preferred majors. Backend does not emit UI messages.
+                // If no preferred majors specified, all students with correct level are eligible
+                if (preferredMajors == null || preferredMajors.isEmpty()) {
+                    anyMatch = true;
                 }
-                return true;
+                return anyMatch;
             }
             return false;
         }
