@@ -1,2 +1,3 @@
 ApplicationNumber,InternshipID,StudentID,Company,Status,Acceptance,WithdrawStatus,StudentMajor
 "1","#INT0001","U2310004D","NewComp","pending","","","Information Engineering and Media"
+"2","#INT0004","U2310004D","NewComp","pending","","","Information Engineering and Media"

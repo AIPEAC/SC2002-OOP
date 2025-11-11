@@ -1,5 +1,5 @@
 internshipID,title,description,level,preferredMajors,openingDate,closeDate,status,CompanyName,companyRepInCharge,numOfSlots,pendingApplicationNumberList,acceptedApplicationNumberList,visibility
-"#INT0001","Basic Info, Engi, Comm","","Basic","Information Engineering and Media","2025-10-10","2025-12-10","approved","NewComp","NewComp@gmail.com","1","1","","false"
+"#INT0001","Basic Info, Engi, Comm","","Basic","Information Engineering and Media","2025-10-10","2025-12-10","approved","NewComp","NewComp@gmail.com","1","","","false"
 "#INT0002","Intermediate Info, Engi, Comm","","Intermediate","Information Engineering and Media","2025-10-10","2025-12-10","approved","NewComp","NewComp@gmail.com","2","","","true"
 "#INT0003","Advance Info, Engi, Comm","","Advanced","Information Engineering and Media","2025-10-12","2025-12-12","approved","NewComp","NewComp@gmail.com","2","","","true"
 "#INT0004","Basic Info HIDDEN","","Basic","Information Engineering and Media","2025-10-13","2025-12-13","approved","NewComp","NewComp@gmail.com","2","","","false"
