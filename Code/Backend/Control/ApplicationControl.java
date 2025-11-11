@@ -323,6 +323,21 @@ public class ApplicationControl {
 		if (app == null || !app.getApplicationStatus().equals("approved")) {
 			throw new IllegalArgumentException("Application not found or not approved.");
 		}
+		
+		// Check if student has already accepted another offer
+		if (getStudentAcceptanceStatus(app.getStudentID())) {
+			throw new IllegalStateException("You have already accepted an internship offer. You cannot accept another offer.");
+		}
+		
+		// Check if student has any other application with acceptance = "yes"
+		boolean hasAcceptedOther = applications.stream()
+			.anyMatch(a -> a.getApplicationNumber() != appNum 
+				&& a.getStudentID().equals(app.getStudentID()) 
+				&& "yes".equalsIgnoreCase(a.getAcceptance()));
+		if (hasAcceptedOther) {
+			throw new IllegalStateException("You have already accepted another internship offer.");
+		}
+		
 		app.setAcceptanceYes();
 		saveApplicationsToDB();
 		// Update student's hasAcceptedInternshipOpportunity in student.csv
