@@ -4,17 +4,27 @@ import Backend.Control.*;
 import Frontend_UI.Boundary.*;
 import javax.swing.SwingUtilities;
 
+/**
+ * Main entry point for the Internship Application Management System.
+ * Uses centralized initialization to ensure proper setup of all backend controllers
+ * and maintains separation between frontend and backend layers.
+ * 
+ * @author Allen
+ * @version 2.0
+ */
 public class Main {
     public static void main(String[] args) {
-        // Build backend controls the same way as the console main
-        AuthenticationControl authCtrl = new AuthenticationControl();
-        UserLoginDirectoryControl userLoginDirCtrl = new UserLoginDirectoryControl(authCtrl);
-        LoginControl loginCtrl = new LoginControl(authCtrl, userLoginDirCtrl);
-        InternshipControl intCtrl = new InternshipControl(authCtrl);
-        ApplicationControl appCtrl = new ApplicationControl(authCtrl, intCtrl);
-        intCtrl.setApplicationControl(appCtrl);
-        ReportControl reportCtrl = new ReportControl(authCtrl, intCtrl);
-        UserControl userCtrl = new UserControl(userLoginDirCtrl, authCtrl);
+        // Initialize all backend controllers through centralized initialization
+        // This prevents the frontend from directly instantiating or manipulating backend components
+        InitializeControl initCtrl = new InitializeControl();
+        
+        // Get controller instances from the initializer
+        AuthenticationControl authCtrl = initCtrl.getAuthenticationControl();
+        LoginControl loginCtrl = initCtrl.getLoginControl();
+        InternshipControl intCtrl = initCtrl.getInternshipControl();
+        ApplicationControl appCtrl = initCtrl.getApplicationControl();
+        ReportControl reportCtrl = initCtrl.getReportControl();
+        UserControl userCtrl = initCtrl.getUserControl();
 
         // Launch UI login and then dispatch to role-specific UIs
         SwingUtilities.invokeLater(() -> {
