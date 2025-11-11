@@ -9,3 +9,4 @@ identity,userID,passwordHash,salt,status
 "Student","U2310005E","4d4b7c502c80754cb92aff15c5cf522183f401c77d03ac741cb347ba482689da","olyQvCUNDkDZ_2geuLFl7Q",""
 "CompanyRepresentative","example_comp_mail@mail.com","5e3484df1530f0744073a7843a808750aff1aa5e8d1f596bdc5875df38353dec","9XedY8TRV1LcXc2ywc92Eg","approved"
 "CompanyRepresentative","NewComp@gmail.com","50092c1af04595c8f4c2043bb03141549d33d1f59c587a50e81908016b83e496","oBTRR_jjrTZIuX5S39MGdg","approved"
+"CompanyRepresentative","NewComp2@gmail.com","c38539cc3773f1e8300f35acb20225d1060659c3ec105c1dbda05ec82b329218","JskIvCj5926DZJN3X6EtbA","approved"
