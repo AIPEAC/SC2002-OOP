@@ -695,10 +695,12 @@ public class InternshipControl{
             updateInternshipInDB();
         }
     }
-    void withdrawEveryOtherApplication(String studentID) {
-        appCtrl.withdrawOtherApplicationsOfApprovedStudent(studentID);
-        updateInternshipInDB();
-    }
+    // Note: This method is deprecated - use ApplicationControl.acceptOffer instead
+    // which automatically handles rejecting other applications
+    // void withdrawEveryOtherApplication(String studentID) {
+    //     appCtrl.withdrawOtherApplicationsOfApprovedStudent(studentID, acceptedAppNum);
+    //     updateInternshipInDB();
+    // }
     String getInternshipCompany(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp != null) {

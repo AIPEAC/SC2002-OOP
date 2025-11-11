@@ -329,7 +329,7 @@ public class ApplicationControl {
 		if (intCtrl != null) {
 			intCtrl.studentAcceptedOfferForInternship(appNum, app.getInternshipID());
 		}
-		withdrawOtherApplicationsOfApprovedStudent(app.getStudentID());
+		withdrawOtherApplicationsOfApprovedStudent(app.getStudentID(), appNum);
 	}
 	
 	/**
@@ -363,6 +363,12 @@ public class ApplicationControl {
 	public void requestWithdrawApplication(int appNum) {
 		Application app = getApplicationByNumber(appNum);
 		if (app == null) throw new IllegalArgumentException("Application not found.");
+		
+		// Check if application is already rejected - cannot withdraw a rejected application
+		if ("rejected".equals(app.getApplicationStatus())) {
+			throw new IllegalStateException("Cannot withdraw a rejected application.");
+		}
+		
 		String ws = app.getWithdrawStatus();
 		if (ws != null && ws.equals("rejected")) {
 			throw new IllegalStateException("Previous withdrawal request was rejected. You are refrained from making changes.");
@@ -596,21 +602,36 @@ public class ApplicationControl {
 	// Other methods
 
 	/**
-	 * Withdraws all other applications for a student who has accepted an offer.
+	 * Rejects all other applications for a student who has accepted an offer.
+	 * When a student accepts one internship offer, all their other applications
+	 * (both pending and approved) are automatically rejected.
 	 * 
 	 * @param studentID the student ID
+	 * @param acceptedAppNum the application number that was accepted (to skip)
 	 */
-	void withdrawOtherApplicationsOfApprovedStudent(String studentID) {
+	void withdrawOtherApplicationsOfApprovedStudent(String studentID, int acceptedAppNum) {
+		// Reject all other applications from this student (both pending and approved)
 		for (Application app : applications) {
-			if (app.getStudentID().equals(studentID) && app.getApplicationStatus().equals("approved")) {
-				continue; // Skip the approved application
+			// Skip the application that was just accepted
+			if (app.getApplicationNumber() == acceptedAppNum) {
+				continue;
 			}
+			// Reject all other applications from this student
 			if (app.getStudentID().equals(studentID)) {
-				app.setApplicationWithdrawn();
-				updateInternshipsApplicationsInDB(app.getApplicationNumber(), app.getInternshipID(), "remove");
+				String currentStatus = app.getApplicationStatus();
+				String withdrawStatus = app.getWithdrawStatus();
+				// Only process applications that are not already rejected or withdrawn
+				// Check both the application status and the withdrawal status
+				boolean alreadyWithdrawn = "approved".equals(withdrawStatus);
+				boolean alreadyRejected = "rejected".equals(currentStatus);
+				
+				if (!alreadyRejected && !alreadyWithdrawn) {
+					app.setApplicationStatusFail(); // Set status to rejected
+					updateInternshipsApplicationsInDB(app.getApplicationNumber(), app.getInternshipID(), "remove");
+				}
 			}
-			saveApplicationsToDB();
 		}
+		saveApplicationsToDB();
 	}
 	
 	//=========================================================
