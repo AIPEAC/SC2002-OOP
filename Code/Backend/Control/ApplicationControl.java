@@ -754,8 +754,14 @@ public class ApplicationControl {
 			br.readLine(); // Skip header
 			while ((line = br.readLine()) != null) {
 				if (line.trim().isEmpty()) continue;
-				String[] values = line.split(",");
+				// Use proper CSV parsing that respects quoted fields
+				String[] values = ControlUtils.splitCsvLine(line);
 				if (values.length < 3) continue;
+				
+				// Unescape all fields
+				for (int i = 0; i < values.length; i++) {
+					values[i] = ControlUtils.unescapeCsvField(values[i]);
+				}
 				
 				int appNum = Integer.parseInt(values[0].trim());
 				String internshipID = values[1].trim();
