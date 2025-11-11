@@ -1,3 +1,6 @@
 ApplicationNumber,InternshipID,StudentID,Company,Status,Acceptance,WithdrawStatus,StudentMajor
-"1","#INT0001","U2310004D","NewComp","pending","","","Information Engineering and Media"
-"2","#INT0004","U2310004D","NewComp","pending","","","Information Engineering and Media"
+"1","#INT0001","U2310004D","NewComp","approved","yes","approved","Information Engineering and Media"
+"2","#INT0006","U2310004D","NewComp2","approved","yes","approved","Information Engineering and Media"
+"3","#INT0010","U2310005E","NewComp3","approved","yes","approved","Computer Science"
+"4","#INT0011","U2310005E","NewComp2","approved","yes","approved","Computer Science"
+"5","#INT0018","U2310001A","NewComp4","pending","","","Computer Science"
