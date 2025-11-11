@@ -489,6 +489,8 @@ public class UserLoginDirectoryControl{
      * 
      * @return a formatted string like "comprep0001" (never called in current implementation)
      */
+    
+    @SuppressWarnings("unused")
     @Deprecated
     private String assignIDToCompanyRep(){
         List<String> allUserIDs = new ArrayList<>();
