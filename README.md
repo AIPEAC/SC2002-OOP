@@ -2,7 +2,12 @@
 
 ## Overview
 - **Langauge**: java
-- **Contributor**: Allen, Deryl, Hong Xun, Jeremy, Teja 
+- **Contributor**:
+  - Allen: Frontend & Backend Coding Implementation, Sequence diagram
+  - Deryl: Class diagram
+  - Hong Xun: Testing
+  - Jeremy: Report
+  - Teja: Filtering Algorithm
 - **Visualization of Project**: UML diagrams
     - Class Diagram
     - Sequence Diagram for Company Representative
