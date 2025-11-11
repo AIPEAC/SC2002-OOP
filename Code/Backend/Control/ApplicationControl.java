@@ -584,6 +584,9 @@ public class ApplicationControl {
 	
 	/**
 	 * Approves a withdrawal request for an application.
+	 * When a withdrawal is approved, this method now also removes ALL applications
+	 * from this student from the system (both from application_list and from
+	 * internship opportunity lists), allowing the student to reapply fresh.
 	 * 
 	 * @param appNum the application number
 	 * @throws IllegalArgumentException if application is not found
@@ -594,20 +597,39 @@ public class ApplicationControl {
 		
 		// Check if student had accepted this offer - if so, need to update their status
 		boolean hadAccepted = "yes".equalsIgnoreCase(app.getAcceptance());
-		
-		app.setApplicationWithdrawn();
-		// persist change
-		saveApplicationsToDB();
+		String studentID = app.getStudentID();
 		
 		// If student had accepted this offer, update their hasAcceptedInternshipOpportunity to false
 		if (hadAccepted) {
-			updateStudentAcceptanceStatus(app.getStudentID(), false);
+			updateStudentAcceptanceStatus(studentID, false);
 		}
 		
-		// remove application number from associated internship
-		if (intCtrl != null) {
-			intCtrl.removeApplicationNumberFromInternshipOpportunity(appNum, app.getInternshipID());
+		// NEW: Remove ALL applications from this student to allow fresh reapplication
+		// First, need to load ALL applications to find all of this student's applications
+		loadAllApplicationsFromDB();
+		
+		// Collect all application numbers and their internships before removal
+		List<Integer> applicationNumbersToDelete = new ArrayList<>();
+		for (Application studentApp : applications) {
+			if (studentApp.getStudentID().equals(studentID)) {
+				int appNumber = studentApp.getApplicationNumber();
+				String internshipID = studentApp.getInternshipID();
+				
+				// Remove from internship's pending/accepted lists
+				if (intCtrl != null) {
+					intCtrl.removeApplicationNumberFromInternshipOpportunity(appNumber, internshipID);
+				}
+				
+				// Track for deletion from CSV
+				applicationNumbersToDelete.add(appNumber);
+			}
 		}
+		
+		// Permanently delete all student's applications from database
+		deleteApplicationsFromDB(applicationNumbersToDelete);
+		
+		// Clear in-memory applications list since we just deleted from DB
+		applications.clear();
 	}
 	// removed unused stub methods: rejectWithdrawal(Application), addApplicationToPendingList(Application), removeApplicationFromPendingList(Application)
 
@@ -858,6 +880,72 @@ public class ApplicationControl {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Permanently deletes applications from the database by application numbers.
+	 * This method reads all applications, removes those matching the provided numbers,
+	 * and writes the remaining applications back to the CSV file.
+	 * 
+	 * @param applicationNumbersToDelete set of application numbers to remove from database
+	 */
+	private void deleteApplicationsFromDB(List<Integer> applicationNumbersToDelete) {
+		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
+		List<Application> remainingApplications = new ArrayList<>();
+		
+		// Load all applications and keep only those NOT in the delete list
+		try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
+			String line;
+			br.readLine(); // Skip header
+			while ((line = br.readLine()) != null) {
+				if (line.trim().isEmpty()) continue;
+				String[] values = ControlUtils.splitCsvLine(line);
+				if (values.length < 3) continue;
+				
+				// Unescape all fields
+				for (int i = 0; i < values.length; i++) {
+					values[i] = ControlUtils.unescapeCsvField(values[i]);
+				}
+				
+				int appNum = Integer.parseInt(values[0].trim());
+				
+				// Keep this application only if it's NOT in the delete list
+				if (!applicationNumbersToDelete.contains(appNum)) {
+					String internshipID = values[1].trim();
+					String studentID = values[2].trim();
+					String company = values.length > 3 ? values[3].trim() : "";
+					String status = values.length > 4 ? values[4].trim() : "pending";
+					String acceptance = (values.length > 5 && !values[5].trim().isEmpty()) ? values[5].trim() : null;
+					String withdrawStatus = (values.length > 6 && !values[6].trim().isEmpty()) ? values[6].trim() : null;
+					List<String> studentMajors = (values.length > 7 && !values[7].trim().isEmpty()) ? Arrays.asList(values[7].trim().split(" ")) : null;
+					
+					Application app = new Application(appNum, internshipID, company, studentID, status, acceptance, withdrawStatus, studentMajors);
+					remainingApplications.add(app);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		// Write remaining applications back to CSV
+		try (FileWriter writer = new FileWriter(CSV_FILE)) {
+			writer.append("ApplicationNumber,InternshipID,StudentID,Company,Status,Acceptance,WithdrawStatus,StudentMajor\n");
+			for (Application app : remainingApplications) {
+				writer.append(ControlUtils.escapeCsvField(String.valueOf(app.getApplicationNumber()))).append(",")
+					.append(ControlUtils.escapeCsvField(app.getInternshipID())).append(",")
+					.append(ControlUtils.escapeCsvField(app.getStudentID())).append(",")
+					.append(ControlUtils.escapeCsvField(app.getCompany() != null ? app.getCompany() : "")).append(",")
+					.append(ControlUtils.escapeCsvField(app.getApplicationStatus() != null ? app.getApplicationStatus() : "pending")).append(",")
+					.append(ControlUtils.escapeCsvField(app.getAcceptance() != null ? app.getAcceptance() : "")).append(",")
+					.append(ControlUtils.escapeCsvField(app.getWithdrawStatus() != null ? app.getWithdrawStatus() : "")).append(",")
+					.append(ControlUtils.escapeCsvField(app.getStudentMajors() != null ? String.join(" ", app.getStudentMajors()) : ""))
+					.append("\n");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private void updateInternshipsApplicationsInDB(int applicationNumber, String internshipID, String action) {
 		if (action.equals("add")) {
 			intCtrl.addApplicationNumberToInternshipOpportunity(applicationNumber, internshipID);
