@@ -25,9 +25,13 @@ import java.io.FileWriter;
  * Company representatives can create up to 5 opportunities with maximum 10 slots each.
  * Students can view and apply to internships based on their major and year of study.
  * Career staff approve or reject internship opportunities before they become visible to students.
+ * <p>
+ * All CSV operations use proper field escaping to handle special characters (commas, quotes)
+ * in internship titles, descriptions, and company names, ensuring data integrity.
+ * </p>
  * 
  * @author Allen
- * @version 1.0
+ * @version 2.0
  */
 public class InternshipControl{
     /** List of all internship opportunities in the system */
@@ -81,48 +85,59 @@ public class InternshipControl{
             br.readLine();
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
-                String[] values = line.split(",");
-                String internshipID = values.length > 0 ? values[0] : "";
-                String title = values.length > 1 ? values[1] : "";
-                String description = values.length > 2 ? values[2] : "";
-                String level = values.length > 3 ? values[3] : "";
-                String pmRaw = values.length > 4 ? values[4] : "";
+                // Use proper CSV parsing that respects quoted fields
+                String[] values = ControlUtils.splitCsvLine(line);
+                String internshipID = values.length > 0 ? ControlUtils.unescapeCsvField(values[0]) : "";
+                String title = values.length > 1 ? ControlUtils.unescapeCsvField(values[1]) : "";
+                String description = values.length > 2 ? ControlUtils.unescapeCsvField(values[2]) : "";
+                String level = values.length > 3 ? ControlUtils.unescapeCsvField(values[3]) : "";
+                String pmRaw = values.length > 4 ? ControlUtils.unescapeCsvField(values[4]) : "";
                 List<String> preferredMajors = parsePreferredMajorsRaw(pmRaw);
                 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                String openStr = values.length > 5 ? values[5] : "";
-                String closeStr = values.length > 6 ? values[6] : "";
+                String openStr = values.length > 5 ? ControlUtils.unescapeCsvField(values[5]) : "";
+                String closeStr = values.length > 6 ? ControlUtils.unescapeCsvField(values[6]) : "";
                 Date openingDate = (openStr != null && !openStr.trim().isEmpty()) ? sdf.parse(openStr.trim()) : new Date();
                 Date closeDate = (closeStr != null && !closeStr.trim().isEmpty()) ? sdf.parse(closeStr.trim()) : new Date();
-                String status = values.length > 7 ? values[7] : "pending";
-                String companyName = values.length > 8 ? values[8] : "";
-                String companyRepInChargeID = values.length > 9 ? values[9] : "";
+                String status = values.length > 7 ? ControlUtils.unescapeCsvField(values[7]) : "pending";
+                String companyName = values.length > 8 ? ControlUtils.unescapeCsvField(values[8]) : "";
+                String companyRepInChargeID = values.length > 9 ? ControlUtils.unescapeCsvField(values[9]) : "";
                 int numberOfSlots = 0;
                 try {
-                    numberOfSlots = values.length > 10 && values[10] != null && !values[10].trim().isEmpty()
-                            ? Integer.parseInt(values[10].trim()) : 0;
+                    String slotsStr = values.length > 10 ? ControlUtils.unescapeCsvField(values[10]) : "";
+                    numberOfSlots = slotsStr != null && !slotsStr.trim().isEmpty()
+                            ? Integer.parseInt(slotsStr.trim()) : 0;
                 } catch (NumberFormatException nfe) {
                     numberOfSlots = 0;
                 }
                 // applicationNumberList is space-separated integers
                 List<Integer> applicationNumberList = new ArrayList<>();
-                if (values.length > 11 && values[11] != null && !values[11].trim().isEmpty()) {
-                    applicationNumberList = Arrays.stream(values[11].trim().split("\\s+"))
-                            .filter(s -> s != null && !s.trim().isEmpty())
-                            .map(Integer::parseInt)
-                            .collect(Collectors.toList());
+                if (values.length > 11) {
+                    String appListStr = ControlUtils.unescapeCsvField(values[11]);
+                    if (appListStr != null && !appListStr.trim().isEmpty()) {
+                        applicationNumberList = Arrays.stream(appListStr.trim().split("\\s+"))
+                                .filter(s -> s != null && !s.trim().isEmpty())
+                                .map(Integer::parseInt)
+                                .collect(Collectors.toList());
+                    }
                 }
                 // acceptedApplicantNumbers is space-separated integers
                 List<Integer> acceptedApplicantNumbers = new ArrayList<>();
-                if (values.length > 12 && values[12] != null && !values[12].trim().isEmpty()) {
-                    acceptedApplicantNumbers = Arrays.stream(values[12].trim().split("\\s+"))
-                            .filter(s -> s != null && !s.trim().isEmpty())
-                            .map(Integer::parseInt)
-                            .collect(Collectors.toList());
+                if (values.length > 12) {
+                    String acceptedStr = ControlUtils.unescapeCsvField(values[12]);
+                    if (acceptedStr != null && !acceptedStr.trim().isEmpty()) {
+                        acceptedApplicantNumbers = Arrays.stream(acceptedStr.trim().split("\\s+"))
+                                .filter(s -> s != null && !s.trim().isEmpty())
+                                .map(Integer::parseInt)
+                                .collect(Collectors.toList());
+                    }
                 }
                 boolean visibility = false;
-                if (values.length > 13 && values[13] != null && !values[13].trim().isEmpty()) {
-                    visibility = Boolean.parseBoolean(values[13].trim());
+                if (values.length > 13) {
+                    String visStr = ControlUtils.unescapeCsvField(values[13]);
+                    if (visStr != null && !visStr.trim().isEmpty()) {
+                        visibility = Boolean.parseBoolean(visStr.trim());
+                    }
                 }
                 InternshipOpportunity opp = new InternshipOpportunity(
                         internshipID, title, description, level, preferredMajors,
@@ -172,6 +187,22 @@ public class InternshipControl{
     // =========================================================
     // Company Rep methods
 
+    /**
+     * Request to create a new internship opportunity by a company representative.
+     * All text fields (title, description, company name) are properly escaped to handle
+     * special characters like commas and quotes.
+     * 
+     * @param internshipTitle the title of the internship
+     * @param description detailed description of the internship (can contain commas, quotes)
+     * @param internshipLevel the level (Basic, Intermediate, Advanced)
+     * @param preferredMajors list of preferred majors for applicants
+     * @param openDateStr opening date in yyyy-MM-dd format
+     * @param closeDateStr closing date in yyyy-MM-dd format
+     * @param numberOfSlotsStr number of available slots (max 10)
+     * @return the auto-generated internship ID
+     * @throws IllegalStateException if user not logged in or max internships reached
+     * @throws IllegalArgumentException if number of slots exceeds 10
+     */
     public String requestCreateInternshipOpportunity(
         String internshipTitle, String description, 
         String internshipLevel, List<String> preferredMajors, 
@@ -336,7 +367,11 @@ public class InternshipControl{
         try (BufferedReader br = new BufferedReader(new FileReader("Code/Backend/Lib/student.csv"))) {
             String line = br.readLine(); // skip header
             while ((line = br.readLine()) != null) {
-                String[] vals = line.split(",");
+                String[] vals = ControlUtils.splitCsvLine(line);
+                // Unescape fields
+                for (int i = 0; i < vals.length; i++) {
+                    vals[i] = ControlUtils.unescapeCsvField(vals[i]);
+                }
                 if (vals.length > 0 && vals[0].equals(studentID)) {
                     String name = vals.length > 1 ? vals[1] : "";
                     String email = vals.length > 2 ? vals[2] : "";
@@ -826,25 +861,26 @@ public class InternshipControl{
             writer.write("internshipID,title,description,level,preferredMajors,openingDate,closeDate,status,CompanyName,companyRepInCharge,numOfSlots,pendingApplicationNumberList,acceptedApplicationNumberList,visibility");
             writer.newLine();
             for (InternshipOpportunity opp : internshipOpportunities) {
+                // Escape all string fields that might contain commas
                 String line = String.join(",",
-                    opp.getInternshipID(),
-                    opp.getInternshipTitle(),
-                    opp.getDescription(),
-                    opp.getInternshipLevel(),
-                    (opp.getPreferredMajors() != null ? String.join(";", opp.getPreferredMajors()) : ""),
-                    new SimpleDateFormat("yyyy-MM-dd").format(opp.getOpeningDate()),
-                    new SimpleDateFormat("yyyy-MM-dd").format(opp.getCloseDate()),
-                    opp.getStatus(),
-                    opp.getCompanyName(),
-                    opp.getCompanyRepInChargeID(),
-                    String.valueOf(opp.getNumOfSlots()),
-                    opp.getApplicationNumberList().stream()
+                    ControlUtils.escapeCsvField(opp.getInternshipID()),
+                    ControlUtils.escapeCsvField(opp.getInternshipTitle()),
+                    ControlUtils.escapeCsvField(opp.getDescription()),
+                    ControlUtils.escapeCsvField(opp.getInternshipLevel()),
+                    ControlUtils.escapeCsvField(opp.getPreferredMajors() != null ? String.join(";", opp.getPreferredMajors()) : ""),
+                    ControlUtils.escapeCsvField(new SimpleDateFormat("yyyy-MM-dd").format(opp.getOpeningDate())),
+                    ControlUtils.escapeCsvField(new SimpleDateFormat("yyyy-MM-dd").format(opp.getCloseDate())),
+                    ControlUtils.escapeCsvField(opp.getStatus()),
+                    ControlUtils.escapeCsvField(opp.getCompanyName()),
+                    ControlUtils.escapeCsvField(opp.getCompanyRepInChargeID()),
+                    ControlUtils.escapeCsvField(String.valueOf(opp.getNumOfSlots())),
+                    ControlUtils.escapeCsvField(opp.getApplicationNumberList().stream()
                         .map(String::valueOf)
-                        .collect(Collectors.joining(" ")),
-                    opp.getAcceptedApplicationNumbers().stream()
+                        .collect(Collectors.joining(" "))),
+                    ControlUtils.escapeCsvField(opp.getAcceptedApplicationNumbers().stream()
                         .map(String::valueOf)
-                        .collect(Collectors.joining(" ")),
-                    String.valueOf(opp.getVisibility())
+                        .collect(Collectors.joining(" "))),
+                    ControlUtils.escapeCsvField(String.valueOf(opp.getVisibility()))
                 );
                 writer.write(line);
                 writer.newLine();
