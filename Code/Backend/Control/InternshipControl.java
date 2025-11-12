@@ -268,6 +268,319 @@ public class InternshipControl{
         updateInternshipInDB();
         return internshipID;
     }
+
+    /**
+     * Edits an existing internship opportunity.
+     * Only allows editing if the opportunity status is "pending" (not yet approved by staff).
+     * Company rep can only edit their own internships.
+     * 
+     * @param internshipID the internship to edit
+     * @param internshipTitle new title
+     * @param description new description
+     * @param internshipLevel new level
+     * @param preferredMajors new preferred majors list
+     * @param openDateStr new opening date (yyyy-MM-dd format)
+     * @param closeDateStr new closing date (yyyy-MM-dd format)
+     * @param numberOfSlotsStr new number of slots
+     * @throws IllegalStateException if not logged in or not a company rep
+     * @throws IllegalArgumentException if internship not found, not authorized, or already approved
+     */
+    public void editInternshipOpportunity(
+        String internshipID,
+        String internshipTitle, String description, 
+        String internshipLevel, List<String> preferredMajors, 
+        String openDateStr, String closeDateStr, String numberOfSlotsStr) {
+        
+        if (!isCompanyRepLoggedIn()) {
+            throw new IllegalStateException("User not logged in or not a company representative.");
+        }
+        
+        String companyRepID = authCtrl.getUserID();
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        
+        if (opp == null) {
+            throw new IllegalArgumentException("Internship opportunity not found: " + internshipID);
+        }
+        
+        if (!opp.getCompanyRepInChargeID().equals(companyRepID)) {
+            throw new IllegalArgumentException("You are not authorized to edit this internship opportunity.");
+        }
+        
+        // Check if already approved - if so, editing not allowed
+        if ("approved".equalsIgnoreCase(opp.getStatus())) {
+            throw new IllegalArgumentException("Cannot edit internship opportunity that has been approved by Career Center Staff.");
+        }
+        
+        // Parse dates and slots - use existing values as defaults
+        Date openDate = opp.getOpeningDate();
+        Date closeDate = opp.getCloseDate();
+        int numberOfSlots = opp.getNumOfSlots();
+        List<String> majors = preferredMajors != null && !preferredMajors.isEmpty() ? preferredMajors : opp.getPreferredMajors();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        
+        if (openDateStr != null && !openDateStr.trim().isEmpty()) {
+            try {
+                openDate = sdf.parse(openDateStr.trim());
+            } catch (ParseException e) {
+                // Keep existing date
+            }
+        }
+        
+        if (closeDateStr != null && !closeDateStr.trim().isEmpty()) {
+            try {
+                closeDate = sdf.parse(closeDateStr.trim());
+            } catch (ParseException e) {
+                // Keep existing date
+            }
+        }
+        
+        if (numberOfSlotsStr != null && !numberOfSlotsStr.trim().isEmpty()) {
+            try {
+                int newSlots = Integer.parseInt(numberOfSlotsStr.trim());
+                if (newSlots > 0 && newSlots <= 10) {
+                    numberOfSlots = newSlots;
+                }
+            } catch (NumberFormatException e) {
+                // Keep existing slots
+            }
+        }
+        
+        // Create a new opportunity object with updated values instead of modifying the existing one
+        // This keeps the entity immutable (only constructor-based)
+        InternshipOpportunity updatedOpp = new InternshipOpportunity(
+            internshipID,
+            internshipTitle,
+            description,
+            internshipLevel,
+            majors,
+            openDate,
+            closeDate,
+            opp.getStatus(),
+            opp.getCompanyName(),
+            opp.getCompanyRepInChargeID(),
+            numberOfSlots,
+            opp.getApplicationNumberList(),
+            opp.getAcceptedApplicationNumbers(),
+            opp.getVisibility()
+        );
+        
+        // Replace old opportunity with updated one in memory
+        int index = internshipOpportunities.indexOf(opp);
+        if (index >= 0) {
+            internshipOpportunities.set(index, updatedOpp);
+        }
+        
+        // Persist changes
+        updateInternshipInDB();
+    }
+
+    /**
+     * Deletes an internship opportunity.
+     * Only allows deletion if the opportunity status is "pending" (not yet approved by staff).
+     * Similar to deleteApplicationsFromDB - reads all, filters out the deleted one, writes back clean CSV.
+     * Company rep can only delete their own internships.
+     * 
+     * @param internshipID the internship to delete
+     * @throws IllegalStateException if not logged in or not a company rep
+     * @throws IllegalArgumentException if internship not found, not authorized, or already approved
+     */
+    public void deleteInternshipOpportunity(String internshipID) {
+        if (!isCompanyRepLoggedIn()) {
+            throw new IllegalStateException("User not logged in or not a company representative.");
+        }
+        
+        String companyRepID = authCtrl.getUserID();
+        InternshipOpportunity opp = getInternshipByID(internshipID);
+        
+        if (opp == null) {
+            throw new IllegalArgumentException("Internship opportunity not found: " + internshipID);
+        }
+        
+        if (!opp.getCompanyRepInChargeID().equals(companyRepID)) {
+            throw new IllegalArgumentException("You are not authorized to delete this internship opportunity.");
+        }
+        
+        // Check if already approved - if so, deletion not allowed
+        if ("approved".equalsIgnoreCase(opp.getStatus())) {
+            throw new IllegalArgumentException("Cannot delete internship opportunity that has been approved by Career Center Staff.");
+        }
+        
+        // Remove from in-memory list
+        internshipOpportunities.remove(opp);
+        
+        // Permanently delete from CSV (similar to deleteApplicationsFromDB)
+        deleteInternshipFromDB(internshipID);
+        
+        // Clear cache
+        companyRepsInternshipOpps = null;
+    }
+    
+    /**
+     * Permanently deletes an internship from the database by reading all, filtering out the deleted one, and writing back.
+     * Ensures no blank rows are left in the CSV file.
+     * 
+     * @param internshipIDToDelete the internship ID to remove from database
+     */
+    private void deleteInternshipFromDB(String internshipIDToDelete) {
+        final String CSV_FILE = "Code/Backend/Lib/internship_opportunity_list.csv";
+        List<InternshipOpportunity> remainingInternships = new ArrayList<>();
+        
+        // Load all internships and keep only those NOT being deleted
+        try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
+            String line;
+            br.readLine(); // Skip header
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] values = ControlUtils.splitCsvLine(line);
+                if (values.length < 1) continue;
+                
+                String id = ControlUtils.unescapeCsvField(values[0]);
+                
+                // Keep this internship only if it's NOT the one being deleted
+                if (!id.equals(internshipIDToDelete)) {
+                    // Parse and recreate the internship
+                    InternshipOpportunity intOpp = parseInternshipFromCsvLine(values);
+                    if (intOpp != null) {
+                        remainingInternships.add(intOpp);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        
+        // Write remaining internships back to CSV
+        updateInternshipInDBWithList(remainingInternships);
+    }
+    
+    /**
+     * Helper method to parse an internship from CSV line values.
+     * 
+     * @param values the CSV fields
+     * @return the parsed InternshipOpportunity or null if invalid
+     */
+    private InternshipOpportunity parseInternshipFromCsvLine(String[] values) {
+        try {
+            if (values.length < 10) return null;
+            
+            String internshipID = ControlUtils.unescapeCsvField(values[0]);
+            String title = ControlUtils.unescapeCsvField(values[1]);
+            String description = ControlUtils.unescapeCsvField(values[2]);
+            String level = ControlUtils.unescapeCsvField(values[3]);
+            String majorsRaw = ControlUtils.unescapeCsvField(values[4]);
+            List<String> majors = new ArrayList<>();
+            if (!majorsRaw.isEmpty()) {
+                for (String major : majorsRaw.split(",")) {
+                    majors.add(major.trim());
+                }
+            }
+            String openDateStr = ControlUtils.unescapeCsvField(values[5]);
+            String closeDateStr = ControlUtils.unescapeCsvField(values[6]);
+            String status = ControlUtils.unescapeCsvField(values[7]);
+            String companyName = ControlUtils.unescapeCsvField(values[8]);
+            String companyRepID = ControlUtils.unescapeCsvField(values[9]);
+            int numSlots = Integer.parseInt(ControlUtils.unescapeCsvField(values[10]));
+            
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date openDate = null, closeDate = null;
+            try {
+                openDate = sdf.parse(openDateStr);
+                closeDate = sdf.parse(closeDateStr);
+            } catch (ParseException e) {
+                // Use null or defaults
+            }
+            
+            List<Integer> pendingApps = new ArrayList<>();
+            List<Integer> acceptedApps = new ArrayList<>();
+            if (values.length > 11 && !ControlUtils.unescapeCsvField(values[11]).isEmpty()) {
+                String[] pendingStr = ControlUtils.unescapeCsvField(values[11]).split(",");
+                for (String app : pendingStr) {
+                    try {
+                        pendingApps.add(Integer.parseInt(app.trim()));
+                    } catch (NumberFormatException e) {
+                        // Skip invalid
+                    }
+                }
+            }
+            if (values.length > 12 && !ControlUtils.unescapeCsvField(values[12]).isEmpty()) {
+                String[] acceptedStr = ControlUtils.unescapeCsvField(values[12]).split(",");
+                for (String app : acceptedStr) {
+                    try {
+                        acceptedApps.add(Integer.parseInt(app.trim()));
+                    } catch (NumberFormatException e) {
+                        // Skip invalid
+                    }
+                }
+            }
+            
+            boolean visibility = true;
+            if (values.length > 13) {
+                visibility = "true".equalsIgnoreCase(ControlUtils.unescapeCsvField(values[13]));
+            }
+            
+            return new InternshipOpportunity(internshipID, title, description, level, majors, openDate, closeDate, 
+                status, companyName, companyRepID, numSlots, pendingApps, acceptedApps, visibility);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Helper method to write internships list to CSV file.
+     * Used by deleteInternshipFromDB to write filtered list.
+     * 
+     * @param internships the list of internships to write
+     */
+    private void updateInternshipInDBWithList(List<InternshipOpportunity> internships) {
+        final String CSV_FILE = "Code/Backend/Lib/internship_opportunity_list.csv";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(CSV_FILE))) {
+            // Write header
+            bw.write("internshipID,title,description,level,preferredMajors,openingDate,closeDate,status,CompanyName,companyRepInCharge,numOfSlots,pendingApplicationNumberList,acceptedApplicationNumberList,visibility\n");
+            
+            for (InternshipOpportunity opp : internships) {
+                // Escape all fields
+                StringBuilder line = new StringBuilder();
+                line.append(ControlUtils.escapeCsvField(opp.getInternshipID())).append(",");
+                line.append(ControlUtils.escapeCsvField(opp.getInternshipTitle())).append(",");
+                line.append(ControlUtils.escapeCsvField(opp.getDescription())).append(",");
+                line.append(ControlUtils.escapeCsvField(opp.getInternshipLevel())).append(",");
+                line.append(ControlUtils.escapeCsvField(formatPreferredMajorsForCSV(opp.getPreferredMajors()))).append(",");
+                line.append(ControlUtils.escapeCsvField(sdf.format(opp.getOpeningDate()))).append(",");
+                line.append(ControlUtils.escapeCsvField(sdf.format(opp.getCloseDate()))).append(",");
+                line.append(ControlUtils.escapeCsvField(opp.getStatus())).append(",");
+                line.append(ControlUtils.escapeCsvField(opp.getCompanyName())).append(",");
+                line.append(ControlUtils.escapeCsvField(opp.getCompanyRepInChargeID())).append(",");
+                line.append(ControlUtils.escapeCsvField(String.valueOf(opp.getNumOfSlots()))).append(",");
+                line.append(ControlUtils.escapeCsvField(formatApplicationNumbers(opp.getApplicationNumberList()))).append(",");
+                line.append(ControlUtils.escapeCsvField(formatApplicationNumbers(opp.getAcceptedApplicationNumbers()))).append(",");
+                line.append(ControlUtils.escapeCsvField(String.valueOf(opp.getVisibility())));
+                bw.write(line.toString());
+                bw.write("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private String formatApplicationNumbers(List<Integer> appNumbers) {
+        if (appNumbers == null || appNumbers.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < appNumbers.size(); i++) {
+            if (i > 0) sb.append(",");
+            sb.append(appNumbers.get(i));
+        }
+        return sb.toString();
+    }
+    
+    private String formatPreferredMajorsForCSV(List<String> majors) {
+        if (majors == null || majors.isEmpty()) return "";
+        return String.join(",", majors);
+    }
+    
     /** Return a list of formatted internship lines for display to the company representative. */
     public List<String> getInternshipStatus() {
         if (!isCompanyRepLoggedIn()) {

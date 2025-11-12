@@ -194,10 +194,22 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                     }
                 });
                 
+                JButton editBtn = new JButton("Edit");
+                editBtn.addActionListener(e -> editInternshipOpportunity(finalId));
+                // Only enable if pending (not yet approved)
+                editBtn.setEnabled("pending".equalsIgnoreCase(finalStatus));
+                
+                JButton deleteBtn = new JButton("Delete");
+                deleteBtn.addActionListener(e -> deleteInternshipOpportunity(finalId));
+                // Only enable if pending (not yet approved)
+                deleteBtn.setEnabled("pending".equalsIgnoreCase(finalStatus));
+                
                 JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
                 actionsPanel.add(checkApps);
                 actionsPanel.add(detailsBtn);
                 actionsPanel.add(toggleVis);
+                actionsPanel.add(editBtn);
+                actionsPanel.add(deleteBtn);
                 actionsPanel.setPreferredSize(new Dimension(400, 28));
                 row.add(actionsPanel, r);
 
@@ -356,5 +368,94 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
             return r;
         }
         return "[" + r + "]";
+    }
+    
+    /**
+     * Opens edit dialog for internship opportunity (only allowed if pending status).
+     * Allows company rep to modify title, description, level, dates, and slots.
+     * 
+     * @param internshipID the internship to edit
+     */
+    private void editInternshipOpportunity(String internshipID) {
+        try {
+            JPanel editPanel = new JPanel(new GridLayout(0, 2, 10, 10));
+            editPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            
+            // Title
+            editPanel.add(new JLabel("Title:"));
+            JTextField titleField = new JTextField(20);
+            editPanel.add(titleField);
+            
+            // Description
+            editPanel.add(new JLabel("Description:"));
+            JTextArea descField = new JTextArea(3, 20);
+            descField.setLineWrap(true);
+            descField.setWrapStyleWord(true);
+            editPanel.add(new JScrollPane(descField));
+            
+            // Level
+            editPanel.add(new JLabel("Level:"));
+            JComboBox<String> levelBox = new JComboBox<>(new String[]{"Basic", "Intermediate", "Advanced"});
+            editPanel.add(levelBox);
+            
+            // Open Date
+            editPanel.add(new JLabel("Open Date (yyyy-MM-dd):"));
+            JTextField openDateField = new JTextField(20);
+            editPanel.add(openDateField);
+            
+            // Close Date
+            editPanel.add(new JLabel("Close Date (yyyy-MM-dd):"));
+            JTextField closeDateField = new JTextField(20);
+            editPanel.add(closeDateField);
+            
+            // Number of Slots
+            editPanel.add(new JLabel("Number of Slots (1-10):"));
+            JTextField slotsField = new JTextField(20);
+            editPanel.add(slotsField);
+            
+            int result = JOptionPane.showConfirmDialog(frame, editPanel, "Edit Internship Opportunity", JOptionPane.OK_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION) {
+                String title = titleField.getText().trim();
+                String description = descField.getText().trim();
+                String level = (String) levelBox.getSelectedItem();
+                String openDate = openDateField.getText().trim();
+                String closeDate = closeDateField.getText().trim();
+                String slots = slotsField.getText().trim();
+                
+                // Parse majors from existing opportunity (kept as is)
+                // For now, we'll use an empty list - could be enhanced
+                List<String> majors = new ArrayList<>();
+                
+                intCtrl.editInternshipOpportunity(internshipID, title, description, level, majors, openDate, closeDate, slots);
+                JOptionPane.showMessageDialog(frame, "Internship opportunity updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                checkMyInternshipOppStatus(); // Refresh the list
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, "Error editing internship: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    /**
+     * Deletes an internship opportunity (only allowed if pending status).
+     * Similar to deleting applications - removes from CSV and in-memory list.
+     * 
+     * @param internshipID the internship to delete
+     */
+    private void deleteInternshipOpportunity(String internshipID) {
+        try {
+            int confirm = JOptionPane.showConfirmDialog(frame, 
+                "Are you sure you want to delete internship opportunity " + internshipID + "?\nThis action cannot be undone.",
+                "Confirm Deletion",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+            
+            if (confirm == JOptionPane.YES_OPTION) {
+                intCtrl.deleteInternshipOpportunity(internshipID);
+                JOptionPane.showMessageDialog(frame, "Internship opportunity deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                checkMyInternshipOppStatus(); // Refresh the list
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, "Error deleting internship: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
