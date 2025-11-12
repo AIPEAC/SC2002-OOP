@@ -191,12 +191,12 @@
 - **Expected Behavior:** Edit functionality is restricted for Company Representatives once internship opportunities are approved by Career Center Staff
 - **Actual Result:** 
 - **Failure Indicator:** Company Representatives are able to make changes to opportunity details after approval
-- **Pass:** 
+- **Pass:** Yes
 - **Screenshots:** 
 
 | Edit is restricted if approved | Edit is rejected if rejected |
-| -- | -- |
-|||
+|-|-|
+| ![Approved case](Testcase13_Approved.png) | ![Rejected case](Testcase13_Rejected.png) |
 ---
 
 ### Test Case 14: Student Application Management
@@ -232,7 +232,10 @@
 - **Failure Indicator:** Inability to create, edit, or delete opportunities or errors during these operations
 - **Pass:** 
 - **Screenshots:** 
+
 |Internship Opportunity is in pending status only |
+|-|
+|![pending case](Testcase16_Pending.png)|
 
 ---
 
