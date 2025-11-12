@@ -34,7 +34,7 @@ public class UserControl {
 	 * @param userDir the user login directory controller
 	 * @param authCtrl the authentication controller
 	 */
-	public UserControl(UserLoginDirectoryControl userDir, AuthenticationControl authCtrl) {
+	UserControl(UserLoginDirectoryControl userDir, AuthenticationControl authCtrl) {
 		this.userDir = userDir;
 		this.authCtrl = authCtrl;
 	}

@@ -43,7 +43,7 @@ public class ApplicationControl {
 	 * @param authCtrl the authentication controller
 	 * @param intCtrl the internship controller
 	 */
-	public ApplicationControl(AuthenticationControl authCtrl, InternshipControl intCtrl) {
+	ApplicationControl(AuthenticationControl authCtrl, InternshipControl intCtrl) {
 		this.authCtrl = authCtrl;
 		this.intCtrl = intCtrl;
 	}
@@ -78,8 +78,16 @@ public class ApplicationControl {
 	 * Clears existing applications before loading.
 	 * 
 	 * @see #loadStudentApplicationFromDB() for student-specific loading
+	 * @throws IllegalStateException if user not logged in
+	 * @throws IllegalArgumentException if user is not Career Staff
 	 */
 	public void loadAllApplicationsFromDB() {
+		if (!authCtrl.isLoggedIn()) {
+			throw new IllegalStateException("User not logged in.");
+		}
+		if (!authCtrl.getUserIdentity().equals("CareerStaff")) {
+			throw new IllegalArgumentException("Only Career Staff can load all applications.");
+		}
 		applications.clear();
 		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
 		File file = new File(CSV_FILE);
@@ -451,8 +459,16 @@ public class ApplicationControl {
 	 * Used by Career Staff to review and approve/reject withdrawal requests.
 	 * 
 	 * @return list of formatted strings for each pending withdrawal application
+	 * @throws IllegalStateException if user not logged in
+	 * @throws IllegalArgumentException if user is not Career Staff
 	 */
 	public List<String> getPendingWithdrawals() {
+		if (!authCtrl.isLoggedIn()) {
+			throw new IllegalStateException("User not logged in.");
+		}
+		if (!authCtrl.getUserIdentity().equals("CareerStaff")) {
+			throw new IllegalArgumentException("Only Career Staff can view pending withdrawals.");
+		}
 		List<String> pending = new ArrayList<>();
 		for (Application app : applications) {
 			if (app.getWithdrawStatus() != null && app.getWithdrawStatus().equals("pending")) {
@@ -481,9 +497,16 @@ public class ApplicationControl {
 	 * Parses the application number string and delegates to the int version.
 	 * 
 	 * @param appNumStr the application number as a string
-	 * @throws IllegalArgumentException if application number is invalid or not parseable
+	 * @throws IllegalStateException if user not logged in
+	 * @throws IllegalArgumentException if user is not Career Staff or invalid application number
 	 */
 	public void approveWithdrawal(String appNumStr) {
+		if (!authCtrl.isLoggedIn()) {
+			throw new IllegalStateException("User not logged in.");
+		}
+		if (!authCtrl.getUserIdentity().equals("CareerStaff")) {
+			throw new IllegalArgumentException("Only Career Staff can approve withdrawals.");
+		}
 		if (appNumStr == null || appNumStr.isEmpty()) {
 			throw new IllegalArgumentException("Invalid application number.");
 		}
@@ -497,6 +520,12 @@ public class ApplicationControl {
 
 	/** UI-friendly wrapper: accepts application number as String, parses and delegates */
 	public void rejectWithdrawal(String appNumStr) {
+		if (!authCtrl.isLoggedIn()) {
+			throw new IllegalStateException("User not logged in.");
+		}
+		if (!authCtrl.getUserIdentity().equals("CareerStaff")) {
+			throw new IllegalArgumentException("Only Career Staff can reject withdrawals.");
+		}
 		if (appNumStr == null || appNumStr.isEmpty()) {
 			throw new IllegalArgumentException("Invalid application number.");
 		}

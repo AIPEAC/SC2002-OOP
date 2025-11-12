@@ -65,7 +65,7 @@ public class InternshipControl{
      * 
      * @param authCtrl the authentication controller for managing user sessions
      */
-    public InternshipControl(AuthenticationControl authCtrl) {
+    InternshipControl(AuthenticationControl authCtrl) {
         this.authCtrl = authCtrl;
         loadInternshipOpportunityFromDB();
     }
@@ -174,7 +174,9 @@ public class InternshipControl{
     }
     /** Return details for display (labelled strings) for a given internship ID. */
     public List<String> getInternshipDetails(String internshipID) {
-        if (!authCtrl.isLoggedIn()) throw new IllegalStateException("Please login to view internship details.");
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         InternshipOpportunity opp = getInternshipByID(internshipID);
         List<String> out = new ArrayList<>();
         if (opp == null) return out;
@@ -215,8 +217,11 @@ public class InternshipControl{
         String internshipTitle, String description, 
         String internshipLevel, List<String> preferredMajors, 
         String openDateStr, String closeDateStr, String numberOfSlotsStr) {
-        if (!authCtrl.isLoggedIn()) {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
+        }
+        if (!authCtrl.getUserIdentity().equals("CompanyRepresentative")) {
+            throw new IllegalArgumentException("Only Company Representatives can create internship opportunities.");
         }
 
         // Check if company rep has already created 5 internships
@@ -273,26 +278,30 @@ public class InternshipControl{
      * Edits an existing internship opportunity.
      * Only allows editing if the opportunity status is "pending" (not yet approved by staff).
      * Company rep can only edit their own internships.
+     * Validates dates (opening date must be valid, optional), slots (1-10), and majors (optional).
      * 
      * @param internshipID the internship to edit
-     * @param internshipTitle new title
+     * @param internshipTitle new title (required, non-empty)
      * @param description new description
-     * @param internshipLevel new level
-     * @param preferredMajors new preferred majors list
-     * @param openDateStr new opening date (yyyy-MM-dd format)
-     * @param closeDateStr new closing date (yyyy-MM-dd format)
-     * @param numberOfSlotsStr new number of slots
+     * @param internshipLevel new level (Basic, Intermediate, Advanced)
+     * @param preferredMajors new preferred majors list (optional, can be empty)
+     * @param openDateStr new opening date (yyyy-MM-dd format, optional)
+     * @param closeDateStr new closing date (yyyy-MM-dd format, optional)
+     * @param numberOfSlotsStr new number of slots (1-10, optional)
      * @throws IllegalStateException if not logged in or not a company rep
-     * @throws IllegalArgumentException if internship not found, not authorized, or already approved
+     * @throws IllegalArgumentException if internship not found, not authorized, already approved, or invalid input
      */
     public void editInternshipOpportunity(
         String internshipID,
         String internshipTitle, String description, 
         String internshipLevel, List<String> preferredMajors, 
         String openDateStr, String closeDateStr, String numberOfSlotsStr) {
-        
-        if (!isCompanyRepLoggedIn()) {
-            throw new IllegalStateException("User not logged in or not a company representative.");
+
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
+        if (!authCtrl.getUserIdentity().equals("CompanyRepresentative")) {
+            throw new IllegalArgumentException("Only Company Representatives can edit internship opportunities.");
         }
         
         String companyRepID = authCtrl.getUserID();
@@ -318,30 +327,34 @@ public class InternshipControl{
         List<String> majors = preferredMajors != null && !preferredMajors.isEmpty() ? preferredMajors : opp.getPreferredMajors();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         
+        // Validate and parse opening date
         if (openDateStr != null && !openDateStr.trim().isEmpty()) {
             try {
                 openDate = sdf.parse(openDateStr.trim());
             } catch (ParseException e) {
-                // Keep existing date
+                throw new IllegalArgumentException("Invalid opening date format. Use yyyy-MM-dd (e.g., 2025-12-25)");
             }
         }
         
+        // Validate and parse closing date
         if (closeDateStr != null && !closeDateStr.trim().isEmpty()) {
             try {
                 closeDate = sdf.parse(closeDateStr.trim());
             } catch (ParseException e) {
-                // Keep existing date
+                throw new IllegalArgumentException("Invalid closing date format. Use yyyy-MM-dd (e.g., 2025-12-25)");
             }
         }
         
+        // Validate slots
         if (numberOfSlotsStr != null && !numberOfSlotsStr.trim().isEmpty()) {
             try {
                 int newSlots = Integer.parseInt(numberOfSlotsStr.trim());
-                if (newSlots > 0 && newSlots <= 10) {
-                    numberOfSlots = newSlots;
+                if (newSlots <= 0 || newSlots > 10) {
+                    throw new IllegalArgumentException("Number of slots must be between 1 and 10.");
                 }
+                numberOfSlots = newSlots;
             } catch (NumberFormatException e) {
-                // Keep existing slots
+                throw new IllegalArgumentException("Number of slots must be a valid integer between 1 and 10.");
             }
         }
         
@@ -385,8 +398,11 @@ public class InternshipControl{
      * @throws IllegalArgumentException if internship not found, not authorized, or already approved
      */
     public void deleteInternshipOpportunity(String internshipID) {
-        if (!isCompanyRepLoggedIn()) {
-            throw new IllegalStateException("User not logged in or not a company representative.");
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
+        if (!authCtrl.getUserIdentity().equals("CompanyRepresentative")) {
+            throw new IllegalArgumentException("Only Company Representatives can delete internship opportunities.");
         }
         
         String companyRepID = authCtrl.getUserID();
@@ -583,6 +599,9 @@ public class InternshipControl{
     
     /** Return a list of formatted internship lines for display to the company representative. */
     public List<String> getInternshipStatus() {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         if (!isCompanyRepLoggedIn()) {
             throw new IllegalStateException("User not logged in or not a company representative.");
         }
@@ -603,6 +622,9 @@ public class InternshipControl{
      * Format: internshipID=... | internshipTitle=... | internshipLevel=... | companyName=... | preferredMajors=[...] | status=...
      */
     public List<String> getMyInternshipsWithStatus() {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         if (!isCompanyRepLoggedIn()) {
             throw new IllegalStateException("User not logged in or not a company representative.");
         }
@@ -629,6 +651,9 @@ public class InternshipControl{
      * Does NOT include student name or ID.
      */
     public List<String> getApplicationsForInternship(String internshipID) {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         if (!isCompanyRepLoggedIn()) {
             throw new IllegalStateException("User not logged in or not a company representative.");
         }
@@ -665,6 +690,9 @@ public class InternshipControl{
      * Format: studentID=... | studentName=... | studentEmail=... | studentMajors=[...] | studentYear=... | status=...
      */
     public String getDetailedStudentInfoForApplication(int applicationNumber) {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         if (!isCompanyRepLoggedIn()) {
             throw new IllegalStateException("User not logged in or not a company representative.");
         }
@@ -723,6 +751,9 @@ public class InternshipControl{
      * Returns additional notification if internship becomes full.
      */
     public String approveApplicationForInternship(String internshipID, int applicationNumber) {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         if (!isCompanyRepLoggedIn()) {
             throw new IllegalStateException("User not logged in or not a company representative.");
         }
@@ -839,6 +870,9 @@ public class InternshipControl{
     
     /** Approve an application: mark application approved (but don't add to accepted list yet). */
     void approveApplicationNumberForInternship(int applicationNumber, String internshipID) {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         // Note: Don't check isFull() here because this is called after approval decision is made
@@ -883,6 +917,9 @@ public class InternshipControl{
      * can request approve/reject actions that also update the ApplicationControl.
      */
     public void approveApplicationAsCompanyRep(int applicationNumber) {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         if (appCtrl != null) {
             appCtrl.approveApplicationByNumber(applicationNumber);
         } else {
@@ -890,6 +927,9 @@ public class InternshipControl{
         }
     }
     public void rejectApplicationAsCompanyRep(int applicationNumber) {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         if (appCtrl != null) {
             appCtrl.rejectApplicationByNumber(applicationNumber);
         } else {
@@ -1062,6 +1102,12 @@ public class InternshipControl{
 
     /** Return formatted lines for pending internship opportunities (for boundary printing). */
     public List<String> getPendingInternshipOpportunities() {
+        if (!authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
+        if (!authCtrl.getUserIdentity().equals("CareerStaff")) {
+            throw new IllegalArgumentException("Only Career Staff can view pending internship opportunities.");
+        }
         List<String> out = new ArrayList<>();
         for (InternshipOpportunity opp : internshipOpportunities) {
             if ("pending".equalsIgnoreCase(opp.getStatus())) {
@@ -1079,6 +1125,10 @@ public class InternshipControl{
      *  Any of the parameters may be null (null filterIn means no criteria; empty filterType means no sorting).
      */
     public List<String> getAllVisibleInternshipOpportunitiesForDisplay(String filterType, boolean ascending, Map<String, List<String>> filterIn) {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
+        
         List<InternshipOpportunity> Opplist = getAllVisibleInternshipOpportunities();
         if (Opplist == null) return new ArrayList<>();
 
@@ -1146,21 +1196,45 @@ public class InternshipControl{
         return out;
     }
     public void approveInternshipCreation(InternshipOpportunity opp) {
+        if (!authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
+        if (!authCtrl.getUserIdentity().equals("CareerStaff")) {
+            throw new IllegalArgumentException("Only Career Staff can approve internship opportunities.");
+        }
         if (opp == null) return;
         opp.setStatusToApproved();
         updateInternshipInDB();
     }
     public void rejectInternshipCreation(InternshipOpportunity rejectInternshipCreation) {
+        if (!authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
+        if (!authCtrl.getUserIdentity().equals("CareerStaff")) {
+            throw new IllegalArgumentException("Only Career Staff can reject internship opportunities.");
+        }
         if (rejectInternshipCreation == null) return;
         rejectInternshipCreation.setStatusToRejected();
         updateInternshipInDB();
     }
     public void approveInternshipCreationByID(String internshipID) {
+        if (!authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
+        if (!authCtrl.getUserIdentity().equals("CareerStaff")) {
+            throw new IllegalArgumentException("Only Career Staff can approve internship opportunities.");
+        }
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         approveInternshipCreation(opp);
     }
     public void rejectInternshipCreationByID(String internshipID) {
+        if (!authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
+        if (!authCtrl.getUserIdentity().equals("CareerStaff")) {
+            throw new IllegalArgumentException("Only Career Staff can reject internship opportunities.");
+        }
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         rejectInternshipCreation(opp);
@@ -1171,6 +1245,9 @@ public class InternshipControl{
         updateInternshipInDB();
     }
     public boolean changeVisibility(InternshipOpportunity opp) {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         if (opp == null) return false;
         // toggle
         boolean cur = opp.getVisibility();
@@ -1181,6 +1258,9 @@ public class InternshipControl{
 
     /** Toggle visibility by internship ID (public wrapper for CLIs) */
     public boolean changeVisibilityByID(String internshipID) {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         return changeVisibility(opp);
@@ -1191,6 +1271,9 @@ public class InternshipControl{
      * Accepts boolean-like strings (y/n, yes/no, approve/reject, a/r).
      */
     public void changeVisibilityByID(String internshipID, String visibleStr) {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         Boolean desired = ControlUtils.parseBooleanLike(visibleStr);
@@ -1310,6 +1393,9 @@ public class InternshipControl{
     // Helper methods for frontend filtering UI
     /** Return unique company names among visible internship opportunities. */
     public List<String> getVisibleCompanyNames() {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         return getAllVisibleInternshipOpportunities().stream()
                 .map(InternshipOpportunity::getCompanyName)
                 .filter(n -> n != null && !n.isEmpty())
@@ -1359,6 +1445,9 @@ public class InternshipControl{
 
     /** Format preferredMajors list into a bracketed, comma-separated string for display. */
     public String formatPreferredMajorsForDisplay(List<String> majors) {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         if (majors == null || majors.isEmpty()) return "[]";
         List<String> clean = new ArrayList<>();
         for (String m : majors) {
@@ -1373,6 +1462,9 @@ public class InternshipControl{
      * For students, only shows internships matching their major(s).
      */
     public List<String> getApprovedVisibleInternshipOpportunitiesForDisplay(String filterType, boolean ascending, Map<String, List<String>> filterIn) {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+            throw new IllegalStateException("User not logged in.");
+        }
         List<InternshipOpportunity> Opplist = getAllVisibleInternshipOpportunities().stream()
                 .filter(opp -> "approved".equalsIgnoreCase(opp.getStatus()))
                 .collect(Collectors.toList());

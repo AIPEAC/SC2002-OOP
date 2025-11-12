@@ -40,7 +40,7 @@ public class ReportControl {
      * @param authCtrl the authentication controller
      * @param intCtrl the internship controller for accessing opportunity data
      */
-    public ReportControl(AuthenticationControl authCtrl, InternshipControl intCtrl){
+    ReportControl(AuthenticationControl authCtrl, InternshipControl intCtrl){
         this.authCtrl=authCtrl;
         this.intCtrl=intCtrl;
         // Initialize after intCtrl is assigned to avoid NPE

@@ -178,7 +178,7 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                 checkApps.setEnabled("approved".equalsIgnoreCase(finalStatus));
                 
                 JButton detailsBtn = new JButton("Details");
-                detailsBtn.addActionListener(e -> showInternshipDetails(finalId));
+                detailsBtn.addActionListener(e -> showInternshipDetailsWithActions(finalId, finalStatus));
                 
                 JButton toggleVis = new JButton("Toggle Visibility");
                 toggleVis.addActionListener(e -> {
@@ -194,22 +194,10 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                     }
                 });
                 
-                JButton editBtn = new JButton("Edit");
-                editBtn.addActionListener(e -> editInternshipOpportunity(finalId));
-                // Only enable if pending (not yet approved)
-                editBtn.setEnabled("pending".equalsIgnoreCase(finalStatus));
-                
-                JButton deleteBtn = new JButton("Delete");
-                deleteBtn.addActionListener(e -> deleteInternshipOpportunity(finalId));
-                // Only enable if pending (not yet approved)
-                deleteBtn.setEnabled("pending".equalsIgnoreCase(finalStatus));
-                
                 JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
                 actionsPanel.add(checkApps);
                 actionsPanel.add(detailsBtn);
                 actionsPanel.add(toggleVis);
-                actionsPanel.add(editBtn);
-                actionsPanel.add(deleteBtn);
                 actionsPanel.setPreferredSize(new Dimension(400, 28));
                 row.add(actionsPanel, r);
 
@@ -371,49 +359,209 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
     }
     
     /**
+     * Shows internship details in a dialog with Edit and Delete buttons available.
+     * Edit and Delete buttons are only enabled if the status is "pending".
+     * 
+     * @param internshipID the internship to view
+     * @param status the current status (pending, approved, etc.)
+     */
+    private void showInternshipDetailsWithActions(String internshipID, String status) {
+        try {
+            JPanel detailsPanel = new JPanel(new GridLayout(0, 2, 10, 10));
+            detailsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            
+            // Get internship details from controller
+            List<String> details = intCtrl.getInternshipDetails(internshipID);
+            if (details == null || details.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "Internship details not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Display all internship information from the list
+            // Expected format: [internshipID, title, description, level, majors, openDate, closeDate, company, slots, pendingApps, acceptedApps, visibility]
+            detailsPanel.add(new JLabel("Internship ID:"));
+            detailsPanel.add(new JLabel(internshipID));
+            
+            String title = details.size() > 1 ? details.get(1) : "";
+            detailsPanel.add(new JLabel("Title:"));
+            detailsPanel.add(new JLabel(title));
+            
+            String desc = details.size() > 2 ? details.get(2) : "";
+            detailsPanel.add(new JLabel("Description:"));
+            // Use JLabel for description to make it completely non-editable
+            JLabel descLabel = new JLabel("<html>" + desc.replace("\n", "<br>") + "</html>");
+            detailsPanel.add(descLabel);
+            
+            String level = details.size() > 3 ? details.get(3) : "";
+            detailsPanel.add(new JLabel("Level:"));
+            detailsPanel.add(new JLabel(level));
+            
+            String majors = details.size() > 4 ? details.get(4) : "";
+            detailsPanel.add(new JLabel("Preferred Majors:"));
+            detailsPanel.add(new JLabel(majors));
+            
+            String company = details.size() > 7 ? details.get(7) : "";
+            detailsPanel.add(new JLabel("Company:"));
+            detailsPanel.add(new JLabel(company));
+            
+            String openDate = details.size() > 5 ? details.get(5) : "";
+            detailsPanel.add(new JLabel("Opening Date:"));
+            detailsPanel.add(new JLabel(openDate));
+            
+            String closeDate = details.size() > 6 ? details.get(6) : "";
+            detailsPanel.add(new JLabel("Closing Date:"));
+            detailsPanel.add(new JLabel(closeDate));
+            
+            String slots = details.size() > 8 ? details.get(8) : "";
+            detailsPanel.add(new JLabel("Number of Slots:"));
+            detailsPanel.add(new JLabel(slots));
+            
+            detailsPanel.add(new JLabel("Status:"));
+            detailsPanel.add(new JLabel(status));
+            
+            // Add Edit and Delete buttons
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+            
+            JButton editBtn = new JButton("Edit");
+            editBtn.addActionListener(e -> {
+                editInternshipOpportunity(internshipID);
+            });
+            editBtn.setEnabled("pending".equalsIgnoreCase(status));
+            
+            JButton deleteBtn = new JButton("Delete");
+            deleteBtn.addActionListener(e -> {
+                deleteInternshipOpportunity(internshipID);
+            });
+            deleteBtn.setEnabled("pending".equalsIgnoreCase(status));
+            
+            buttonPanel.add(editBtn);
+            buttonPanel.add(deleteBtn);
+            
+            JPanel mainPanel = new JPanel(new BorderLayout());
+            mainPanel.add(detailsPanel, BorderLayout.CENTER);
+            mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+            
+            JOptionPane.showMessageDialog(frame, mainPanel, "Internship Details - " + internshipID, JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(frame, "Error loading details: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    /**
      * Opens edit dialog for internship opportunity (only allowed if pending status).
-     * Allows company rep to modify title, description, level, dates, and slots.
+     * Allows company rep to modify title, description, level, dates, slots, and majors.
      * 
      * @param internshipID the internship to edit
      */
     private void editInternshipOpportunity(String internshipID) {
         try {
-            JPanel editPanel = new JPanel(new GridLayout(0, 2, 10, 10));
+            // Get current internship details from backend
+            List<String> details = intCtrl.getInternshipDetails(internshipID);
+            if (details == null || details.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "Internship details not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Parse current values from details list (format has "Label: Value" prefixes)
+            String currentTitle = extractValue(details, "Title: ");
+            String currentDesc = extractValue(details, "Description: ");
+            String currentLevel = extractValue(details, "Level: ");
+            String currentMajorsStr = extractValue(details, "Preferred Majors: ");
+            String currentOpenDate = extractDateOnly(extractValue(details, "Opening Date: "));
+            String currentCloseDate = extractDateOnly(extractValue(details, "Closing Date: "));
+            String currentSlots = extractValue(details, "Slots: ");
+            
+            // Parse current majors from string format (e.g., "[CSC, EEE, MAE]")
+            List<String> currentSelectedMajors = new ArrayList<>();
+            if (currentMajorsStr != null && !currentMajorsStr.isEmpty() && !"N/A".equals(currentMajorsStr)) {
+                String majorsClean = currentMajorsStr.replaceAll("[\\[\\]]", "").trim();
+                if (!majorsClean.isEmpty()) {
+                    for (String m : majorsClean.split(",")) {
+                        currentSelectedMajors.add(m.trim());
+                    }
+                }
+            }
+            
+            // Create edit panel
+            JPanel editPanel = new JPanel(new BorderLayout(5, 5));
             editPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             
-            // Title
-            editPanel.add(new JLabel("Title:"));
-            JTextField titleField = new JTextField(20);
-            editPanel.add(titleField);
+            // Top panel with title, level, dates, slots
+            JPanel top = new JPanel(new GridLayout(0, 2, 10, 10));
             
-            // Description
-            editPanel.add(new JLabel("Description:"));
-            JTextArea descField = new JTextArea(3, 20);
-            descField.setLineWrap(true);
-            descField.setWrapStyleWord(true);
-            editPanel.add(new JScrollPane(descField));
+            // Title
+            top.add(new JLabel("Title:"));
+            JTextField titleField = new JTextField(currentTitle, 20);
+            top.add(titleField);
             
             // Level
-            editPanel.add(new JLabel("Level:"));
+            top.add(new JLabel("Level:"));
             JComboBox<String> levelBox = new JComboBox<>(new String[]{"Basic", "Intermediate", "Advanced"});
-            editPanel.add(levelBox);
+            levelBox.setSelectedItem(currentLevel);
+            top.add(levelBox);
             
             // Open Date
-            editPanel.add(new JLabel("Open Date (yyyy-MM-dd):"));
-            JTextField openDateField = new JTextField(20);
-            editPanel.add(openDateField);
+            top.add(new JLabel("Open Date (yyyy-MM-dd):"));
+            JTextField openDateField = new JTextField(currentOpenDate, 20);
+            top.add(openDateField);
             
             // Close Date
-            editPanel.add(new JLabel("Close Date (yyyy-MM-dd):"));
-            JTextField closeDateField = new JTextField(20);
-            editPanel.add(closeDateField);
+            top.add(new JLabel("Close Date (yyyy-MM-dd):"));
+            JTextField closeDateField = new JTextField(currentCloseDate, 20);
+            top.add(closeDateField);
             
             // Number of Slots
-            editPanel.add(new JLabel("Number of Slots (1-10):"));
-            JTextField slotsField = new JTextField(20);
-            editPanel.add(slotsField);
+            top.add(new JLabel("Number of Slots (1-10):"));
+            JTextField slotsField = new JTextField(currentSlots, 20);
+            top.add(slotsField);
             
-            int result = JOptionPane.showConfirmDialog(frame, editPanel, "Edit Internship Opportunity", JOptionPane.OK_CANCEL_OPTION);
+            editPanel.add(top, BorderLayout.NORTH);
+            
+            // Middle panel with majors
+            JPanel majorsPanel = new JPanel(new BorderLayout());
+            majorsPanel.setBorder(BorderFactory.createTitledBorder("Preferred Majors"));
+            
+            List<String> allMajors = loadMajors();
+            // Create a simple list showing current majors (could be enhanced with checkboxes)
+            JTextArea majorsArea = new JTextArea(3, 30);
+            majorsArea.setText(String.join(", ", currentSelectedMajors));
+            majorsArea.setLineWrap(true);
+            majorsArea.setWrapStyleWord(true);
+            JLabel majorsHint = new JLabel("<html>Current majors: " + String.join(", ", currentSelectedMajors) + 
+                                          "<br>To change majors, click 'Select Majors' button below</html>");
+            majorsPanel.add(majorsHint, BorderLayout.CENTER);
+            editPanel.add(majorsPanel, BorderLayout.CENTER);
+            
+            // Bottom panel with description
+            JPanel bottomPanel = new JPanel(new BorderLayout());
+            bottomPanel.add(new JLabel("Description:"), BorderLayout.NORTH);
+            JTextArea descField = new JTextArea(currentDesc, 5, 30);
+            descField.setLineWrap(true);
+            descField.setWrapStyleWord(true);
+            bottomPanel.add(new JScrollPane(descField), BorderLayout.CENTER);
+            editPanel.add(bottomPanel, BorderLayout.SOUTH);
+            
+            // Create wrapper panel with majors selector button
+            JPanel wrapperPanel = new JPanel(new BorderLayout());
+            wrapperPanel.add(editPanel, BorderLayout.CENTER);
+            
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            JButton selectMajorsBtn = new JButton("Select Majors");
+            final List<String> selectedMajors = new ArrayList<>(currentSelectedMajors);
+            selectMajorsBtn.addActionListener(e -> {
+                List<String> newMajors = UIHelper.showMultiSelectMajors(allMajors);
+                if (newMajors != null) {
+                    selectedMajors.clear();
+                    selectedMajors.addAll(newMajors);
+                    // Update hint
+                    majorsHint.setText("<html>Current majors: " + String.join(", ", selectedMajors) + 
+                                      "<br>To change majors, click 'Select Majors' button below</html>");
+                }
+            });
+            buttonPanel.add(selectMajorsBtn);
+            wrapperPanel.add(buttonPanel, BorderLayout.SOUTH);
+            
+            int result = JOptionPane.showConfirmDialog(frame, wrapperPanel, "Edit Internship Opportunity", JOptionPane.OK_CANCEL_OPTION);
             if (result == JOptionPane.OK_OPTION) {
                 String title = titleField.getText().trim();
                 String description = descField.getText().trim();
@@ -422,18 +570,91 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                 String closeDate = closeDateField.getText().trim();
                 String slots = slotsField.getText().trim();
                 
-                // Parse majors from existing opportunity (kept as is)
-                // For now, we'll use an empty list - could be enhanced
-                List<String> majors = new ArrayList<>();
-                
-                intCtrl.editInternshipOpportunity(internshipID, title, description, level, majors, openDate, closeDate, slots);
+                intCtrl.editInternshipOpportunity(internshipID, title, description, level, selectedMajors, openDate, closeDate, slots);
                 JOptionPane.showMessageDialog(frame, "Internship opportunity updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 checkMyInternshipOppStatus(); // Refresh the list
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(frame, "Error editing internship: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }
+    
+    /**
+     * Helper method to extract value from a prefixed string.
+     * E.g., "Title: My Title" -> "My Title"
+     */
+    private String extractValue(List<String> details, String prefix) {
+        for (String detail : details) {
+            if (detail.startsWith(prefix)) {
+                return detail.substring(prefix.length()).trim();
+            }
+        }
+        return "";
+    }
+    
+    /**
+     * Helper method to extract just the date portion (yyyy-MM-dd) from a full date string.
+     * Handles formats like "Wed Nov 12 12:34:56 PST 2025" and extracts just the date.
+     * If already in yyyy-MM-dd format, returns as is.
+     * 
+     * @param fullDate the full date string from the backend
+     * @return date in yyyy-MM-dd format, or empty string if parsing fails
+     */
+    private String extractDateOnly(String fullDate) {
+        if (fullDate == null || fullDate.isEmpty()) {
+            return "";
+        }
+        
+        // If already in yyyy-MM-dd format, return as is
+        if (fullDate.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            return fullDate;
+        }
+        
+        // Try to parse various date formats and extract yyyy-MM-dd
+        try {
+            // Try common Java Date.toString() format: "Wed Nov 12 12:34:56 PST 2025"
+            String[] parts = fullDate.split(" ");
+            if (parts.length >= 6) {
+                // Format: Day Month Day Time Timezone Year
+                String month = parts[1];
+                String day = parts[2];
+                String year = parts[5];
+                
+                // Convert month name to number
+                String monthNum = getMonthNumber(month);
+                if (!monthNum.isEmpty()) {
+                    return year + "-" + monthNum + "-" + String.format("%02d", Integer.parseInt(day));
+                }
+            }
+        } catch (Exception e) {
+            // Fall through to return empty string
+        }
+        
+        return "";
+    }
+    
+    /**
+     * Helper to convert month name to number (e.g., "Jan" -> "01")
+     */
+    private String getMonthNumber(String monthName) {
+        switch (monthName.toLowerCase()) {
+            case "jan": return "01";
+            case "feb": return "02";
+            case "mar": return "03";
+            case "apr": return "04";
+            case "may": return "05";
+            case "jun": return "06";
+            case "jul": return "07";
+            case "aug": return "08";
+            case "sep": return "09";
+            case "oct": return "10";
+            case "nov": return "11";
+            case "dec": return "12";
+            default: return "";
+        }
+    }
+    
     
     /**
      * Deletes an internship opportunity (only allowed if pending status).

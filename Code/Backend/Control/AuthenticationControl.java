@@ -23,14 +23,7 @@ public class AuthenticationControl {
         this.currentUser=null;
     }
     
-    /**
-     * Constructs an AuthenticationControl with a specific user already logged in.
-     * 
-     * @param user the user to set as logged in
-     */
-    public AuthenticationControl(User user){
-        currentUser=user;
-    }
+    
 
     /**
      * Sets the currently logged-in user.
