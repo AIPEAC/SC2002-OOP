@@ -5,7 +5,7 @@
 - **Contributor**:
   - Allen: Frontend & Backend.Control Coding, Sequence diagram
   - Deryl: Class diagram
-  - Hong Xun: Backend.Entity Coding, Testing
+  - Hong Xun: Backend.Entity Coding, [Testing](https://github.com/AIPEAC/SC2002-OOP/blob/main/Testcases/Testcase_Appendix_A/Test_Appendix_A.md)
   - Jeremy: Report
   - Teja: Filtering Algorithm
 - **Visualization of Project**: UML diagrams
@@ -88,9 +88,6 @@ The application uses Java Swing with simple button-based menus:
 **Security**: Password hashing with SHA-256 and salt  
 **Reports**: Generated as Markdown files with statistics and charts  
 **Architecture**: Separate layers for business logic, data storage, and user interface
-
-## Testing
-**[Test Cases](https://github.com/AIPEAC/SC2002-OOP/blob/main/Testcases/Testcase_Appendix_A/Test_Appendix_A.md)**
 
 ## Highlights
 
