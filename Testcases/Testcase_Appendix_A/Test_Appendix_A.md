@@ -194,6 +194,9 @@
 - **Pass:** 
 - **Screenshots:** 
 
+| Edit is restricted if approved | Edit is rejected if rejected |
+| -- | -- |
+|||
 ---
 
 ### Test Case 14: Student Application Management
@@ -229,6 +232,7 @@
 - **Failure Indicator:** Inability to create, edit, or delete opportunities or errors during these operations
 - **Pass:** 
 - **Screenshots:** 
+|Internship Opportunity is in pending status only |
 
 ---
 

@@ -25,7 +25,7 @@ public class LoginControl {
      * @param authCtrl the authentication controller
      * @param userLoginDirCtrl the user login directory controller
      */
-    public LoginControl(AuthenticationControl authCtrl, UserLoginDirectoryControl userLoginDirCtrl) {
+    LoginControl(AuthenticationControl authCtrl, UserLoginDirectoryControl userLoginDirCtrl) {
         this.authCtrl = authCtrl;
         this.userLoginDirCtrl = userLoginDirCtrl;
     }
