@@ -51,8 +51,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
  
-| Invid ID | Notification |
-| -------------------------------------- | -------------------------------------- | 
+ | Invalid ID | Notification |
+ | -------------------------------------- | -------------------------------------- |
 | ![Invalid ID](Testcase2_InvalidID.png) | ![Notification](Testcase2_NotificationID.png) |
 ---
 
@@ -64,8 +64,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Career Staff | Student | Company Rep | Invalid PW |
-| ---------- | ----------- | -------------- | -------------- | 
+ | Career Staff | Student | Company Rep | Invalid PW |
+ | ------------ | ------- | ------------- | ----------- |
 | ![PW staff](Testcase3_StaffPW.png) | ![PW Student](Testcase3_StudentPW.png) |![PW CompRep](Testcase3_CompanyRepPW.png) | ![InvalidPW](Testcase3_NotificationPW.png) |
 ---
 
@@ -77,8 +77,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Initial Password Login | Initial Login Success | Password Change | Password Change Confirmation | Final Password Login | Final Login Success |
-| ---------- | ----------- | -------------- | -------------- | -------------- | -------------- | 
+ | Initial Password Login | Initial Login Success | Password Change | Password Change Confirmation | Final Password Login | Final Login Success |
+ | --------------------- | -------------------- | -------------- | --------------------------- | -------------------- | ------------------- |
 |![Initial Password Login](Testcase4_InitialLogin.png) |![Initial Login Success](Testcase4_InitialLoginSuccess.png) | ![Password Change](Testcase4_ChangePW.png) | ![Password Change Confirmation](Testcase4_ConfirmationChangedPW.png) | ![Final Password Login](Testcase4_FinalLogin.png) | ![Final Login Success](Testcase4_FinalLoginSuccess.png) |
 ---
 
@@ -90,8 +90,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Register | Notification | Unauthorised Login |
-| -------- | ------------ | ------------------ | 
+ | Register | Notification | Unauthorised Login |
+ | -------- | ------------ | ------------------ |
 | ![Company Representative Register](Testcase5_CompRepRegister.png) | ![New Company Representative Registered](Testcase5_RegisteredConfirmation.png) |![Unauthorised Login](Testcase5_UnauthorisedLogin.png) |
 ---
 
@@ -103,8 +103,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Internship Opportunities | Y1 Student Info View | Y3 Student DSAI View |
-| ------------------------ | -------------------- | -------------------- | 
+ | Internship Opportunities | Y1 Student Info View | Y3 Student DSAI View |
+ | ------------------------ | -------------------- | -------------------- |
 | ![All Internship Opportunities](Testcase6_AllIntOp.png) | ![Y1 Student Info View](Testcase6_Y1StudentInfo.png) |![Y3 Student DSAI View](Testcase6_Y3StudentDSAI.png) |
 ---
 
@@ -116,8 +116,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Internship Opportunities | Student Apply Choices |
-| ------------------------ | --------------------- | 
+ | Internship Opportunities | Student Apply Choices |
+ | ------------------------ | --------------------- |
 | ![All Internship Opportunities](Testcase7_AllIntOp.png) | ![Y1 Student Info View (apply button grayed out)](Testcase7_Y1StudentInfo.png) |
 ---
 
@@ -129,8 +129,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Visibility Off | Student Try To View App Details |
-| ---------------- | ------------------ | 
+ | Visibility Off | Student Try To View App Details |
+ | -------------- | ----------------------------- |
 | ![Visibility Off](Testcase8_VisOff.png) | ![Student View App Details](Testcase8_AppDetails.png) |
 ---
 
@@ -142,8 +142,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Multiple Internship Opportunity | Student Accept First | Updated Status (Note Second Internship Withdrawn Status Is Now Approved) | Student Try To Accept Second |
-| ------------------------------- | -------------------- | ---------------------------- | -----------------------|
+ | Multiple Internship Opportunity | Student Accept First | Updated Status | Student Try To Accept Second |
+ | ------------------------------ | -------------------- | -------------- | --------------------------- |
 | ![Student View Multiple Internship Op](Testcase9_MultIntOp.png) | ![First Internship Op Accept](Testcase9_FirstAccept.png) | ![Updated Status](Testcase9_UpdatedStatus.png) | ![Second Internship Op Accept](Testcase9_SecondAccept.png) |
 ---
 
@@ -155,8 +155,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Trying to create 6th Internship Opportunity | All Internship Opportunities By Comp Rep |
-| ------------------------------------------- | ---------------------------------------- |
+ | 6th Internship Opportunity Attempt | All Internship Opportunities By Comp Rep |
+ | ---------------------------------- | ---------------------------------------- |
 | ![6th Internship Op Attempt](Testcase10_ExceedFive.png) | ![All Int Op](Testcase10_AllIntOp.png) |
 ---
 
@@ -168,8 +168,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Company Representative View Internship Opportunity Status |
-| --------------------------------------------------------- |
+ | Company Representative View Internship Opportunity Status |
+ | -------------------------------------------------------- |
 | ![Company Representative View Internship Op Status](Testcase11_IntOpStatus.png) |
 ---
 
@@ -181,8 +181,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Details Always Visible (Details and Visibility Seperate Option) |
-| --------------------------------------------------------------- | 
+ | Details Always Visible |
+ | --------------------- |
 | ![Details Visible](Testcase12_DetailsVisible.png) |
 ---
 
@@ -204,8 +204,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Student 1 Applies | Student 2 Applies | Company Representative Retrieve Application | Not Full | Approving Both Student | Student 1 Accept | Student 2 Cannot Accept (Auto Reject)| Full Slot (Because only 1 slot allowed)|
-| --------------------- | ------------ | ------------- | --------- | -------- | --------- | --------- | -------- |
+| Student 1 Applies | Student 2 Applies | Application Retrieval | Not Full | Approving Both Students | Student 1 Accept | Student 2 Cannot Accept | Full Slot |
+| ------------------ | ---------------- | --------------------- | -------- | ---------------------- | --------------- | ---------------------- | --------- |
 | ![Student 1 Applies](Testcase14_StudentApplication.png) | ![Student 2 Applies](Testcase14_Student2Application.png) | ![Application Retrieval](Testcase14_AppRetrieval.png) | ![Not Full](Testcase14_NotFull.png) | ![Approving Both Student](Testcase14_Approve1.png) | ![Student 1 Accept](Testcase14_Student1Accept.png) | ![Student 2 Cannot Accept](Testcase14_CannotAccept.png) | ![Full Slot](Testcase14_FullSlot.png)
 ---
 
@@ -216,8 +216,9 @@
 - **Failure Indicator:** System fails to update or incorrectly records the placement confirmation status
 - **Pass:** Yes
 - **Screenshots:** 
-| Student Accept Internship Opportunity | Placement Confirmation Status |
-| ------------------------------------- | ----------------------------- |
+ 
+ | Student Accept Internship Opportunity | Placement Confirmation Status |
+ | ------------------------------------- | ----------------------------- |
 | ![Student Accept](Testcase15_StudentAccept.png) | ![Placement Confirmation Status](Testcase15_AppStatusConfirmed.png) |
 ---
 
@@ -239,8 +240,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Comp Rep making Internship Opportunity | Staff Viewing Pending Internship Opportunity | Internship Opportunity approval | internship Opportunity Rejection | Internship Oportunity Status | Student Viewing Internship Opportunity |
-| -------------- | ------------------ | -------------------- | ---------------------- | -------------- |
+| Comp Rep making Internship Opportunity | Staff Viewing Pending Internship Opportunity | Internship Opportunity Approval | Internship Opportunity Rejection | Internship Opportunity Status | Student Viewing Internship Opportunity |
+| -------------------------------------- | ------------------------------------------- | ------------------------------- | -------------------------------- | ---------------------------- | ------------------------------------- |
 | ![Internship Op Creation](Testcase17_IntOpCreation.png) | ![Staff Viewing Pending Internship Op](Testcase17_StaffViewPendIntOp.png) | ![Internship Op Approved](Testcase17_Approved.png) | ![Internship Op Rejected](Testcase17_Rejected.png) | ![Internship Op Status](Testcase17_IntOpStatus.png) | ![Student View](Testcase17_StudentView.png) |
 
 ---
@@ -253,8 +254,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| All NewComp Internship Opportunity | Student Viewing Internship Opportunity |
-| ---------------------------------- | -------------------------------------- |
+ | All NewComp Internship Opportunities | Student Viewing Internship Opportunity |
+ | ----------------------------------- | -------------------------------------- |
 | ![NewComp Internship Op](Testcase18_AllIntOp.png) | ![Student View](Testcase18_StudentView.png) |
 ---
 
@@ -266,8 +267,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| Student 1 Withdraw From Full Internship Opportunity | Staff Rejects | Withdraw Reject Status Update | Slot still Full | Student 2 Withdraw From Full Internship Opportunity | Staff Approves | Withdraw Approve Status Update | Slot No Longer Full |
-| ---------------------------------- | -------------------------------------- |
+| Student 1 Withdraw | Staff Rejects | Withdraw Reject Status | Slot Still Full | Student 2 Withdraw | Staff Approves | Withdraw Approve Status | Slot No Longer Full |
+| ------------------- | ------------- | ---------------------- | --------------- | ------------------ | ------------- | ----------------------- | ------------------- |
 | ![Student 1 Withdraw From Full](Testcase19_StudWithdrawFull.png) | ![Staff Rejects](Testcase19_Reject.png) | ![Withdraw Reject Status](Testcase19_WithdrawRejected.png) | ![Slot Still Full](Testcase19_Full.png) | ![Student 2 WIthdraw From Full](Testcase19_Stud2WithdrawFull.png) | ![Staff Approves](Testcase19_Approve.png) | ![Withdraw Approve Status](Testcase19_WithdrawApproved.png) | ![Slot Not Full](Testcase19_NotFull.png) |
 ---
 
@@ -279,8 +280,8 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
-| NewComp Internship List (3 Full)| NewComp2 Internship List (0 Full)| Generated Overview Report (No Filter) | NewComp filtered Report | Basic Internship Level Report | Info and CS Major Filtered Report | Added 2026 Internship Opportunity | 2026 Internship Report | Filter Panel (For Upcoming image) |2025, Only CS or Civil Engineering or Chinese Majors, Advanced Level, From NewComp2 |
-| ------------------------------------- |
+ | NewComp Internship List (3 Full) | NewComp2 Internship List (0 Full) | Overview Report | NewComp Report | Basic Internship Level Report | Info and CS Major Report | Added 2026 Internship Opportunity | 2026 Internship Report | Filter Panel | Assorted Filters |
+ | ------------------------------- | --------------------------------- | --------------- | ------------- | -------------------------- | ---------------------- | ---------------------------- | --------------------- | ------------ | --------------- |
 | ![NewComp Internship List](Testcase20_NewCompInternList.png) | ![NewComp2 Internship List](Testcase20_NewComp2InternList.png) | ![Generated Overview Report](Testcase20_OverviewReport.png) | ![NewComp Report](Testcase20_NewCompReport.png) | ![Basic Internship Level Report](Testcase20_BasicInternLevelReport.png) | ![Info and CS Major Filtered Report](Testcase20_InfoAndCSMajorReport.png) | ![Added 2026 Internship Opportunity](Testcase20_Added2026InternOp.png) | ![2026 Internship Report](Testcase20_2026Report.png) | ![Filter Panel](Testcase20_FilterPanel.png) | ![Assorted Filters](Testcase20_Filtered.png) |
 ---
 
