@@ -233,9 +233,9 @@
 - **Pass:** 
 - **Screenshots:** 
 
-|Internship Opportunity is in pending status only |
-|-|
-|![pending case](Testcase16_Pending.png)|
+|Internship Opportunity is in pending status only | Edited information | Edit Messgae | After Edit |Delete Warning| Delete Message | After Delete |
+| - | - | - |-|-|-|-|
+|![pending case: can edit](Testcase16_Pending_Can_Edit.png)|![edit info](Testcase16_Edit_Info.png)|![alt text](Testcase16_Edit_Success.png)|![alt text](Testcase16_After_Edit.png)| ![alt text](Testcase16_Delete_Warning.png) | ![alt text](Testcase16_Delete_Success.png) | ![alt text](Testcase16_After_Delele.png)|
 
 ---
 
