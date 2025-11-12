@@ -105,7 +105,7 @@
 
  | Internship Opportunities | Y1 Student Info View | Y3 Student DSAI View |
  | ------------------------ | -------------------- | -------------------- |
-| ![All Internship Opportunities](Testcase6_AllIntOp.png) | ![Y1 Student Info View](Testcase6_Y1StudentInfo.png) |![Y3 Student DSAI View](Testcase6_Y3StudentDSAI.png) |
+| ![All Internship Opportunities](Testcase6_AllIntOpp.png) | ![Y1 Student Info View](Testcase6_Y1StudentInfo.png) |![Y3 Student DSAI View](Testcase6_Y3StudentDSAI.png) |
 ---
 
 ### Test Case 7: Internship Application Eligibility
@@ -118,7 +118,7 @@
 
  | Internship Opportunities | Student Apply Choices |
  | ------------------------ | --------------------- |
-| ![All Internship Opportunities](Testcase7_AllIntOp.png) | ![Y1 Student Info View (apply button grayed out)](Testcase7_Y1StudentInfo.png) |
+| ![All Internship Opportunities](Testcase7_AllIntOpp.png) | ![Y1 Student Info View (apply button grayed out)](Testcase7_Y1StudentInfo.png) |
 ---
 
 ### Test Case 8: Viewing Application Status after Visibility Toggle Off
@@ -157,7 +157,7 @@
 
  | 6th Internship Opportunity Attempt | All Internship Opportunities By Comp Rep |
  | ---------------------------------- | ---------------------------------------- |
-| ![6th Internship Op Attempt](Testcase10_ExceedFive.png) | ![All Int Op](Testcase10_AllIntOp.png) |
+| ![6th Internship Op Attempt](Testcase10_ExceedFive.png) | ![All Int Op](Testcase10_AllIntOpp.png) |
 ---
 
 ### Test Case 11: Internship Opportunity Approval Status
@@ -168,9 +168,9 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
- | Company Representative View Internship Opportunity Status |
- | -------------------------------------------------------- |
-| ![Company Representative View Internship Op Status](Testcase11_IntOpStatus.png) |
+ | Internship Opportunity Before Staff Review | Staff Reject | Staff Approve | Internship Opportunity After Staff Review |
+ | ----------------------------- | --------------------- | ------------------ | -----------------------------------|
+| ![Internship Op Before Review](Testcase11_BeforeReview.png) | ![Staff Reject](Testcase11_StaffReject.png) | ![Staff Approve](Testcase11_StaffApprove.png) | ![Internship Op After Review](Testcase11_AfterReview.png) |
 ---
 
 ### Test Case 12: Internship Detail Access for Company Representative
@@ -233,9 +233,9 @@
 - **Pass:** 
 - **Screenshots:** 
 
-|Internship Opportunity is in pending status only | Edited information | Edit Messgae | After Edit |Delete Warning| Delete Message | After Delete |
+|Internship Opportunity is in pending status only | Edited information | Edit Message | After Edit |Delete Warning| Delete Message | After Delete |
 | - | - | - |-|-|-|-|
-|![pending case: can edit](Testcase16_Pending_Can_Edit.png)|![edit info](Testcase16_Edit_Info.png)|![alt text](Testcase16_Edit_Success.png)|![alt text](Testcase16_After_Edit.png)| ![alt text](Testcase16_Delete_Warning.png) | ![alt text](Testcase16_Delete_Success.png) | ![alt text](Testcase16_After_Delele.png)|
+|![pending case: can edit](Testcase16_Pending_Can_Edit.png)|![edit info](Testcase16_Edit_Info.png)|![Edit Success](Testcase16_Edit_Success.png)|![After Edit](Testcase16_After_Edit.png)| ![Delete Warning](Testcase16_Delete_Warning.png) | ![Delete Success](Testcase16_Delete_Success.png) | ![After Delete](Testcase16_After_Delele.png)|
 
 ---
 
@@ -261,9 +261,9 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
- | All NewComp Internship Opportunities | Student Viewing Internship Opportunity |
- | ----------------------------------- | -------------------------------------- |
-| ![NewComp Internship Op](Testcase18_AllIntOp.png) | ![Student View](Testcase18_StudentView.png) |
+ | All NewComp Internship Opportunities | Student Viewing Internship Opportunity Before Changes | Hide Int0001 | Unhide Int0004 | Student Viewing Internship Opportunity After Changes
+ | ------------------------------------ | -------------------- | --------------- | ------------ | -------------- |
+| ![NewComp Internship Op](Testcase18_AllIntOpp.png) | ![Student View Before Changes](Testcase18_StudentView.png) | ![Hide Int0001](Testcase18_Hide.png) | ![Unhide Int0004](Testcase18_Unhide.png) | ![Student View After Changes](Testcase18_StudentViewAfter.png) |
 ---
 
 ### Test Case 19: Career Center Staff Internship Opportunity Management Withdrawal

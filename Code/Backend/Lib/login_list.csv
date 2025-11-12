@@ -7,6 +7,5 @@ identity,userID,passwordHash,salt,status
 "Student","U2310003C","9278e6591fee08cd94520e079ba4be07f733858240aabceed4430a7f50ebd0b0","DJvCI8aLdp36on17rRb4Cw",""
 "Student","U2310004D","f49ed8cf512a70e3778b049c2b85e60fd341f026e70ad9d26f8ca464bf4dc469","LTfU6swk7Zwn17lyqWPHvw",""
 "Student","U2310005E","4d4b7c502c80754cb92aff15c5cf522183f401c77d03ac741cb347ba482689da","olyQvCUNDkDZ_2geuLFl7Q",""
-"CompanyRepresentative","example_comp_mail@mail.com","5e3484df1530f0744073a7843a808750aff1aa5e8d1f596bdc5875df38353dec","9XedY8TRV1LcXc2ywc92Eg","approved"
-"CompanyRepresentative","NewComp@gmail.com","ed89fa672c27a7da992c9dcd57c9896c331905725c0259307612aa3a28ab9ecf","Um1olK0Aiqdg5bBQXEIcJw","approved"
-"CompanyRepresentative","NewComp2@gmail.com","b6278d13d0349385e4d753503a225935279b1c150bb974fd10ef63d12751fc7d","5Hh9zdXKapAuB1YFP78kwQ","approved"
+"CompanyRepresentative","NewComp@gmail.com","fe08539dacbc502b12f0d811b4a8a728cc5df23d511fe1dc8ee01b4285f4deea","jdqHWlXf_CpJEX0eo4m_2A","approved"
+"CompanyRepresentative","NewComp2@gmail.com","ae9073808e92c8a979456bb8b5c37e73c84710fba5caafb42637fb6e731a65a7","MudxVlsGY2xaLNZuyK2cYw","approved"
