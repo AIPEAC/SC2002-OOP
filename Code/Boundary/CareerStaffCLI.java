@@ -233,7 +233,7 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
-    // --- Parsing helpers for lines produced by backend list methods ---
+    // --- Parsing helpers for lines produced by control list methods ---
     private String parseCompanyRepID(String line) {
         // Expected format: "ID: <userID> | ..."
         if (line == null) return "";
@@ -250,7 +250,7 @@ public class CareerStaffCLI extends AbstractCLI {
     }
 
     private String parseInternshipID(String line) {
-        // Expected format starts with "<internshipID> | ..." per backend
+        // Expected format starts with "<internshipID> | ..." per control
         if (line == null) return "";
         int end = line.indexOf('|');
         if (end > 0) return line.substring(0, end).trim();
@@ -308,7 +308,7 @@ public class CareerStaffCLI extends AbstractCLI {
         JPanel filtersPanel = new JPanel();
         filtersPanel.setLayout(new BoxLayout(filtersPanel, BoxLayout.Y_AXIS));
         
-        // Get available companies and majors from backend
+        // Get available companies and majors from control
         List<String> availableCompanies = reportCtrl.getAllCompanyNames();
         List<String> availableMajors = reportCtrl.getAllMajors();
         

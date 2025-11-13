@@ -90,7 +90,7 @@ public class ApplicationControl {
 			throw new IllegalArgumentException("Only Career Staff can load all applications.");
 		}
 		applications.clear();
-		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
+		final String CSV_FILE = "Code/Libs/Lib/application_list.csv";
 		File file = new File(CSV_FILE);
 		BufferedReader br = null;
 		try {
@@ -146,7 +146,7 @@ public class ApplicationControl {
 		// Clear existing applications to avoid duplicates
 		applications.clear();
 		// Load applications from the database for the given studentID
-		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
+		final String CSV_FILE = "Code/Libs/Lib/application_list.csv";
 		File file = new File(CSV_FILE);
 		BufferedReader br = null;
 		try {
@@ -735,7 +735,7 @@ public class ApplicationControl {
 	 */
 	void rejectUnansweredApprovedApplicationsForInternship(String internshipID, List<Integer> acceptedApps) {
 		// Load all applications from database to check for this internship
-		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
+		final String CSV_FILE = "Code/Libs/Lib/application_list.csv";
 		try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
 			String line;
 			br.readLine(); // Skip header
@@ -772,7 +772,7 @@ public class ApplicationControl {
 	 */
 	private int getNextApplicationNumber() {
 		int maxAppNumber = 0;
-		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
+		final String CSV_FILE = "Code/Libs/Lib/application_list.csv";
 		try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
 			String line;
 			br.readLine(); // Skip header
@@ -799,7 +799,7 @@ public class ApplicationControl {
 	}
 	
 	private Application loadApplicationByNumberFromDB(int appNumber) {
-		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
+		final String CSV_FILE = "Code/Libs/Lib/application_list.csv";
 		try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
 			String line;
 			br.readLine(); // Skip header
@@ -839,7 +839,7 @@ public class ApplicationControl {
 		return null;
 	}
 	private void saveApplicationsToDB() {
-		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
+		final String CSV_FILE = "Code/Libs/Lib/application_list.csv";
 		
 		// Load ALL applications from database first
 		List<Application> allApplications = new ArrayList<>();
@@ -919,7 +919,7 @@ public class ApplicationControl {
 	 * @param applicationNumbersToDelete set of application numbers to remove from database
 	 */
 	private void deleteApplicationsFromDB(List<Integer> applicationNumbersToDelete) {
-		final String CSV_FILE = "Code/Backend/Lib/application_list.csv";
+		final String CSV_FILE = "Code/Libs/Lib/application_list.csv";
 		List<Application> remainingApplications = new ArrayList<>();
 		
 		// Load all applications and keep only those NOT in the delete list
@@ -988,7 +988,7 @@ public class ApplicationControl {
 	 * Get the student's hasAcceptedInternshipOpportunity status from student.csv
 	 */
 	private boolean getStudentAcceptanceStatus(String studentID) {
-		final String CSV_FILE = "Code/Backend/Lib/student.csv";
+		final String CSV_FILE = "Code/Libs/Lib/student.csv";
 		
 		try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
 			String line;
@@ -1023,7 +1023,7 @@ public class ApplicationControl {
 	 * Update the student's hasAcceptedInternshipOpportunity field in student.csv
 	 */
 	private void updateStudentAcceptanceStatus(String studentID, boolean hasAccepted) {
-		final String CSV_FILE = "Code/Backend/Lib/student.csv";
+		final String CSV_FILE = "Code/Libs/Lib/student.csv";
 		List<String> allLines = new ArrayList<>();
 		
 		try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {

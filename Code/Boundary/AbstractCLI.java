@@ -123,13 +123,13 @@ public abstract class AbstractCLI {
         gbc.insets = new Insets(4,4,4,4);
         gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST;
 
-        // Preferred Majors dropdown (loaded from backend)
+        // Preferred Majors dropdown (loaded from control)
         // For students, this filter is disabled as they can only see their major's internships
         List<String> allMajors = new ArrayList<>();
         try {
             allMajors = intCtrl.getAvailableMajors();
         } catch (Exception ex) {
-            // fallback to empty list if backend call fails
+            // fallback to empty list if control helper call fails
         }
         JComboBox<String> majorCombo = new JComboBox<>();
         majorCombo.addItem("(Any)");
@@ -150,7 +150,7 @@ public abstract class AbstractCLI {
         gbc.gridx = 1;
         filterBlock.add(majorCombo, gbc);
 
-        // Company names dropdown (from backend helper)
+        // Company names dropdown (from control helper)
         gbc.gridx = 0; gbc.gridy++;
         JComboBox<String> companyCombo = new JComboBox<>();
         companyCombo.addItem("(Any)");
@@ -243,7 +243,7 @@ public abstract class AbstractCLI {
         JPanel listPanel = new JPanel();
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
 
-        // (Apply availability is checked per-row using backend helper)
+        // (Apply availability is checked per-row using helper)
 
         // Header row (use GridBag so actions column can be fixed width and other columns align)
         JPanel header = new JPanel(new GridBagLayout());

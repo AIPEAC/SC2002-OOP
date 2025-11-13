@@ -48,7 +48,7 @@ public class UserControl {
 	 */
 	public List<String> getPendingCompanyRepList() {
 		List<String> out = new ArrayList<>();
-		String csvFile = "Code/Backend/Lib/company_representative.csv";
+		String csvFile = "Code/Libs/Lib/company_representative.csv";
 		File file = new File(csvFile);
 		if (!file.exists()) return out;
 		try (BufferedReader br = new BufferedReader(new FileReader(file))) {

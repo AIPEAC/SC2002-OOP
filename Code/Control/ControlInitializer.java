@@ -1,13 +1,13 @@
 package Control;
 
 /**
- * Central initialization and management class for all backend controllers.
+ * Central initialization and management class for all controllers.
  * This class encapsulates the creation and dependency injection of all control layer components,
  * preventing direct manipulation by the frontend layer and ensuring proper initialization order.
  * <p>
  * The frontend should only interact with this class to obtain controller instances,
  * rather than instantiating controllers directly. This enforces separation of concerns
- * and maintains the integrity of the backend architecture.
+ * and maintains the integrity of the architecture.
  * </p>
  * 
  * @author Allen
@@ -36,7 +36,7 @@ public class ControlInitializer {
     private final UserControl userCtrl;
     
     /**
-     * Constructs and initializes all backend controllers in the correct order.
+     * Constructs and initializes all controllers in the correct order.
      * Sets up all dependencies and cross-references between controllers.
      * This constructor ensures that all controllers are properly initialized
      * and wired together before being exposed to the frontend.

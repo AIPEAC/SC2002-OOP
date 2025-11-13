@@ -6,9 +6,6 @@ import Boundary.Helper.UIHelper;
 import Control.*;
 
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -76,24 +73,7 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
 
     // changePassword and viewFilteredInternshipOpportunities inherited from AbstractCLI
 
-    private List<String> loadMajors() {
-        List<String> majors = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("Code/Backend/Lib/majors.csv"))) {
-            String line = br.readLine();
-            while ((line = br.readLine()) != null) {
-                if (!line.trim().isEmpty()) {
-                    String m = line.trim();
-                    if (m.startsWith("\"") && m.endsWith("\"")) {
-                        m = m.substring(1, m.length() - 1);
-                    }
-                    majors.add(m);
-                }
-            }
-        } catch (IOException e) {
-            // ignore, return empty
-        }
-        return majors;
-    }
+
 
     private void createInternshipOpportunity() {
         JTextField title = new JTextField();
@@ -104,7 +84,12 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
         JTextField close = new JTextField();
         JTextField slots = new JTextField("1");
 
-        List<String> allMajors = loadMajors();
+        List<String> allMajors = new ArrayList<>();
+        try {
+            allMajors = intCtrl.getAvailableMajors();
+        } catch (Exception ex) {
+            // fallback to empty list
+        }
         List<String> selectedMajors = UIHelper.showMultiSelectMajors(allMajors);
 
         JPanel panel = new JPanel(new BorderLayout(5,5));
@@ -456,7 +441,7 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
      */
     private void editInternshipOpportunity(String internshipID) {
         try {
-            // Get current internship details from backend
+            // Get current internship details from control
             List<String> details = intCtrl.getInternshipDetails(internshipID);
             if (details == null || details.isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "Internship details not found.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -522,7 +507,12 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
             JPanel majorsPanel = new JPanel(new BorderLayout());
             majorsPanel.setBorder(BorderFactory.createTitledBorder("Preferred Majors"));
             
-            List<String> allMajors = loadMajors();
+            final List<String> allMajors = new ArrayList<>();
+            try {
+                allMajors.addAll(intCtrl.getAvailableMajors());
+            } catch (Exception ex) {
+                // fallback to empty list
+            }
             // Create a simple list showing current majors (could be enhanced with checkboxes)
             JTextArea majorsArea = new JTextArea(3, 30);
             majorsArea.setText(String.join(", ", currentSelectedMajors));
@@ -599,7 +589,7 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
      * Handles formats like "Wed Nov 12 12:34:56 PST 2025" and extracts just the date.
      * If already in yyyy-MM-dd format, returns as is.
      * 
-     * @param fullDate the full date string from the backend
+     * @param fullDate the full date string from the control
      * @return date in yyyy-MM-dd format, or empty string if parsing fails
      */
     private String extractDateOnly(String fullDate) {

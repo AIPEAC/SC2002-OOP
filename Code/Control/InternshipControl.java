@@ -80,7 +80,7 @@ public class InternshipControl{
         this.appCtrl = appCtrl;
     }
     private void loadInternshipOpportunityFromDB() {
-        String CSV_FILE = "Code/Backend/Lib/internship_opportunity_list.csv"; // corrected absolute path within project
+        String CSV_FILE = "Code/Libs/Lib/internship_opportunity_list.csv"; // corrected absolute path within project
         // Ensure header newline present to avoid concatenation when first opportunity is written
         try {
             ControlUtils.ensureCsvPrepared(CSV_FILE, "internshipID,title,description,level,preferredMajors,openingDate,closeDate,status,CompanyName,companyRepInCharge,numOfSlots,pendingApplicationNumberList,acceptedApplicationNumberList,visibility");
@@ -232,7 +232,7 @@ public class InternshipControl{
             throw new IllegalStateException("Cannot create more than 5 internship opportunities per company representative.");
         }
 
-        // Parse dates and slots here (backend handles conversions)
+        // Parse dates and slots here ( handles conversions)
         Date openDate = new Date();
         Date closeDate = new Date();
         int numberOfSlots = 1;
@@ -439,7 +439,7 @@ public class InternshipControl{
      * @param internshipIDToDelete the internship ID to remove from database
      */
     private void deleteInternshipFromDB(String internshipIDToDelete) {
-        final String CSV_FILE = "Code/Backend/Lib/internship_opportunity_list.csv";
+        final String CSV_FILE = "Code/Libs/Lib/internship_opportunity_list.csv";
         List<InternshipOpportunity> remainingInternships = new ArrayList<>();
         
         // Load all internships and keep only those NOT being deleted
@@ -551,7 +551,7 @@ public class InternshipControl{
      * @param internships the list of internships to write
      */
     private void updateInternshipInDBWithList(List<InternshipOpportunity> internships) {
-        final String CSV_FILE = "Code/Backend/Lib/internship_opportunity_list.csv";
+        final String CSV_FILE = "Code/Libs/Lib/internship_opportunity_list.csv";
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(CSV_FILE))) {
@@ -714,7 +714,7 @@ public class InternshipControl{
         StringBuilder sb = new StringBuilder();
         
         // Read student details from CSV
-        try (BufferedReader br = new BufferedReader(new FileReader("Code/Backend/Lib/student.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("Code/Libs/Lib/student.csv"))) {
             String line = br.readLine(); // skip header
             while ((line = br.readLine()) != null) {
                 String[] vals = ControlUtils.splitCsvLine(line);
@@ -953,7 +953,7 @@ public class InternshipControl{
         if (student != null && student.getUserID().equals(studentID)) {
             return; // Already loaded
         }
-    String CSV_FILE = "Code/Backend/Lib/student.csv";
+    String CSV_FILE = "Code/Libs/Lib/student.csv";
         //read from csv and initialize student
         try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
             String line;
@@ -1095,7 +1095,7 @@ public class InternshipControl{
         if (student != null) {
             return student.getMajors();
         }
-        // student not loaded; backend does not print. Caller should handle null.
+        // student not loaded;  does not print. Caller should handle null.
         return null;
     }
     // =========================================================
@@ -1122,7 +1122,7 @@ public class InternshipControl{
     } 
 
     /** Return formatted lines for visible internships applying the provided filter criteria.
-     *  The parameters are unpacked to keep frontend Filter types decoupled from backend.
+     *  The parameters are unpacked to keep frontend Filter types decoupled from lib.
      *  Any of the parameters may be null (null filterIn means no criteria; empty filterType means no sorting).
      */
     public List<String> getAllVisibleInternshipOpportunitiesForDisplay(String filterType, boolean ascending, Map<String, List<String>> filterIn) {
@@ -1292,7 +1292,7 @@ public class InternshipControl{
     }
     private void updateInternshipInDB() {
         // Write the updated internshipOpportunities list back to the CSV file (same file the loader reads)
-        String CSV_FILE = "Code/Backend/Lib/internship_opportunity_list.csv";
+        String CSV_FILE = "Code/Libs/Lib/internship_opportunity_list.csv";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_FILE))) {
             // Always write header first followed by newline
             writer.write("internshipID,title,description,level,preferredMajors,openingDate,closeDate,status,CompanyName,companyRepInCharge,numOfSlots,pendingApplicationNumberList,acceptedApplicationNumberList,visibility");
@@ -1338,7 +1338,7 @@ public class InternshipControl{
     private String autoAssignInternshipID(){
         // the internships will have IDs like #INT0001, #INT0002, ...
         String prefix = "#INT";
-        String filePath = "Code/Backend/Lib/internship_opportunity_list.csv";
+        String filePath = "Code/Libs/Lib/internship_opportunity_list.csv";
         int maxID = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -1629,7 +1629,7 @@ public class InternshipControl{
      */
     public List<String> getAvailableMajors() {
         List<String> majors = new ArrayList<>();
-        String CSV_FILE = "Code/Backend/Lib/majors.csv";
+        String CSV_FILE = "Code/Libs/Lib/majors.csv";
         try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
             String line;
             // Skip header if present
@@ -1662,7 +1662,7 @@ public class InternshipControl{
             return null;
         }
         String studentID = authCtrl.getUserID();
-        try (BufferedReader br = new BufferedReader(new FileReader("Code/Backend/Lib/student.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("Code/Libs/Lib/student.csv"))) {
             String line = br.readLine(); // header
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
