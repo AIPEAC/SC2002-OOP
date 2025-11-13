@@ -1,6 +1,6 @@
 # Diagrams
 
-**contributor**: Deryl, Allen
+**Contributor**: Deryl, Allen, Hong Xun
 
 ---
 |Class diagram|
