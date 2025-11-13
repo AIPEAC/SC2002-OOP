@@ -5,6 +5,7 @@ import java.awt.*;
 import java.util.List;
 
 import Backend.Control.*;
+import Frontend_UI.Helper.UIHelper;
 
 /**
  * Boundary class for student user interface.
@@ -63,7 +64,7 @@ public class StudentCLI extends AbstractCLI {
 
             JButton logout = new JButton("Logout");
             logout.addActionListener(e -> {
-                Frontend_UI.Helper.UIHelper.closeLoggedInPopup();
+                UIHelper.closeLoggedInPopup();
                 frame.dispose();
             });
             p.add(logout);

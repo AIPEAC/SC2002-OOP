@@ -1622,6 +1622,34 @@ public class InternshipControl{
     }
     
     /**
+     * Returns the list of all available majors from the system database.
+     * Used by the UI to populate major filter dropdowns.
+     * 
+     * @return a list of all available major codes/names
+     */
+    public List<String> getAvailableMajors() {
+        List<String> majors = new ArrayList<>();
+        String CSV_FILE = "Code/Backend/Lib/majors.csv";
+        try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
+            String line;
+            // Skip header if present
+            br.readLine();
+            while ((line = br.readLine()) != null) {
+                String m = line.trim();
+                if (m.isEmpty()) continue;
+                // Remove quotes if present
+                if (m.startsWith("\"") && m.endsWith("\"")) {
+                    m = m.substring(1, m.length() - 1);
+                }
+                majors.add(m);
+            }
+        } catch (IOException e) {
+            // silent fallback: return empty list
+        }
+        return majors;
+    }
+
+    /**
      * Returns the logged-in student's year of study (used for eligibility filtering).
      * Year 3/4 students are eligible for Intermediate and Advanced internships,
      * while Year 1/2 students can only apply to Basic level internships.

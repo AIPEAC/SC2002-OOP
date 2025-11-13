@@ -84,7 +84,7 @@ public class CareerStaffCLI extends AbstractCLI {
 
             JButton logout = new JButton("Logout");
             logout.addActionListener(e -> {
-                Frontend_UI.Helper.UIHelper.closeLoggedInPopup();
+                UIHelper.closeLoggedInPopup();
                 frame.dispose();
             });
             p.add(logout);

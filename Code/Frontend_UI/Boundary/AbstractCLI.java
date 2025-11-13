@@ -6,13 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 
 import Backend.Control.InternshipControl;
 import Backend.Control.LoginControl;
 import Frontend_UI.Helper.Filter;
+import Frontend_UI.Helper.UIHelper;
 
 /**
  * Abstract base class for all user interface boundary classes.
@@ -43,7 +41,7 @@ public abstract class AbstractCLI {
     }
 
     /** Implementors should show their UI (window/dialogs). */
-    public abstract void show();
+    protected abstract void show();
 
     /**
      * Sets the login control for this CLI.
@@ -59,7 +57,7 @@ public abstract class AbstractCLI {
      */
     public void logout() {
         // Close any logged-in popup left open by the login flow
-        Frontend_UI.Helper.UIHelper.closeLoggedInPopup();
+        UIHelper.closeLoggedInPopup();
         JOptionPane.showMessageDialog(null, "Logged out (frontend).", "Logout", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -124,9 +122,14 @@ public abstract class AbstractCLI {
         gbc.insets = new Insets(4,4,4,4);
         gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST;
 
-        // Preferred Majors dropdown (loaded from majors.csv)
+        // Preferred Majors dropdown (loaded from backend)
         // For students, this filter is disabled as they can only see their major's internships
-        List<String> allMajors = loadMajorsFromCSV();
+        List<String> allMajors = new ArrayList<>();
+        try {
+            allMajors = intCtrl.getAvailableMajors();
+        } catch (Exception ex) {
+            // fallback to empty list if backend call fails
+        }
         JComboBox<String> majorCombo = new JComboBox<>();
         majorCombo.addItem("(Any)");
         for (String m : allMajors) majorCombo.addItem(m);
@@ -229,22 +232,6 @@ public abstract class AbstractCLI {
 
         filter = new Filter(chosenFilterType, ascending, filterIn);
         renderInternshipList(intCtrl.getApprovedVisibleInternshipOpportunitiesForDisplay(filter.getFilterType(), filter.isAscending(), filter.getFilterIn()));
-    }
-
-    private List<String> loadMajorsFromCSV() {
-        List<String> out = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("Code/Backend/Lib/majors.csv"))) {
-            String line = br.readLine(); // header (maybe)
-            while ((line = br.readLine()) != null) {
-                String m = line.trim();
-                if (m.isEmpty()) continue;
-                if (m.startsWith("\"") && m.endsWith("\"")) m = m.substring(1, m.length()-1);
-                out.add(m);
-            }
-        } catch (IOException e) {
-            // silent fallback: empty list
-        }
-        return out;
     }
 
     private void renderInternshipList(List<String> lines) {
