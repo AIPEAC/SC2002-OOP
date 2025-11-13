@@ -16,6 +16,15 @@
 
 This is a desktop application built in Java that helps manage internship opportunities between students, companies, and career staff at a university. It handles the entire process from posting internships to students accepting offers.
 
+## Highlights
+
+- **Multi Window**: Allow multiple terminal windows run side by side, no delays.
+- **Complete workflow**: Handles the entire internship process from start to finish
+- **Role-based access**: Each user type sees only relevant features
+- **Real-time validation**: Prevents common errors like double-applications or overbooking
+- **Detailed reporting**: Staff can analyze trends and generate professional reports
+- **User-friendly**: Simple GUI interface.
+
 ## Main Features
 
 ### For Students
@@ -88,15 +97,5 @@ The application uses Java Swing with simple button-based menus:
 **Security**: Password hashing with SHA-256 and salt  
 **Reports**: Generated as Markdown files with statistics and charts  
 **Architecture**: Separate layers for business logic, data storage, and user interface
-
-
-## Highlights
-
-- **Multi Window**: Allow multiple terminal windows run side by side, no delays.
-- **Complete workflow**: Handles the entire internship process from start to finish
-- **Role-based access**: Each user type sees only relevant features
-- **Real-time validation**: Prevents common errors like double-applications or overbooking
-- **Detailed reporting**: Staff can analyze trends and generate professional reports
-- **User-friendly**: Simple GUI interface.
 
 This system replaces manual processes like email chains and spreadsheets with an organized, automated solution that reduces errors and saves time for everyone involved.
