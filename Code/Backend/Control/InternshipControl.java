@@ -11,6 +11,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.stream.Collectors;
 
+import Backend.Control.Tool.ControlUtils;
 import Backend.Entity.Application;
 import Backend.Entity.InternshipOpportunity;
 import Backend.Entity.Users.Student;
@@ -1090,7 +1091,7 @@ public class InternshipControl{
         return "[]";
     }
     
-    protected List<String> getStudentMajors() {
+    List<String> getStudentMajors() {
         if (student != null) {
             return student.getMajors();
         }
@@ -1239,11 +1240,7 @@ public class InternshipControl{
         if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         rejectInternshipCreation(opp);
     }
-    public void reject(InternshipOpportunity opp) {
-        if (opp == null) return;
-        opp.setStatusToRejected();
-        updateInternshipInDB();
-    }
+    
     public boolean changeVisibility(InternshipOpportunity opp) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");

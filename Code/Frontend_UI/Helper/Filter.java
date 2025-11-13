@@ -16,13 +16,13 @@ import java.util.List;
  */
 public class Filter {
     /** The attribute to sort by (e.g., "company", "internshipLevel") */
-    public String filterType;
+    private String filterType;
     
     /** True for ascending order, false for descending order */
-    public boolean ascending;
+    private boolean ascending;
     
     /** The filtering criteria mapping field names to lists of acceptable values */
-    public Map<String, List<String>> filterIn;
+    private Map<String, List<String>> filterIn;
     
     /**
      * Constructs a Filter with specified sorting and filtering criteria.

@@ -1,4 +1,4 @@
-package Backend.Control;
+package Backend.Control.Tool;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,12 +25,12 @@ import java.util.List;
  * @author Allen
  * @version 2.0
  */
-class ControlUtils {
+public class ControlUtils {
     /**
      * Parse common boolean-like strings into Boolean.
      * Returns Boolean.TRUE / Boolean.FALSE, or null if unable to parse.
      */
-    static Boolean parseBooleanLike(String s) {
+    public static Boolean parseBooleanLike(String s) {
         if (s == null) return null;
         String v = s.trim().toLowerCase();
         if (v.isEmpty()) return null;
@@ -49,7 +49,7 @@ class ControlUtils {
      * If the file does not exist or is empty, it will be created with the header followed by a newline.
      * If the file exists and does not end with a newline, a newline will be appended.
      */
-    static void ensureCsvPrepared(String filePath, String header) throws IOException {
+    public static void ensureCsvPrepared(String filePath, String header) throws IOException {
         File file = new File(filePath);
         if (!file.exists()) {
             File parent = file.getParentFile();
@@ -74,7 +74,7 @@ class ControlUtils {
      * Append a newline to the file if the last byte is not already a newline ("\n").
      * Treats '\n' as the definitive newline marker; supports CRLF by accepting '\r' before '\n'.
      */
-    static void ensureTrailingNewline(String filePath) throws IOException {
+    public static void ensureTrailingNewline(String filePath) throws IOException {
         File file = new File(filePath);
         if (!file.exists() || file.length() == 0) return;
         try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
@@ -96,7 +96,7 @@ class ControlUtils {
      * @param field the field to escape
      * @return the escaped field wrapped in quotes, or empty string if field is null
      */
-    static String escapeCsvField(String field) {
+    public static String escapeCsvField(String field) {
         if (field == null) {
             return "\"\"";
         }
@@ -113,7 +113,7 @@ class ControlUtils {
      * @param field the field to unescape
      * @return the unescaped field
      */
-    static String unescapeCsvField(String field) {
+    public static String unescapeCsvField(String field) {
         if (field == null) {
             return "";
         }
@@ -136,7 +136,7 @@ class ControlUtils {
      * @param line the CSV line to split
      * @return array of fields with quotes removed where appropriate
      */
-    static String[] splitCsvLine(String line) {
+    public static String[] splitCsvLine(String line) {
         List<String> fields = new ArrayList<>();
         StringBuilder currentField = new StringBuilder();
         boolean inQuotes = false;

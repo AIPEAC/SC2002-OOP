@@ -3,6 +3,7 @@ package Frontend_UI.Helper;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Helper class providing common UI utility methods for Swing dialogs and user interactions.
@@ -22,7 +23,7 @@ public class UIHelper {
         return res == JOptionPane.YES_OPTION;
     }
 
-    public static java.util.List<String> showMultiSelectMajors(java.util.List<String> allMajors) {
+    public static List<String> showMultiSelectMajors(List<String> allMajors) {
         if (allMajors == null || allMajors.isEmpty()) return new ArrayList<>();
         JList<String> list = new JList<>(allMajors.toArray(new String[0]));
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);

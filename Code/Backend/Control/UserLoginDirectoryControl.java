@@ -13,6 +13,7 @@ import java.util.Base64;
 import java.util.ArrayList;
 import java.util.List;
 
+import Backend.Control.Tool.ControlUtils;
 import Backend.Entity.Users.*;
 
 import java.util.Arrays;
@@ -50,7 +51,7 @@ public class UserLoginDirectoryControl{
      * 
      * @param authCtrl The authentication control instance for coordinating user authentication
      */
-    public UserLoginDirectoryControl(AuthenticationControl authCtrl){
+    UserLoginDirectoryControl(AuthenticationControl authCtrl){
         this.authCtrl=authCtrl;
         loadUsersFromExamplesToDB();
         loadLoginListFromDB();
