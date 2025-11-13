@@ -3,14 +3,11 @@
 ## Overview
 - **Langauge**: java
 - **Contributor**:
-  - Allen: Boundary & Control Classes Coding in Java, Sequence diagram
-  - Deryl: [Class diagram](https://github.com/AIPEAC/SC2002-OOP/blob/main/Diagrams/Clean_Class_Diagram.png)
+  - Allen: Boundary & Control Classes Coding in Java, UML Sequence diagram
+  - Deryl: [UML Class diagram](https://github.com/AIPEAC/SC2002-OOP/blob/main/Diagrams/Clean_Class_Diagram.png)
   - Hong Xun: Entity Classes Coding in Java, [Testing Functionality](https://github.com/AIPEAC/SC2002-OOP/blob/main/Testcases/Testcase_Appendix_A/Test_Appendix_A.md)
   - Jeremy: Report
   - Teja: Filtering Algorithm
-- **Visualization of Project**: UML diagrams
-    - Class Diagram
-    - Sequence Diagram for Company Representative
 
 ## What This Application Does
 
