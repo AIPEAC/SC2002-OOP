@@ -89,8 +89,10 @@ The application uses Java Swing with simple button-based menus:
 **Reports**: Generated as Markdown files with statistics and charts  
 **Architecture**: Separate layers for business logic, data storage, and user interface
 
+
 ## Highlights
 
+- **Multi Window**: Allow multiple terminal windows run side by side, no delays.
 - **Complete workflow**: Handles the entire internship process from start to finish
 - **Role-based access**: Each user type sees only relevant features
 - **Real-time validation**: Prevents common errors like double-applications or overbooking
