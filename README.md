@@ -4,7 +4,7 @@
 - **Langauge**: java
 - **Contributor**:
   - Allen: Frontend & Backend.Control Coding, Sequence diagram
-  - Deryl: Class diagram
+  - Deryl: [Class diagram](https://github.com/AIPEAC/SC2002-OOP/blob/main/Diagrams/Clean_Class_Diagram.png)
   - Hong Xun: Backend.Entity Coding, **[Testing Functionality](https://github.com/AIPEAC/SC2002-OOP/blob/main/Testcases/Testcase_Appendix_A/Test_Appendix_A.md)**
   - Jeremy: Report
   - Teja: Filtering Algorithm
