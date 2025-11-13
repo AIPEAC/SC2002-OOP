@@ -199,7 +199,7 @@ public class ReportControl {
     private int getNumberOfReports(){
         // Count files in the Output_report directory matching Report####.md
         try {
-            File dir = new File("Code/Output_report");
+            File dir = new File("Output_report");
             if (!dir.exists() || !dir.isDirectory()) return 0;
             String[] files = dir.list((d, name) -> name.matches("Report\\d{4}\\.md"));
             return files == null ? 0 : files.length;
