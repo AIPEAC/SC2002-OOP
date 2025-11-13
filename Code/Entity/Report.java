@@ -62,6 +62,13 @@ public class Report {
     /** Map of companies to their number of internships */
     private Map<String,Integer> companyAndTheirNumOfInternships=new HashMap<String,Integer>();
 
+    /**
+     * Constructs a Report without applied filters.
+     * 
+     * @param reportIndex The unique index for this report
+     * @param internshipOpportunities The list of internship opportunities
+     * @param filtered Whether the report is filtered
+     */
     public Report(int reportIndex,List<InternshipOpportunity> internshipOpportunities,boolean filtered) {
         this.reportIndex = reportIndex;
         this.internshipOpportunities = internshipOpportunities;
@@ -69,6 +76,14 @@ public class Report {
         this.appliedFilters = null;
     }
     
+    /**
+     * Constructs a Report with applied filters.
+     * 
+     * @param reportIndex The unique index for this report
+     * @param internshipOpportunities The list of internship opportunities
+     * @param filtered Whether the report is filtered
+     * @param appliedFilters The map of applied filters
+     */
     public Report(int reportIndex,List<InternshipOpportunity> internshipOpportunities,boolean filtered, Map<String, List<String>> appliedFilters) {
         this.reportIndex = reportIndex;
         this.internshipOpportunities = internshipOpportunities;
@@ -76,7 +91,11 @@ public class Report {
         this.appliedFilters = appliedFilters;
     }
     
-    /** Build the formatted report lines instead of printing directly. */
+    /**
+     * Build the formatted report lines instead of printing directly.
+     * 
+     * @return a list of formatted report lines
+     */
     public List<String> formatOutput(){
         List<String> lines = new ArrayList<>();
         if (internshipOpportunities == null || internshipOpportunities.size()==0){
@@ -89,7 +108,12 @@ public class Report {
         return lines;
     }
 
-    /** Save the current report to local markdown file and return the path. Throws on error. */
+    /**
+     * Save the current report to local markdown file and return the path.
+     * 
+     * @return the file path where the report was saved
+     * @throws IOException if an I/O error occurs
+     */
     public String saveToLocal() throws IOException {
         if (internshipOpportunities==null || internshipOpportunities.size()==0){
             throw new IllegalStateException("No internships to save in report.");
@@ -108,6 +132,11 @@ public class Report {
         }
     }
     
+    /**
+     * Calculates and sets the statistics for the report.
+     * 
+     * @param internshipOpportunities The list of internship opportunities to analyze
+     */
     private void statistifyTheNumbers(List<InternshipOpportunity> internshipOpportunities){
         // Reset and calculate statistics (safe to call multiple times)
         numOfInternships=0;
@@ -175,6 +204,11 @@ public class Report {
         }
     }
 
+    /**
+     * Appends the statistics to the list of lines.
+     * 
+     * @param lines The list to append the statistics to
+     */
     private void printStatistics(List<String> lines){
         // Punchy header
         lines.add("========================================");
@@ -234,12 +268,28 @@ public class Report {
     }
 
     // Helper: print a label, raw count, percentage and a small ASCII bar
+    /**
+     * Appends a labeled count with percentage and bar to the lines.
+     * 
+     * @param lines The list to append to
+     * @param label The label for the count
+     * @param count The count value
+     * @param maxForBars The maximum value for the bar
+     */
     private void appendLabeledCount(List<String> lines, String label, int count, int maxForBars){
         double pct = (numOfInternships>0)?(count*100.0/numOfInternships):0.0;
         String pctStr = String.format("%.1f", pct);
         String bar = makeBar(count, maxForBars, 30);
         lines.add(String.format("%-20s %4d  (%5s%%) %s", label, count, pctStr, bar));
     }
+    /**
+     * Creates an ASCII bar for visualization.
+     * 
+     * @param value The value to represent
+     * @param max The maximum value
+     * @param width The width of the bar
+     * @return The ASCII bar string
+     */
     private String makeBar(int value, int max, int width){
         if (max<=0) max=1;
         int filled = (int) Math.round((double)value / max * width);
@@ -248,6 +298,12 @@ public class Report {
         for (int i=filled;i<width;i++) sb.append(' ');
         return "|"+sb.toString()+"|";
     }
+    /**
+     * Sorts a map by value in descending order.
+     * 
+     * @param map The map to sort
+     * @return The sorted list of entries
+     */
     private List<Entry<String,Integer>> sortMapByValueDesc(Map<String,Integer> map){
         List<Entry<String,Integer>> list = new ArrayList<>(map.entrySet());
         Collections.sort(list, new Comparator<Entry<String,Integer>>(){
@@ -260,6 +316,11 @@ public class Report {
 
 
     // Build a Markdown-formatted report string
+    /**
+     * Builds the report in Markdown format.
+     * 
+     * @return The Markdown string
+     */
     private String buildMarkdownReport(){
         StringBuilder sb = new StringBuilder();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -360,18 +421,42 @@ public class Report {
         sb.append("*Generated by the internship reporting system.*\n");
         return sb.toString();
     }
+    /**
+     * Creates a Markdown table row.
+     * 
+     * @param label The label
+     * @param count The count
+     * @param maxForBars The max for bars
+     * @param width The width
+     * @return The table row string
+     */
     private String tableRowMd(String label, int count, int maxForBars, int width){
         double pct = (numOfInternships>0)?(count*100.0/numOfInternships):0.0;
         String pctStr = String.format("%.1f", pct);
         String bar = makeBar(count, maxForBars, width);
         return String.format("| %s | %d | %s%% | `%s` |\n", escapeMd(label), count, pctStr, bar);
     }
+    /**
+     * Creates a text table row.
+     * 
+     * @param label The label
+     * @param count The count
+     * @param maxForBars The max for bars
+     * @param width The width
+     * @return The table row string
+     */
     private String tableRowText(String label, int count, int maxForBars, int width){
         double pct = (numOfInternships>0)?(count*100.0/numOfInternships):0.0;
         String pctStr = String.format("%.1f", pct);
         String bar = makeBar(count, maxForBars, width);
         return String.format("%s | %d | %s%% | %s", label, count, pctStr, bar);
     }
+    /**
+     * Escapes Markdown special characters.
+     * 
+     * @param s The string to escape
+     * @return The escaped string
+     */
     private String escapeMd(String s){
         if (s==null) return "";
         return s.replace("|","\\|");

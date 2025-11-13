@@ -14,6 +14,12 @@ import Control.*;
  * @version 2.0
  */
 public class Main {
+    /**
+     * The main entry point for the application.
+     * Initializes all controllers and starts the login interface.
+     * 
+     * @param args command-line arguments (not used)
+     */
     public static void main(String[] args) {
         // Initialize all controllers through centralized initialization
         // This prevents the frontend from directly instantiating or manipulating control components

@@ -79,6 +79,10 @@ public class InternshipControl{
     public void setApplicationControl(ApplicationControl appCtrl) {
         this.appCtrl = appCtrl;
     }
+    
+    /**
+     * Loads internship opportunities from the database.
+     */
     private void loadInternshipOpportunityFromDB() {
         String CSV_FILE = "Code/Libs/Lib/internship_opportunity_list.csv"; // corrected absolute path within project
         // Ensure header newline present to avoid concatenation when first opportunity is written
@@ -164,6 +168,11 @@ public class InternshipControl{
 
     //=========================================================
     // All Users methods
+    
+    /**
+     * Gets all visible internship opportunities.
+     * @return list of visible internships
+     */
     List<InternshipOpportunity> getAllVisibleInternshipOpportunities() {
         List<InternshipOpportunity> visible = new ArrayList<>();
         for (InternshipOpportunity opp : internshipOpportunities) {
@@ -174,6 +183,13 @@ public class InternshipControl{
         return visible;
     }
     /** Return details for display (labelled strings) for a given internship ID. */
+    /**
+     * Retrieves detailed information about a specific internship opportunity.
+     * 
+     * @param internshipID the ID of the internship
+     * @return a list of formatted detail lines about the internship
+     * @throws IllegalStateException if user is not logged in
+     */
     public List<String> getInternshipDetails(String internshipID) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -583,6 +599,11 @@ public class InternshipControl{
         }
     }
     
+    /**
+     * Formats application numbers for CSV.
+     * @param appNumbers list of application numbers
+     * @return formatted string
+     */
     private String formatApplicationNumbers(List<Integer> appNumbers) {
         if (appNumbers == null || appNumbers.isEmpty()) return "";
         StringBuilder sb = new StringBuilder();
@@ -593,12 +614,23 @@ public class InternshipControl{
         return sb.toString();
     }
     
+    /**
+     * Formats preferred majors for CSV.
+     * @param majors list of majors
+     * @return formatted string
+     */
     private String formatPreferredMajorsForCSV(List<String> majors) {
         if (majors == null || majors.isEmpty()) return "";
         return String.join(",", majors);
     }
     
     /** Return a list of formatted internship lines for display to the company representative. */
+    /**
+     * Retrieves the status of all internship opportunities managed by the logged-in company representative.
+     * 
+     * @return a list of internship status strings
+     * @throws IllegalStateException if user is not logged in or not a company representative
+     */
     public List<String> getInternshipStatus() {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -621,6 +653,12 @@ public class InternshipControl{
     /**
      * Return company rep's internships formatted for UI table with status.
      * Format: internshipID=... | internshipTitle=... | internshipLevel=... | companyName=... | preferredMajors=[...] | status=...
+     */
+    /**
+     * Retrieves all internships managed by the logged-in company representative along with their status.
+     * 
+     * @return a list of internship status strings with detailed information
+     * @throws IllegalStateException if user is not logged in or not a company representative
      */
     public List<String> getMyInternshipsWithStatus() {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
@@ -650,6 +688,15 @@ public class InternshipControl{
      * Return applications for a given internship (company rep only).
      * Format per line: applicationNumber=... | studentMajors=[major1, major2] | status=...
      * Does NOT include student name or ID.
+     */
+    /**
+     * Retrieves all applications for a specific internship opportunity.
+     * Only the company representative managing the internship can retrieve this information.
+     * 
+     * @param internshipID the ID of the internship
+     * @return a list of application information strings
+     * @throws IllegalStateException if user is not logged in or not a company representative
+     * @throws IllegalArgumentException if internship does not exist or user is not authorized
      */
     public List<String> getApplicationsForInternship(String internshipID) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
@@ -689,6 +736,15 @@ public class InternshipControl{
     /**
      * Return detailed student information for a specific application (company rep only).
      * Format: studentID=... | studentName=... | studentEmail=... | studentMajors=[...] | studentYear=... | status=...
+     */
+    /**
+     * Retrieves detailed student information for a specific application.
+     * Only the company representative with authorization can retrieve this information.
+     * 
+     * @param applicationNumber the application number
+     * @return a formatted string containing detailed student information
+     * @throws IllegalStateException if user is not logged in or not a company representative
+     * @throws IllegalArgumentException if application is not found or user is not authorized
      */
     public String getDetailedStudentInfoForApplication(int applicationNumber) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
@@ -750,6 +806,16 @@ public class InternshipControl{
     /**
      * Approve application and return a status message.
      * Returns additional notification if internship becomes full.
+     */
+    /**
+     * Approves an application for a specific internship opportunity.
+     * Only the company representative managing the internship can approve applications.
+     * 
+     * @param internshipID the ID of the internship
+     * @param applicationNumber the application number to approve
+     * @return a message indicating the approval result
+     * @throws IllegalStateException if user is not logged in or internship is full
+     * @throws IllegalArgumentException if internship does not exist or user is not authorized
      */
     public String approveApplicationForInternship(String internshipID, int applicationNumber) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
@@ -821,6 +887,15 @@ public class InternshipControl{
     /**
      * Reject application by internship ID and application number (company rep only).
      */
+    /**
+     * Rejects an application for a specific internship opportunity.
+     * Only the company representative managing the internship can reject applications.
+     * 
+     * @param internshipID the ID of the internship
+     * @param applicationNumber the application number to reject
+     * @throws IllegalStateException if user is not logged in or not a company representative
+     * @throws IllegalArgumentException if internship does not exist or user is not authorized
+     */
     public void rejectApplicationForInternship(String internshipID, int applicationNumber) {
         if (!isCompanyRepLoggedIn()) {
             throw new IllegalStateException("User not logged in or not a company representative.");
@@ -838,6 +913,15 @@ public class InternshipControl{
     }
 
     /** Return a list of formatted application lines for display to the company representative. */
+    /**
+     * Retrieves applications for viewing by the company representative.
+     * If internshipID is null or empty, retrieves all applications for all internships managed by the user.
+     * 
+     * @param internshipID the ID of a specific internship, or null to retrieve all
+     * @return a list of application information strings
+     * @throws IllegalStateException if user is not logged in or not a company representative
+     * @throws IllegalArgumentException if internship does not exist or user is not authorized
+     */
     public List<String> viewApplications(String internshipID) {
         if (!isCompanyRepLoggedIn()) {
             throw new IllegalStateException("User not logged in or not a company representative.");
@@ -869,7 +953,11 @@ public class InternshipControl{
         return out;
     }
     
-    /** Approve an application: mark application approved (but don't add to accepted list yet). */
+    /**
+     * Approves an application number for an internship.
+     * @param applicationNumber the application number
+     * @param internshipID the internship ID
+     */
     void approveApplicationNumberForInternship(int applicationNumber, String internshipID) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -883,7 +971,11 @@ public class InternshipControl{
         updateInternshipInDB();
     }
     
-    /** Called when a student accepts an approved offer - add to internship's accepted list. */
+    /**
+     * Handles when a student accepts an offer for an internship.
+     * @param applicationNumber the application number
+     * @param internshipID the internship ID
+     */
     void studentAcceptedOfferForInternship(int applicationNumber, String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
@@ -906,7 +998,11 @@ public class InternshipControl{
         }
     }
 
-    /** Reject an application for an internship. */
+    /**
+     * Rejects an application number for an internship.
+     * @param applicationNumber the application number
+     * @param internshipID the internship ID
+     */
     void rejectApplicationNumberForInternship(int applicationNumber, String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
@@ -916,6 +1012,11 @@ public class InternshipControl{
 
     /** Convenience wrappers so a CompanyRepresentative CLI (which may not hold an ApplicationControl reference)
      * can request approve/reject actions that also update the ApplicationControl.
+     */
+    
+    /**
+     * Approves an application as company rep.
+     * @param applicationNumber the application number
      */
     public void approveApplicationAsCompanyRep(int applicationNumber) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
@@ -927,6 +1028,11 @@ public class InternshipControl{
             throw new IllegalStateException("ApplicationControl not set; cannot approve application.");
         }
     }
+    
+    /**
+     * Rejects an application as company rep.
+     * @param applicationNumber the application number
+     */
     public void rejectApplicationAsCompanyRep(int applicationNumber) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -992,6 +1098,12 @@ public class InternshipControl{
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Checks if an internship is visible, not full, and not rejected.
+     * @param oppID the internship ID
+     * @return true if conditions met
+     */
     boolean isVisibleAndNotFullAndNotRejected(String oppID) {
         InternshipOpportunity opp = getInternshipByID(oppID);
         if (opp != null) {
@@ -1003,6 +1115,13 @@ public class InternshipControl{
         }
         return false;
     }
+    
+    /**
+     * Checks if a student fits the requirements for an internship.
+     * @param studentID the student ID
+     * @param oppID the internship ID
+     * @return true if fits
+     */
     boolean studentFitsRequirements(String studentID, String oppID) {
         loadStudentFromDB(studentID);
         InternshipOpportunity opp = getInternshipByID(oppID);
@@ -1038,6 +1157,12 @@ public class InternshipControl{
         }
         throw new IllegalStateException("Error in retrieving student or internship details.");
     }
+    
+    /**
+     * Adds an application number to an internship opportunity.
+     * @param applicationNumber the application number
+     * @param internshipID the internship ID
+     */
     void addApplicationNumberToInternshipOpportunity(int applicationNumber, String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp != null) {
@@ -1045,6 +1170,12 @@ public class InternshipControl{
             updateInternshipInDB();
         }
     }
+    
+    /**
+     * Removes an application number from an internship opportunity.
+     * @param applicationNumber the application number
+     * @param internshipID the internship ID
+     */
     void removeApplicationNumberFromInternshipOpportunity(int applicationNumber, String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp != null) {
@@ -1058,6 +1189,12 @@ public class InternshipControl{
     //     appCtrl.withdrawOtherApplicationsOfApprovedStudent(studentID, acceptedAppNum);
     //     updateInternshipInDB();
     // }
+    
+    /**
+     * Gets the company name for an internship.
+     * @param internshipID the internship ID
+     * @return the company name or null
+     */
     String getInternshipCompany(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp != null) {
@@ -1066,6 +1203,11 @@ public class InternshipControl{
         return null;
     }
     
+    /**
+     * Gets the title for an internship.
+     * @param internshipID the internship ID
+     * @return the title or null
+     */
     String getInternshipTitle(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp != null) {
@@ -1074,6 +1216,11 @@ public class InternshipControl{
         return null;
     }
     
+    /**
+     * Gets the level for an internship.
+     * @param internshipID the internship ID
+     * @return the level or null
+     */
     String getInternshipLevel(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp != null) {
@@ -1082,6 +1229,11 @@ public class InternshipControl{
         return null;
     }
     
+    /**
+     * Gets the preferred majors for an internship.
+     * @param internshipID the internship ID
+     * @return the majors as string
+     */
     String getInternshipPreferredMajors(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);
         if (opp != null) {
@@ -1091,6 +1243,10 @@ public class InternshipControl{
         return "[]";
     }
     
+    /**
+     * Gets the student's majors.
+     * @return list of majors or null
+     */
     List<String> getStudentMajors() {
         if (student != null) {
             return student.getMajors();
@@ -1102,6 +1258,11 @@ public class InternshipControl{
     // Career Staff methods
 
     /** Return formatted lines for pending internship opportunities (for boundary printing). */
+    /**
+     * Retrieves all pending (not yet approved) internship opportunities.
+     * 
+     * @return a list of pending internship opportunity strings
+     */
     public List<String> getPendingInternshipOpportunities() {
         if (!authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -1117,6 +1278,11 @@ public class InternshipControl{
         }
         return out;
     }
+    
+    /**
+     * Gets all internship opportunities for report.
+     * @return list of all internships
+     */
     List<InternshipOpportunity> getAllInternshipOpportunities(){ //for report
         return new ArrayList<>(internshipOpportunities);
     } 
@@ -1124,6 +1290,14 @@ public class InternshipControl{
     /** Return formatted lines for visible internships applying the provided filter criteria.
      *  The parameters are unpacked to keep frontend Filter types decoupled from lib.
      *  Any of the parameters may be null (null filterIn means no criteria; empty filterType means no sorting).
+     */
+    /**
+     * Retrieves all visible internship opportunities with optional filtering and sorting.
+     * 
+     * @param filterType the type of filter to apply (e.g., "level", "major", "company")
+     * @param ascending whether to sort in ascending order
+     * @param filterIn a map of filter criteria
+     * @return a list of formatted internship opportunity strings
      */
     public List<String> getAllVisibleInternshipOpportunitiesForDisplay(String filterType, boolean ascending, Map<String, List<String>> filterIn) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
@@ -1196,6 +1370,11 @@ public class InternshipControl{
         for (InternshipOpportunity opp : Opplist) out.add(opp.toString());
         return out;
     }
+    
+    /**
+     * Approves an internship creation.
+     * @param opp the internship opportunity
+     */
     public void approveInternshipCreation(InternshipOpportunity opp) {
         if (!authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -1207,6 +1386,11 @@ public class InternshipControl{
         opp.setStatusToApproved();
         updateInternshipInDB();
     }
+    
+    /**
+     * Rejects an internship creation.
+     * @param rejectInternshipCreation the internship opportunity
+     */
     public void rejectInternshipCreation(InternshipOpportunity rejectInternshipCreation) {
         if (!authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -1218,6 +1402,11 @@ public class InternshipControl{
         rejectInternshipCreation.setStatusToRejected();
         updateInternshipInDB();
     }
+    
+    /**
+     * Approves an internship creation by ID.
+     * @param internshipID the internship ID
+     */
     public void approveInternshipCreationByID(String internshipID) {
         if (!authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -1229,6 +1418,11 @@ public class InternshipControl{
         if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
         approveInternshipCreation(opp);
     }
+    
+    /**
+     * Rejects an internship creation by ID.
+     * @param internshipID the internship ID
+     */
     public void rejectInternshipCreationByID(String internshipID) {
         if (!authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -1241,6 +1435,11 @@ public class InternshipControl{
         rejectInternshipCreation(opp);
     }
     
+    /**
+     * Changes the visibility of an internship.
+     * @param opp the internship opportunity
+     * @return the new visibility state
+     */
     public boolean changeVisibility(InternshipOpportunity opp) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -1254,6 +1453,12 @@ public class InternshipControl{
     }
 
     /** Toggle visibility by internship ID (public wrapper for CLIs) */
+    /**
+     * Toggles the visibility of an internship opportunity.
+     * 
+     * @param internshipID the ID of the internship
+     * @return true if visibility was successfully changed, false otherwise
+     */
     public boolean changeVisibilityByID(String internshipID) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -1266,6 +1471,14 @@ public class InternshipControl{
     /**
      * Set visibility by internship ID using a string value (safe wrapper for external UIs).
      * Accepts boolean-like strings (y/n, yes/no, approve/reject, a/r).
+     */
+    /**
+     * Changes the visibility of an internship opportunity based on a visibility string.
+     * 
+     * @param internshipID the ID of the internship
+     * @param visibleStr the visibility setting as a string (e.g., "yes", "no", "true", "false")
+     * @throws IllegalStateException if user is not logged in
+     * @throws IllegalArgumentException if internship is not found
      */
     public void changeVisibilityByID(String internshipID, String visibleStr) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
@@ -1282,6 +1495,12 @@ public class InternshipControl{
     //=========================================================
     // Private Helpers / package private
     // for all users
+    
+    /**
+     * Gets an internship by ID.
+     * @param internshipID the internship ID
+     * @return the internship or null
+     */
     InternshipOpportunity getInternshipByID(String internshipID) {
         for (InternshipOpportunity opp : internshipOpportunities) {
             if (opp.getInternshipID().equals(internshipID)) {
@@ -1290,6 +1509,10 @@ public class InternshipControl{
         }
         return null;
     }
+    
+    /**
+     * Updates the internship database.
+     */
     private void updateInternshipInDB() {
         // Write the updated internshipOpportunities list back to the CSV file (same file the loader reads)
         String CSV_FILE = "Code/Libs/Lib/internship_opportunity_list.csv";
@@ -1368,6 +1591,12 @@ public class InternshipControl{
         }
         return String.format("%s%04d", prefix, maxID + 1);
     }
+    
+    /**
+     * Gets internships by company rep ID.
+     * @param companyRepID the company rep ID
+     * @return list of internships
+     */
     private List<InternshipOpportunity> getInternshipsByCompanyRepID(String companyRepID) {
         List<InternshipOpportunity> repsOpps = new ArrayList<>();
         for (InternshipOpportunity opp : internshipOpportunities) {
@@ -1377,6 +1606,12 @@ public class InternshipControl{
         }
         return repsOpps;
     }
+    
+    /**
+     * Gathers applications for a company rep.
+     * @param companyRepID the company rep ID
+     * @return list of application numbers
+     */
     private List<Integer> gatherApplication(String companyRepID) {
         List<Integer> applicationNumbers = new ArrayList<>();
         for (InternshipOpportunity opp : internshipOpportunities) {
@@ -1389,6 +1624,11 @@ public class InternshipControl{
     // =========================================================
     // Helper methods for frontend filtering UI
     /** Return unique company names among visible internship opportunities. */
+    /**
+     * Retrieves a list of all company names from visible internship opportunities.
+     * 
+     * @return a list of company names
+     */
     public List<String> getVisibleCompanyNames() {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -1401,6 +1641,10 @@ public class InternshipControl{
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Checks if a company rep is logged in.
+     * @return true if logged in as company rep
+     */
     private boolean isCompanyRepLoggedIn() {
         if (authCtrl == null || !authCtrl.isLoggedIn()) return false;
         String identity = authCtrl.getUserIdentity();
@@ -1409,8 +1653,10 @@ public class InternshipControl{
         return "Company Representative".equals(identity);
     }
 
-    /** Parse a raw preferred majors field from CSV into a cleaned List&lt;String&gt;.
-     *  Accepts formats like: "a;b;c" or "a, b, c" or "[a, b]" or single value. Does not split on spaces.
+    /**
+     * Parses a raw preferred majors field from CSV.
+     * @param pmRaw the raw string
+     * @return list of majors
      */
     private List<String> parsePreferredMajorsRaw(String pmRaw) {
         List<String> out = new ArrayList<>();
@@ -1441,6 +1687,12 @@ public class InternshipControl{
     }
 
     /** Format preferredMajors list into a bracketed, comma-separated string for display. */
+    /**
+     * Formats a list of preferred majors into a displayable string.
+     * 
+     * @param majors the list of majors to format
+     * @return a formatted string representation of majors
+     */
     public String formatPreferredMajorsForDisplay(List<String> majors) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -1457,6 +1709,14 @@ public class InternshipControl{
      * Return formatted lines for approved, visible internships applying the provided filter criteria.
      * This avoids exposing entities to the UI and centralizes approved-only logic.
      * For students, only shows internships matching their major(s).
+     */
+    /**
+     * Retrieves all approved and visible internship opportunities with optional filtering and sorting.
+     * 
+     * @param filterType the type of filter to apply (e.g., "level", "major", "company")
+     * @param ascending whether to sort in ascending order
+     * @param filterIn a map of filter criteria
+     * @return a list of formatted internship opportunity strings
      */
     public List<String> getApprovedVisibleInternshipOpportunitiesForDisplay(String filterType, boolean ascending, Map<String, List<String>> filterIn) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
@@ -1570,6 +1830,12 @@ public class InternshipControl{
     /**
      * Return whether the currently logged-in user (if a student) can apply to the given internship ID.
      * Encapsulates auth checks and requirement checks so the UI doesn't need to access entities.
+     */
+    /**
+     * Checks if the currently logged-in student can apply for a specific internship.
+     * 
+     * @param internshipID the ID of the internship
+     * @return true if the student can apply, false otherwise
      */
     public boolean canCurrentLoggedInStudentApply(String internshipID) {
         try {

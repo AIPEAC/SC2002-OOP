@@ -46,6 +46,12 @@ public class ReportControl {
         // Initialize after intCtrl is assigned to avoid NPE
         this.allOpplist = (this.intCtrl == null) ? new ArrayList<>() : this.intCtrl.getAllInternshipOpportunities();
     }
+    
+    /**
+     * Generates a report overview.
+     * @param optToSaveReport whether to save the report
+     * @return list of report lines
+     */
     public List<String> generateReportOverview(boolean optToSaveReport){
         if (!authCtrl.isLoggedIn()) throw new IllegalStateException("You are not logged in.");
         if (!authCtrl.getUserIdentity().equals("CareerStaff")) throw new IllegalStateException("You do not have the permission to generate reports.");
@@ -63,6 +69,13 @@ public class ReportControl {
         }
         return lines;
     }
+    
+    /**
+     * Generates a specific report with filters.
+     * @param optToSaveReport whether to save the report
+     * @param filterIn the filters
+     * @return list of report lines
+     */
     public List<String> generateReportSpecific(boolean optToSaveReport,Map<String,List<String>> filterIn){
         if (!authCtrl.isLoggedIn()) throw new IllegalStateException("You are not logged in.");
         if (!authCtrl.getUserIdentity().equals("CareerStaff")) throw new IllegalStateException("You do not have the permission to generate reports.");
@@ -82,6 +95,12 @@ public class ReportControl {
         return lines;
     }
     
+    /**
+     * Filters internship opportunities based on criteria.
+     * @param internshipOpportunities the list to filter
+     * @param filterIn the filters
+     * @return filtered list
+     */
     private List<InternshipOpportunity> comprehensive(List<InternshipOpportunity> internshipOpportunities,
                 Map<String,List<String>> filterIn){
         /*
@@ -196,6 +215,10 @@ public class ReportControl {
         return result;
     }
 
+    /**
+     * Gets the number of reports.
+     * @return the number of reports
+     */
     private int getNumberOfReports(){
         // Count files in the Output_report directory matching Report####.md
         try {
@@ -210,6 +233,11 @@ public class ReportControl {
     }
     
     /** Get list of unique company names from all internship opportunities */
+    /**
+     * Retrieves a list of all company names from internship opportunities in the system.
+     * 
+     * @return a list of company names
+     */
     public List<String> getAllCompanyNames() {
         Set<String> companies = new HashSet<>();
         for (InternshipOpportunity opp : allOpplist) {
@@ -226,7 +254,11 @@ public class ReportControl {
         return sortedCompanies;
     }
     
-    /** Get list of unique majors from all internship opportunities */
+    /**
+     * Retrieves a list of all majors from the system.
+     * 
+     * @return a list of available majors
+     */
     public List<String> getAllMajors() {
         Set<String> majors = new HashSet<>();
         for (InternshipOpportunity opp : allOpplist) {

@@ -141,6 +141,9 @@ public class ApplicationControl {
 	//=========================================================
 	// Student methods
 
+	/**
+	 * Loads applications for the logged-in student from the database.
+	 */
 	public void loadStudentApplicationFromDB() {
 		String studentID = authCtrl.getUserID();
 		// Clear existing applications to avoid duplicates
@@ -264,6 +267,10 @@ public class ApplicationControl {
 		updateInternshipsApplicationsInDB(app.getApplicationNumber(), internshipID, "add");
 		return app.getApplicationNumber();
 	}
+	
+	/**
+	 * Gets the application status. (Ditched method)
+	 */
 	void getApplicationStatus() {
 		// Ditched: use getApplicationsForDisplay() instead
 		return;
@@ -519,7 +526,14 @@ public class ApplicationControl {
 		}
 	}
 
-	/** UI-friendly wrapper: accepts application number as String, parses and delegates */
+	/**
+	 * UI-friendly wrapper: accepts application number as String, parses and delegates.
+	 * Only Career Staff can reject withdrawals.
+	 * 
+	 * @param appNumStr the application number as a string
+	 * @throws IllegalStateException if user is not logged in
+	 * @throws IllegalArgumentException if user is not Career Staff or if application number is invalid
+	 */
 	public void rejectWithdrawal(String appNumStr) {
 		if (!authCtrl.isLoggedIn()) {
 			throw new IllegalStateException("User not logged in.");
@@ -798,6 +812,11 @@ public class ApplicationControl {
 		return maxAppNumber + 1;
 	}
 	
+	/**
+	 * Loads an application by number from the database.
+	 * @param appNumber the application number
+	 * @return the Application object or null
+	 */
 	private Application loadApplicationByNumberFromDB(int appNumber) {
 		final String CSV_FILE = "Code/Libs/Lib/application_list.csv";
 		try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
@@ -838,6 +857,10 @@ public class ApplicationControl {
 		}
 		return null;
 	}
+	
+	/**
+	 * Saves applications to the database.
+	 */
 	private void saveApplicationsToDB() {
 		final String CSV_FILE = "Code/Libs/Lib/application_list.csv";
 		
@@ -976,6 +999,12 @@ public class ApplicationControl {
 		}
 	}
 	
+	/**
+	 * Updates internship applications in the database.
+	 * @param applicationNumber the application number
+	 * @param internshipID the internship ID
+	 * @param action the action (add/remove)
+	 */
 	private void updateInternshipsApplicationsInDB(int applicationNumber, String internshipID, String action) {
 		if (action.equals("add")) {
 			intCtrl.addApplicationNumberToInternshipOpportunity(applicationNumber, internshipID);

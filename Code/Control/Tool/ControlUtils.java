@@ -29,6 +29,9 @@ public class ControlUtils {
     /**
      * Parse common boolean-like strings into Boolean.
      * Returns Boolean.TRUE / Boolean.FALSE, or null if unable to parse.
+     * 
+     * @param s the string to parse
+     * @return Boolean.TRUE if the string represents true, Boolean.FALSE if it represents false, null otherwise
      */
     public static Boolean parseBooleanLike(String s) {
         if (s == null) return null;
@@ -48,6 +51,10 @@ public class ControlUtils {
      * Ensure a CSV file exists with the given header and that the file ends with a newline.
      * If the file does not exist or is empty, it will be created with the header followed by a newline.
      * If the file exists and does not end with a newline, a newline will be appended.
+     * 
+     * @param filePath the path to the CSV file
+     * @param header the header line for the CSV file
+     * @throws IOException if an I/O error occurs
      */
     public static void ensureCsvPrepared(String filePath, String header) throws IOException {
         File file = new File(filePath);
@@ -73,6 +80,9 @@ public class ControlUtils {
     /**
      * Append a newline to the file if the last byte is not already a newline ("\n").
      * Treats '\n' as the definitive newline marker; supports CRLF by accepting '\r' before '\n'.
+     * 
+     * @param filePath the path to the file
+     * @throws IOException if an I/O error occurs
      */
     public static void ensureTrailingNewline(String filePath) throws IOException {
         File file = new File(filePath);

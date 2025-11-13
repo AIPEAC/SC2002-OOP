@@ -145,6 +145,11 @@ public class InternshipOpportunity {
     
 
 
+    /**
+     * Gets the status of the internship.
+     * 
+     * @return The status of the internship
+     */
     public String getStatus() {
         return status;
     }
@@ -266,48 +271,30 @@ public class InternshipOpportunity {
     public List<Integer> getAcceptedApplicationNumbers() {
         return acceptedApplicationNumbers;
     }
+    /**
+     * Gets the visibility of the internship.
+     * 
+     * @return True if the internship is visible to students, false otherwise
+     */
     public boolean getVisibility() {
         return visibility;
     }
 
+    /**
+     * Sets the visibility of the internship.
+     * 
+     * @param visibility True to make the internship visible to students, false otherwise
+     */
     public void setVisibility(boolean visibility) {
         this.visibility = visibility;
     }
     
 
-    public List<Object> getDetailsForViewing() {
-        List<Object> details=new ArrayList<Object>();
-        details.add(internshipID); //0
-        details.add(internshipTitle); //1
-        details.add(description); //2
-        details.add(internshipLevel); //3
-        details.add(preferredMajors); //4
-        details.add(openingDate); //5
-        details.add(closeDate); //6
-        details.add(status); //7
-        details.add(companyName); //8
-        details.add(numOfSlots); //9
-        details.add(isFull()); //10
-        return details;
-    }
-
-    @Override
-    public String toString() {
-        return "internshipID" + internshipID + 
-               ", internshipTitle=" + internshipTitle + 
-               ", description=" + description + 
-               ", internshipLevel=" + internshipLevel + 
-               ", preferredMajors=" + preferredMajors + 
-               ", openingDate=" + openingDate + 
-               ", closeDate=" + closeDate + 
-               ", status=" + status + 
-               ", companyName=" + companyName + 
-               ", companyRepInChargeID=" + companyRepInChargeID + 
-               ", numOfSlots=" + numOfSlots + 
-               ", applicationNumberList=" + applicationNumberList + 
-               ", acceptedApplicationNumbers=" + acceptedApplicationNumbers + 
-               ", visibility=" + visibility;
-    }
+    /**
+     * Gets the details of the internship for report generation.
+     * 
+     * @return A list of objects containing internship details
+     */
     public List<Object> getDetailsForReport() {
         List<Object> details=new ArrayList<Object>();
         details.add(internshipID); //0
@@ -322,10 +309,16 @@ public class InternshipOpportunity {
         return details;
     }
     
+    /**
+     * Sets the status of the internship to approved.
+     */
     public void setStatusToApproved() {
         status = "approved";
     }
 
+    /**
+     * Sets the status of the internship to rejected.
+     */
     public void setStatusToRejected() {
         status = "rejected";
     }
@@ -338,6 +331,11 @@ public class InternshipOpportunity {
     public void addApplicationNumberToInternship(int applicationNumber) {
         applicationNumberList.add(applicationNumber);
     }
+    /**
+     * Removes an application number from the internship.
+     * 
+     * @param applicationNumber The application number to remove
+     */
     public void removeApplicationNumberFromInternship(int applicationNumber) {
         applicationNumberList.remove(Integer.valueOf(applicationNumber));
         // Also remove from accepted list if present (for withdrawal scenarios)
@@ -388,12 +386,25 @@ public class InternshipOpportunity {
         acceptedApplicationNumbers.add(applicationID);
     }
 
+    /**
+     * Removes a selected application from the accepted list.
+     * 
+     * @param applicationID The application ID to remove
+     */
     public void removeSelectedApplication(int applicationID) {
         acceptedApplicationNumbers.remove(applicationID);
     }
     
     
+    /**
+     * Checks if the internship is full.
+     * 
+     * @return True if the number of accepted applications equals the number of slots, false otherwise
+     */
     public boolean isFull(){
         return acceptedApplicationNumbers.size() == numOfSlots;
     } 
 }
+
+
+

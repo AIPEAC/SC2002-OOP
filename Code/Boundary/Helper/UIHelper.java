@@ -18,11 +18,24 @@ import java.util.List;
  */
 public class UIHelper {
     private static volatile JFrame loggedInFrame = null;
+    
+    /**
+     * Displays a yes/no confirmation dialog.
+     * 
+     * @param message the message to display
+     * @return true if user selected Yes, false otherwise
+     */
     public static boolean showYesNo(String message) {
         int res = JOptionPane.showConfirmDialog(null, message, "Confirm", JOptionPane.YES_NO_OPTION);
         return res == JOptionPane.YES_OPTION;
     }
 
+    /**
+     * Displays a dialog for multi-selecting majors.
+     * 
+     * @param allMajors the list of available majors
+     * @return a list of selected majors, or empty list if cancelled
+     */
     public static List<String> showMultiSelectMajors(List<String> allMajors) {
         if (allMajors == null || allMajors.isEmpty()) return new ArrayList<>();
         JList<String> list = new JList<>(allMajors.toArray(new String[0]));
@@ -37,6 +50,12 @@ public class UIHelper {
         }
     }
 
+    /**
+     * Displays a popup indicating the currently logged-in user.
+     * 
+     * @param userID the ID of the logged-in user
+     * @param identity the role/identity of the logged-in user
+     */
     public static void showLoggedInPopup(String userID, String identity) {
         SwingUtilities.invokeLater(() -> {
             // Dispose existing popup if present
@@ -65,6 +84,9 @@ public class UIHelper {
         });
     }
 
+    /**
+     * Closes the logged-in user popup if it is currently displayed.
+     */
     public static void closeLoggedInPopup() {
         SwingUtilities.invokeLater(() -> {
             if (loggedInFrame != null) {

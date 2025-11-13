@@ -31,6 +31,9 @@ public class LoginCLI {
         this.authCtrl = authCtrl;
     }
 
+    /**
+     * Runs the login CLI dialog, handling user authentication and registration.
+     */
     public void run() {
         String[] options = {"Login", "Register as Company Rep", "Cancel"};
         int choice = JOptionPane.showOptionDialog(null, "Welcome - choose an action", "Login",

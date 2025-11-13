@@ -57,6 +57,9 @@ public class UserLoginDirectoryControl{
         loadLoginListFromDB();
     }
 
+    /**
+     * Loads the login list from the database.
+     */
     private void loadLoginListFromDB(){
         String csvFile = "Code/Libs/Lib/login_list.csv";
         File file = new File(csvFile);
@@ -88,6 +91,11 @@ public class UserLoginDirectoryControl{
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Loads student data for the given user ID.
+     * @param userID the user ID
+     */
     private void loadStudent(String userID){
         String csvFile = "Code/Libs/Lib/student.csv";
         File file = new File(csvFile);
@@ -121,6 +129,11 @@ public class UserLoginDirectoryControl{
             throw new RuntimeException(e.getMessage());
         }
     }
+    
+    /**
+     * Loads staff data for the given user ID.
+     * @param userID the user ID
+     */
     private void loadStaff(String userID){
         String csvFile = "Code/Libs/Lib/staff.csv";
         File file = new File(csvFile);
@@ -154,6 +167,11 @@ public class UserLoginDirectoryControl{
             throw new RuntimeException(e.getMessage());
         }
     }
+    
+    /**
+     * Loads company rep data for the given user ID.
+     * @param userID the user ID
+     */
     private void loadCompanyRep(String userID){
         String csvFile = "Code/Libs/Lib/company_representative.csv";
         File file = new File(csvFile);
@@ -195,6 +213,12 @@ public class UserLoginDirectoryControl{
         }
     }  
     
+    /**
+     * Verifies the user credentials.
+     * @param userID the user ID
+     * @param password the password
+     * @return the identity or null
+     */
     String verifyUser(String userID, String password){
         for (String[] loginData : loginList) {
             String identity = loginData[0];
@@ -229,7 +253,12 @@ public class UserLoginDirectoryControl{
     }
      
     
-    // New: SHA-256 hash with salt. If salt is empty string, behaves like previous hashPassword.
+    /**
+     * Hashes the password with salt using SHA-256.
+     * @param password the password
+     * @param salt the salt
+     * @return the hashed password
+     */
     private static String hashPassword(String password, String salt) {
         if (password == null) return null;
         String input = (salt == null || salt.isEmpty()) ? password : salt + password;
@@ -248,12 +277,22 @@ public class UserLoginDirectoryControl{
         }
     }
 
-    // Generate a random salt encoded in base64-url without padding
+    /**
+     * Generates a random salt.
+     * @return the salt string
+     */
     private static String generateSalt() {
         byte[] salt = new byte[16];
         new SecureRandom().nextBytes(salt);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(salt);
     }
+    
+    /**
+     * Creates a user object based on identity.
+     * @param userID the user ID
+     * @param identity the identity
+     * @return the user object
+     */
     User createUser(String userID, String identity){
         switch(identity){
             case "Student":
@@ -302,6 +341,12 @@ public class UserLoginDirectoryControl{
                 throw new IllegalArgumentException("bug: UserLoginDirectory.createUser(): wrong identity, possibly wrongly written into login_list.csv");
         }
     }
+    
+    /**
+     * Gets the company name for a company rep.
+     * @param userID the user ID
+     * @return the company name
+     */
     String getCompanyRepsCompany(String userID){
         if (authCtrl.isLoggedIn()) {
             loadCompanyRep(userID);
@@ -313,6 +358,11 @@ public class UserLoginDirectoryControl{
     }
     
 
+    /**
+     * Changes the password for a user.
+     * @param userID the user ID
+     * @param newPassword the new password
+     */
     void changePassword(String userID, String newPassword){
         if (!authCtrl.isLoggedIn()) {
             throw new IllegalStateException("UserLoginDirectoryControl.changePassword(): no logged in user when changing password");
@@ -554,17 +604,31 @@ public class UserLoginDirectoryControl{
         return String.format("comprep%04d", maxID + 1);
     }
 
+    /**
+     * Approves a company rep.
+     * @param userID the user ID
+     */
     void approveCompanyRep(String userID){
         if (!authCtrl.isLoggedIn()) throw new IllegalStateException("UserLoginDirectoryControl.approveCompanyRep(): no logged in user when approving a CompanyRep");
         if (userID == null) throw new IllegalArgumentException("UserLoginDirectoryControl.approveCompanyRep(): null userID");
         updateCompanyRepStatusInLogin(userID, "approved");
         updateCompanyRepStatusInCompanyRepCSV(userID, "approved");
     }
+    
+    /**
+     * Rejects a company rep.
+     * @param userID the user ID
+     */
     void rejectCompanyRep(String userID){
         updateCompanyRepStatusInLogin(userID, "rejected");
         updateCompanyRepStatusInCompanyRepCSV(userID, "rejected");
     }
-    // Update the status field (stored in the 5th column) for a CompanyRepresentative in login_list.csv
+    
+    /**
+     * Updates the company rep status in login list.
+     * @param userID the user ID
+     * @param status the status
+     */
     private void updateCompanyRepStatusInLogin(String userID, String status) {
         boolean updated = false;
 
@@ -633,6 +697,12 @@ public class UserLoginDirectoryControl{
             throw new IllegalArgumentException("UserLoginDirectoryControl.updateCompanyRepStatusInLogin(): CompanyRepresentative not found for userID=" + userID);
         }
     }
+    
+    /**
+     * Updates the company rep status in CSV.
+     * @param userID the user ID
+     * @param status the status
+     */
     private void updateCompanyRepStatusInCompanyRepCSV(String userID, String status) {
     String csvFile = "Code/Libs/Lib/company_representative.csv";
         File inputFile = new File(csvFile);
@@ -697,6 +767,10 @@ public class UserLoginDirectoryControl{
 
 
     //intialization related methods
+    
+    /**
+     * Checks if the system has been initialized.
+     */
     private void checkHaveInitialized() {
         String csvFile = "Code/Libs/Lib/have_initialized.csv";
         File file = new File(csvFile);
@@ -724,6 +798,11 @@ public class UserLoginDirectoryControl{
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Sets the initialization status.
+     * @param status the status
+     */
     private void setHaveInitialized(boolean status) {
         String csvFile = "Code/Libs/Lib/have_initialized.csv";
         File inputFile = new File(csvFile);
@@ -745,6 +824,10 @@ public class UserLoginDirectoryControl{
         tempFile.renameTo(inputFile);
         haveInitialized = status;
     }
+    
+    /**
+     * Loads users from example files to database.
+     */
     private void loadUsersFromExamplesToDB(){
         checkHaveInitialized();
         if (haveInitialized) {

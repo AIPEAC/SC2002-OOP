@@ -77,6 +77,10 @@ public class UserControl {
 		return out;
 	}
 
+	/**
+	 * Approves a company registration.
+	 * @param companyID the company ID
+	 */
 	public void approveRegister(String companyID) {
 		if (authCtrl.isLoggedIn() && authCtrl.getUserIdentity().equals("CareerStaff")) {
 			userDir.approveCompanyRep(companyID);
@@ -87,6 +91,10 @@ public class UserControl {
 		}
 	}
 
+	/**
+	 * Rejects a company registration.
+	 * @param companyID the company ID
+	 */
 	public void rejectRegister(String companyID) {
 		if (authCtrl.isLoggedIn() && authCtrl.getUserIdentity().equals("CareerStaff")) {
 			userDir.rejectCompanyRep(companyID);
@@ -97,14 +105,26 @@ public class UserControl {
 		}
 	}
 
+	/**
+	 * Adds a company rep from pending.
+	 * @param rep the company representative
+	 */
 	void addCompanyRepFromPending(CompanyRepresentative rep) {
 		pendingCompanyRepID.add(rep.getUserID());
 	}
 
+	/**
+	 * Removes a company rep from pending.
+	 * @param rep the company representative
+	 */
 	void removeCompanyRepFromPending(CompanyRepresentative rep) {
 		pendingCompanyRepID.remove(rep.getUserID());
 	}
 
+	/**
+	 * Gets pending company reps.
+	 * @return list of pending company rep IDs
+	 */
 	List<String> getPendingCompanyRep() {
 		return getPendingCompanyRepList();
 	}
