@@ -466,11 +466,17 @@ public class UserLoginDirectoryControl{
      */
     String requestRegisterCompanyRep(String name,String companyName,String department,String postion,String email){
         // Validate inputs: require at least 3 characters for companyName and name
-        if (companyName == null || companyName.trim().length() < 3) {
-            throw new IllegalArgumentException("Company name must be at least 3 characters.");
+        if (companyName == null || companyName.trim().length() < 4) {
+            throw new IllegalArgumentException("Company name must be at least 4 characters.");
         }
-        if (name == null || name.trim().length() < 3) {
-            throw new IllegalArgumentException("Name must be at least 3 characters.");
+        if (name == null || name.trim().length() < 4) {
+            throw new IllegalArgumentException("Name must be at least 4 characters.");
+        }
+        if (name.trim().length() > 15){
+            throw new IllegalArgumentException("Name cannot exceed 15 characters.");
+        }
+        if (name.contains("\n") || companyName.contains("\n") || department.contains("\n") || postion.contains("\n")) {
+            throw new IllegalArgumentException("Input fields cannot contain newline characters.");
         }
         // Validate email: must be non-empty and follow proper email format
         if (email == null || email.trim().isEmpty()) {
