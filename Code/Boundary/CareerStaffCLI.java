@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Boundary class for career center staff user interface.
@@ -55,9 +56,20 @@ public class CareerStaffCLI extends AbstractCLI {
      * Shows the career staff interface.
      */
     public void show() {
+        // Initialize the latch for window close detection
+        windowClosed = new CountDownLatch(1);
+        
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("Career Staff");
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    if (windowClosed != null) {
+                        windowClosed.countDown();
+                    }
+                }
+            });
             frame.setSize(520,420);
             frame.setLocationRelativeTo(null);
             JPanel p = new JPanel(new GridLayout(0,1,5,5));

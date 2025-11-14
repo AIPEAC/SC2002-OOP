@@ -33,8 +33,9 @@ public class LoginCLI {
 
     /**
      * Runs the login CLI dialog, handling user authentication and registration.
+     * @throws Exception if login fails due to invalid credentials
      */
-    public void run() {
+    public void run() throws Exception {
         String[] options = {"Login", "Register as Company Rep", "Cancel"};
         int choice = JOptionPane.showOptionDialog(null, "Welcome - choose an action", "Login",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
@@ -61,6 +62,7 @@ public class LoginCLI {
                 }
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(null, e.getMessage(), "Login Failed", JOptionPane.ERROR_MESSAGE);
+                throw e; // Re-throw the exception to signal login failure
             }
         }
     }

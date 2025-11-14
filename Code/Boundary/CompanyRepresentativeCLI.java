@@ -8,6 +8,7 @@ import Control.*;
 import java.awt.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Boundary class for company representative user interface.
@@ -38,9 +39,20 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
      * Shows the company representative interface.
      */
     public void show() {
+        // Initialize the latch for window close detection
+        windowClosed = new CountDownLatch(1);
+        
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("Company Representative");
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    if (windowClosed != null) {
+                        windowClosed.countDown();
+                    }
+                }
+            });
             frame.setSize(500, 400);
             frame.setLocationRelativeTo(null);
             JPanel p = new JPanel();

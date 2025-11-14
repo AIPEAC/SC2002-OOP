@@ -57,8 +57,8 @@ public class Main {
                     try { Thread.sleep(300); } catch (InterruptedException e) { }
 
                     if (!authCtrl.isLoggedIn()) {
-                        System.out.println("Exiting application (login failed or cancelled).");
-                        shouldRestart[0] = false;
+                        System.out.println("No user logged in. Exiting application.");
+                        shouldRestart[0] = false; // Don't restart - user cancelled or closed window
                         return;
                     }
 
@@ -68,23 +68,42 @@ public class Main {
                         case "Career Staff":
                             CareerStaffCLI staffUI = new CareerStaffCLI(appCtrl, intCtrl, reportCtrl, userCtrl, loginCtrl);
                             staffUI.show();
+                            try {
+                                staffUI.waitForWindowClose();
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
                             shouldRestart[0] = true; // Restart when window is closed
                             break;
                         case "Student":
                             StudentCLI studentUI = new StudentCLI(appCtrl, intCtrl, loginCtrl);
                             studentUI.show();
+                            try {
+                                studentUI.waitForWindowClose();
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
                             shouldRestart[0] = true; // Restart when window is closed
                             break;
                         case "CompanyRepresentative":
                         case "Company Representative":
                             CompanyRepresentativeCLI compUI = new CompanyRepresentativeCLI(intCtrl, loginCtrl);
                             compUI.show();
+                            try {
+                                compUI.waitForWindowClose();
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
                             shouldRestart[0] = true; // Restart when window is closed
                             break;
                         default:
                             System.out.println("Unknown identity: " + identity + ". Exiting.");
                             shouldRestart[0] = false;
                     }
+                } catch (Exception e) {
+                    // Login failed with exception (wrong credentials, etc.)
+                    System.out.println("Login failed. Restarting with fresh login screen...");
+                    shouldRestart[0] = true;
                 } finally {
                     // Signal that UI has finished
                     uiFinished.countDown();

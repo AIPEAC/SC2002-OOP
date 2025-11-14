@@ -7,6 +7,7 @@ import Control.*;
 
 import java.awt.*;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Boundary class for student user interface.
@@ -43,9 +44,20 @@ public class StudentCLI extends AbstractCLI {
      * Shows the student interface.
      */
     public void show() {
+        // Initialize the latch for window close detection
+        windowClosed = new CountDownLatch(1);
+        
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("Student");
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    if (windowClosed != null) {
+                        windowClosed.countDown();
+                    }
+                }
+            });
             frame.setSize(480,360);
             frame.setLocationRelativeTo(null);
             JPanel p = new JPanel(new GridLayout(0,1,5,5));

@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Abstract base class for all user interface boundary classes.
@@ -31,6 +32,9 @@ public abstract class AbstractCLI {
     
     /** Current filter settings for internship searches */
     protected Filter filter = null;
+    
+    /** Latch to signal when the CLI window has been closed */
+    protected CountDownLatch windowClosed = null;
 
     /**
      * Constructs an AbstractCLI with the specified internship control.
@@ -43,6 +47,16 @@ public abstract class AbstractCLI {
 
     /** Implementors should show their UI (window/dialogs). */
     protected abstract void show();
+    
+    /**
+     * Waits for the CLI window to be closed.
+     * @throws InterruptedException if the thread is interrupted while waiting
+     */
+    public void waitForWindowClose() throws InterruptedException {
+        if (windowClosed != null) {
+            windowClosed.await();
+        }
+    }
 
     /**
      * Sets the login control for this CLI.
