@@ -51,6 +51,9 @@ public class CareerStaffCLI extends AbstractCLI {
         setLoginControl(loginCtrl);
     }
 
+    /**
+     * Shows the career staff interface.
+     */
     public void show() {
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("Career Staff");
@@ -95,6 +98,9 @@ public class CareerStaffCLI extends AbstractCLI {
         });
     }
 
+    /**
+     * Views the list of pending company representative registrations.
+     */
     private void viewCompanyRepRegisterList() {
         try {
             List<String> pending = userCtrl.getPendingCompanyRepList();
@@ -135,6 +141,11 @@ public class CareerStaffCLI extends AbstractCLI {
     }
 
 
+    /**
+     * Approves a company representative registration.
+     *
+     * @param id the ID of the registration to approve
+     */
     private void approveRegister(String id) {
         try {
             userCtrl.approveRegister(id);
@@ -144,6 +155,11 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
+    /**
+     * Rejects a company representative registration.
+     *
+     * @param id the ID of the registration to reject
+     */
     private void rejectRegister(String id) {
         try {
             userCtrl.rejectRegister(id);
@@ -153,6 +169,9 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
+    /**
+     * Views the list of pending internship opportunities.
+     */
     private void viewPendingInternshipOpp() {
         try {
             List<String> pending = intCtrl.getPendingInternshipOpportunities();
@@ -192,6 +211,9 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
+    /**
+     * Views the list of pending withdrawal requests.
+     */
     private void viewPendingWithdrawal() {
         try {
             // Load all applications first so staff can see pending withdrawals
@@ -234,6 +256,12 @@ public class CareerStaffCLI extends AbstractCLI {
     }
 
     // --- Parsing helpers for lines produced by control list methods ---
+    /**
+     * Parses the company representative ID from a line.
+     *
+     * @param line the line to parse
+     * @return the parsed ID
+     */
     private String parseCompanyRepID(String line) {
         // Expected format: "ID: <userID> | ..."
         if (line == null) return "";
@@ -249,6 +277,12 @@ public class CareerStaffCLI extends AbstractCLI {
         return parts.length > 0 ? parts[0] : "";
     }
 
+    /**
+     * Parses the internship ID from a line.
+     *
+     * @param line the line to parse
+     * @return the parsed ID
+     */
     private String parseInternshipID(String line) {
         // Expected format starts with "<internshipID> | ..." per control
         if (line == null) return "";
@@ -259,6 +293,12 @@ public class CareerStaffCLI extends AbstractCLI {
         return parts.length > 0 ? parts[0] : "";
     }
 
+    /**
+     * Parses the application number from a line.
+     *
+     * @param line the line to parse
+     * @return the parsed application number
+     */
     private String parseApplicationNumber(String line) {
         // Expected format: "Application No: <num> | ..."
         if (line == null) return "";
@@ -277,6 +317,9 @@ public class CareerStaffCLI extends AbstractCLI {
         return "";
     }
 
+    /**
+     * Shows the report generation choice dialog.
+     */
     private void generateReportChoice() {
         String[] options = {"Overview","Specific","Cancel"};
         int c = JOptionPane.showOptionDialog(frame, "Generate report overview (o) or specific (s)?", "Generate Report",
@@ -289,6 +332,9 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
     
+    /**
+     * Shows the filter dialog for specific reports.
+     */
     private void showFilterDialog() {
         JDialog filterDialog = new JDialog(frame, "Specific Report Filters", true);
         filterDialog.setLayout(new BorderLayout(10, 10));
@@ -426,6 +472,11 @@ public class CareerStaffCLI extends AbstractCLI {
         filterDialog.setVisible(true);
     }
 
+    /**
+     * Approves a withdrawal request.
+     *
+     * @param appNum the application number to approve withdrawal for
+     */
     private void approveWithdrawal(String appNum) {
         try {
             appCtrl.approveWithdrawal(appNum);
@@ -435,6 +486,11 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
+    /**
+     * Rejects a withdrawal request.
+     *
+     * @param appNum the application number to reject withdrawal for
+     */
     private void rejectWithdrawal(String appNum) {
         try {
             appCtrl.rejectWithdrawal(appNum);
@@ -444,6 +500,11 @@ public class CareerStaffCLI extends AbstractCLI {
         }
     }
 
+    /**
+     * Generates an overview report.
+     *
+     * @param optToSaveReport whether to save the report to file
+     */
     private void generateReportOverview(boolean optToSaveReport){
         try {
             List<String> lines = reportCtrl.generateReportOverview(optToSaveReport);
@@ -452,6 +513,12 @@ public class CareerStaffCLI extends AbstractCLI {
             JOptionPane.showMessageDialog(frame, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+    /**
+     * Generates a specific report with filters.
+     *
+     * @param optToSaveReport whether to save the report to file
+     * @param filterIn the filter criteria
+     */
     private void generateReportSpecific(boolean optToSaveReport,Map<String,List<String>> filterIn){
         try {
             List<String> lines = reportCtrl.generateReportSpecific(optToSaveReport, filterIn);

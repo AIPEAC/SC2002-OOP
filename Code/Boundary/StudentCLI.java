@@ -39,6 +39,9 @@ public class StudentCLI extends AbstractCLI {
         appCtrl.loadStudentApplicationFromDB();
     }
 
+    /**
+     * Shows the student interface.
+     */
     public void show() {
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("Student");
@@ -77,6 +80,11 @@ public class StudentCLI extends AbstractCLI {
 
     // changePassword and viewFilteredInternshipOpportunities inherited from AbstractCLI
 
+    /**
+     * Handles application submission for an internship.
+     *
+     * @param internshipID the internship ID to apply for
+     */
     @Override
     protected void onApply(String internshipID) {
         if (internshipID == null || internshipID.isEmpty()) {
@@ -91,6 +99,9 @@ public class StudentCLI extends AbstractCLI {
         }
     }
 
+    /**
+     * Checks the status of my applications.
+     */
     private void checkMyApplicationStatus() {
         try {
             appCtrl.loadStudentApplicationFromDB();
@@ -244,6 +255,9 @@ public class StudentCLI extends AbstractCLI {
         }
     }
 
+    /**
+     * Views the internships I have applied to.
+     */
     private void viewInternshipIAppliedTo() {
         try {
             appCtrl.loadStudentApplicationFromDB();
@@ -305,15 +319,32 @@ public class StudentCLI extends AbstractCLI {
         }
     }
 
+    /**
+     * Accepts an internship opportunity.
+     *
+     * @param appNum the application number
+     */
     private void acceptInternshipOpportunity(int appNum) {
         appCtrl.acceptOffer(appNum);
     }
 
+    /**
+     * Rejects an internship opportunity.
+     *
+     * @param appNum the application number
+     */
     private void rejectInternshipOpportunity(int appNum) {
         appCtrl.rejectOffer(appNum);
         JOptionPane.showMessageDialog(frame, "You have rejected this internship offer.");
     }
 
+    /**
+     * Parses a field value from a line.
+     *
+     * @param line the line to parse
+     * @param key the key to find
+     * @return the parsed value
+     */
     private String parseFieldValue(String line, String key) {
         String marker = key + "=";
         int idx = line.indexOf(marker);
@@ -325,6 +356,12 @@ public class StudentCLI extends AbstractCLI {
         return line.substring(start, end).trim();
     }
 
+    /**
+     * Formats majors in a simple way.
+     *
+     * @param raw the raw majors string
+     * @return the formatted majors
+     */
     private String formatMajorsSimple(String raw) {
         if (raw == null) return "[]";
         String r = raw.trim();

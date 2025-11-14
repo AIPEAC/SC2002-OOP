@@ -235,6 +235,11 @@ public abstract class AbstractCLI {
         renderInternshipList(intCtrl.getApprovedVisibleInternshipOpportunitiesForDisplay(filter.getFilterType(), filter.isAscending(), filter.getFilterIn()));
     }
 
+    /**
+     * Renders the list of internships in a dialog.
+     *
+     * @param lines the list of internship lines to display
+     */
     private void renderInternshipList(List<String> lines) {
         if (lines == null || lines.isEmpty()) {
             JOptionPane.showMessageDialog(null, "No internships found.");
@@ -345,6 +350,13 @@ public abstract class AbstractCLI {
     }
 
     // Parsing helpers from toString() line format
+    /**
+     * Parses a field from the line string.
+     *
+     * @param line the line to parse
+     * @param key the key to find
+     * @return the parsed field value
+     */
     private String parseField(String line, String key) {
         String marker = key + "=";
         int idx = line.indexOf(marker);
@@ -356,6 +368,14 @@ public abstract class AbstractCLI {
         if (end < 0) end = line.length();
         return line.substring(start, end).trim();
     }
+    /**
+     * Parses a field by prefix from the line string.
+     *
+     * @param line the line to parse
+     * @param key the key to find
+     * @param includeEquals whether to include equals in the marker
+     * @return the parsed field value
+     */
     private String parseFieldByPrefix(String line, String key, boolean includeEquals) {
         String marker = key + (includeEquals ? "=" : "");
         int idx = line.indexOf(marker);
@@ -370,6 +390,12 @@ public abstract class AbstractCLI {
         return line.substring(start, end).trim();
     }
 
+    /**
+     * Formats the majors string.
+     *
+     * @param raw the raw majors string
+     * @return the formatted majors string
+     */
     private String formatMajors(String raw) {
         if (raw == null) return "[]";
         String r = raw.trim();

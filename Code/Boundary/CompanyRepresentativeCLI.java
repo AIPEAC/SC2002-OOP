@@ -34,6 +34,9 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
         setLoginControl(loginCtrl);
     }
 
+    /**
+     * Shows the company representative interface.
+     */
     public void show() {
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("Company Representative");
@@ -75,6 +78,9 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
 
 
 
+    /**
+     * Creates a new internship opportunity.
+     */
     private void createInternshipOpportunity() {
         JTextField title = new JTextField();
         JTextArea desc = new JTextArea(5,30);
@@ -114,6 +120,9 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
         }
     }
 
+    /**
+     * Checks the status of my internship opportunities.
+     */
     private void checkMyInternshipOppStatus() {
         try {
             List<String> lines = intCtrl.getMyInternshipsWithStatus();
@@ -205,6 +214,11 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
         }
     }
 
+    /**
+     * Shows applications for a specific internship.
+     *
+     * @param internshipID the internship ID
+     */
     private void showApplicationsForInternship(String internshipID) {
         try {
             List<String> lines = intCtrl.getApplicationsForInternship(internshipID);
@@ -320,6 +334,13 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
         }
     }
 
+    /**
+     * Parses a field value from a line.
+     *
+     * @param line the line to parse
+     * @param key the key to find
+     * @return the parsed value
+     */
     private String parseFieldValue(String line, String key) {
         String marker = key + "=";
         int idx = line.indexOf(marker);
@@ -331,6 +352,12 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
         return line.substring(start, end).trim();
     }
 
+    /**
+     * Formats majors in a simple way.
+     *
+     * @param raw the raw majors string
+     * @return the formatted majors
+     */
     private String formatMajorsSimple(String raw) {
         if (raw == null) return "[]";
         String r = raw.trim();

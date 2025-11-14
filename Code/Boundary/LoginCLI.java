@@ -65,6 +65,9 @@ public class LoginCLI {
         }
     }
 
+    /**
+     * Registers a new company representative.
+     */
     private void registerCompanyRep() {
         JTextField name = new JTextField();
         JTextField company = new JTextField();
