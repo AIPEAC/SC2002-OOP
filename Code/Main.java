@@ -15,6 +15,12 @@ import Control.*;
  */
 public class Main {
     /**
+     * Private constructor to prevent instantiation of this main class.
+     */
+    private Main() {
+    }
+    
+    /**
      * The main entry point for the application.
      * Initializes all controllers and starts the login interface.
      * 

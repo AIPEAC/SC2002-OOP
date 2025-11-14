@@ -17,6 +17,9 @@ import java.util.List;
  * @version 1.0
  */
 public class UIHelper {
+    /**
+     * Frame reference for the logged-in user notification.
+     */
     private static volatile JFrame loggedInFrame = null;
     
     /**

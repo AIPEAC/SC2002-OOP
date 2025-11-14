@@ -845,10 +845,13 @@ public class InternshipControl{
     /**
      * @deprecated Use approveApplicationForInternship which returns status message instead.
      *
-     * Check if the internship has reached its capacity. If so, reject all remaining pending applications.
-     * Returns a message if internship is full, null otherwise.
+    /**
+     * Check if the internship is full and reject pending applications if so.
+     * 
+     * @param opp the internship opportunity to check
+     * @return a message if internship is full, null otherwise
+     * @deprecated This method is no longer used
      */
-    
     @SuppressWarnings("unused")
     @Deprecated
     private String checkAndRejectIfFull(InternshipOpportunity opp) {
@@ -1838,6 +1841,9 @@ public class InternshipControl{
     /**
      * Check if the internship is currently open based on opening and closing dates.
      * Returns true if today's date is between opening date (inclusive) and closing date (inclusive).
+     * 
+     * @param internshipID the ID of the internship opportunity
+     * @return true if the internship is open, false otherwise
      */
     private boolean isInternshipOpen(String internshipID) {
         InternshipOpportunity opp = getInternshipByID(internshipID);

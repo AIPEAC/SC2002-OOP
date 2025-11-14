@@ -27,6 +27,12 @@ import java.util.List;
  */
 public class ControlUtils {
     /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
+    private ControlUtils() {
+    }
+    
+    /**
      * Parse common boolean-like strings into Boolean.
      * Returns Boolean.TRUE / Boolean.FALSE, or null if unable to parse.
      * 

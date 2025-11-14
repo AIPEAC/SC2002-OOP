@@ -771,6 +771,8 @@ public class ApplicationControl {
 	/**
 	 * Get the next available application number by reading all applications from the database
 	 * and finding the maximum application number, then returning max + 1.
+	 * 
+	 * @return the next available application number
 	 */
 	private int getNextApplicationNumber() {
 		int maxAppNumber = 0;
@@ -1003,6 +1005,9 @@ public class ApplicationControl {
 	
 	/**
 	 * Get the student's hasAcceptedInternshipOpportunity status from student.csv
+	 * 
+	 * @param studentID the ID of the student
+	 * @return true if the student has accepted an internship opportunity, false otherwise
 	 */
 	private boolean getStudentAcceptanceStatus(String studentID) {
 		final String CSV_FILE = "Code/Libs/Lib/student.csv";
@@ -1038,6 +1043,9 @@ public class ApplicationControl {
 	
 	/**
 	 * Update the student's hasAcceptedInternshipOpportunity field in student.csv
+	 * 
+	 * @param studentID the ID of the student
+	 * @param hasAccepted the acceptance status to update
 	 */
 	private void updateStudentAcceptanceStatus(String studentID, boolean hasAccepted) {
 		final String CSV_FILE = "Code/Libs/Lib/student.csv";

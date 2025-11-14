@@ -601,6 +601,10 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
     /**
      * Helper method to extract value from a prefixed string.
      * E.g., "Title: My Title" -> "My Title"
+     * 
+     * @param details the list of detail strings to search
+     * @param prefix the prefix to search for
+     * @return the value after the prefix, or empty string if not found
      */
     private String extractValue(List<String> details, String prefix) {
         for (String detail : details) {
@@ -654,6 +658,9 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
     
     /**
      * Helper to convert month name to number (e.g., "Jan" -> "01")
+     * 
+     * @param monthName the month name to convert
+     * @return the corresponding month number as a string (e.g., "01" for "Jan"), or "01" if not recognized
      */
     private String getMonthNumber(String monthName) {
         switch (monthName.toLowerCase()) {

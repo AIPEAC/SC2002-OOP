@@ -39,8 +39,19 @@ import java.util.Arrays;
  * @version 2.0
  */
 public class UserLoginDirectoryControl{
+    /**
+     * List of login credentials loaded from the database.
+     */
     private List<LoginCredential> loginList;
+    
+    /**
+     * Flag to track whether initialization has been completed.
+     */
     private boolean haveInitialized=false;
+    
+    /**
+     * Authentication control instance for user authentication coordination.
+     */
     private AuthenticationControl authCtrl;
     
     /**
