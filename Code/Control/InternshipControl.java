@@ -896,15 +896,16 @@ public class InternshipControl{
      * @throws IllegalArgumentException if internship does not exist or user is not authorized
      */
     public void rejectApplicationForInternship(String internshipID, int applicationNumber) {
-        if (!isCompanyRepLoggedIn()) {
+        if (!isCompanyRepLoggedIn()) { //debug only
             throw new IllegalStateException("User not logged in or not a company representative.");
         }
-        String companyRepID = authCtrl.getUserID();
+        
         InternshipOpportunity opp = getInternshipByID(internshipID);
-        if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) {
+        String companyRepID = authCtrl.getUserID(); //debug only
+        if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) { //debug only
             throw new IllegalArgumentException("No such internship under your account or not authorized.");
         }
-        if (appCtrl != null) {
+        if (appCtrl != null) {//debug only, should always be non-null
             appCtrl.rejectApplicationByNumber(applicationNumber);
             // Update internship opportunity directly
             opp.rejectApplicationNumber(applicationNumber);
