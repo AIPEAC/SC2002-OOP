@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"Boundary"},{"l":"Boundary.Helper"},{"l":"Control"},{"l":"Control.Tool"},{"l":"Entity"},{"l":"Entity.Users"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"Boundary"},{"l":"Control"},{"l":"Entity"}];updateSearchResults();
