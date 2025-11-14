@@ -55,6 +55,10 @@ public class ControlInitializer {
         // Initialize remaining controllers
         reportCtrl = new ReportControl(authCtrl, intCtrl);
         userCtrl = new UserControl(userLoginDirCtrl, authCtrl);
+        
+        // Set user login directory control in internship control
+        
+        intCtrl.setUserLoginDirectoryControl(userLoginDirCtrl);
     }
     
     /**

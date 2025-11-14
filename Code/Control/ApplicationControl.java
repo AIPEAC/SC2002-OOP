@@ -587,17 +587,11 @@ public class ApplicationControl {
 		Application app = getApplicationByNumber(appNum);
 		if (app == null) throw new IllegalArgumentException("Application not found: " + appNum);
 		app.setApplicationStatusSuccess();
-		// Ensure the application is in the applications list for saving
+		// Ensure the application is in the applications list for saving, for debug only
 		if (!applications.contains(app)) {
 			applications.add(app);
 		}
 		saveApplicationsToDB();
-		// Also ensure internship data is updated via InternshipControl if available
-		if (intCtrl != null) {
-			intCtrl.approveApplicationNumberForInternship(appNum, app.getInternshipID());
-		} else {
-			throw new IllegalStateException("InternshipControl not set; cannot approve application.");
-		}
 	}
 	
 	/**
@@ -605,7 +599,6 @@ public class ApplicationControl {
 	 * 
 	 * @param appNum the application number to reject
 	 * @throws IllegalArgumentException if application is not found
-	 * @throws IllegalStateException if InternshipControl is not set
 	 */
 	void rejectApplicationByNumber(int appNum) {
 		Application app = getApplicationByNumber(appNum);
@@ -616,11 +609,6 @@ public class ApplicationControl {
 			applications.add(app);
 		}
 		saveApplicationsToDB();
-		if (intCtrl != null) {
-			intCtrl.rejectApplicationNumberForInternship(appNum, app.getInternshipID());
-		} else {
-			throw new IllegalStateException("InternshipControl not set; cannot reject application.");
-		}
 	}
 
 	// =========================================================

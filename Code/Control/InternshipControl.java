@@ -40,7 +40,7 @@ import java.io.FileWriter;
  * </p>
  * 
  * @author Allen
- * @version 2.1
+ * @version 2.2
  */
 public class InternshipControl{
     /** List of all internship opportunities in the system */
@@ -54,6 +54,9 @@ public class InternshipControl{
     
     /** Application controller for coordinating application data */
     private ApplicationControl appCtrl=null;
+    
+    /** User login directory for retrieving student entities */
+    private UserLoginDirectoryControl userLoginDir=null;
     
     /** Currently logged-in student (if applicable) */
     private Student student=null;
@@ -78,6 +81,15 @@ public class InternshipControl{
      */
     public void setApplicationControl(ApplicationControl appCtrl) {
         this.appCtrl = appCtrl;
+    }
+    
+    /**
+     * Sets the user login directory control for retrieving student entities.
+     * 
+     * @param userLoginDir the user login directory control
+     */
+    public void setUserLoginDirectoryControl(UserLoginDirectoryControl userLoginDir) {
+        this.userLoginDir = userLoginDir;
     }
     
     /**
@@ -669,7 +681,7 @@ public class InternshipControl{
         }
         String companyRepID = authCtrl.getUserID();
         List<InternshipOpportunity> myOpps = getInternshipsByCompanyRepID(companyRepID);
-        List<String> out = new ArrayList<>();
+        List<String> outputStatus = new ArrayList<>();
         String DELIM = " | ";
         for (InternshipOpportunity opp : myOpps) {
             StringBuilder sb = new StringBuilder();
@@ -679,9 +691,9 @@ public class InternshipControl{
             sb.append(DELIM).append("companyName=").append(opp.getCompanyName() != null ? opp.getCompanyName() : "");
             sb.append(DELIM).append("preferredMajors=").append(formatPreferredMajorsForDisplay(opp.getPreferredMajors()));
             sb.append(DELIM).append("status=").append(opp.getStatus() != null ? opp.getStatus() : "");
-            out.add(sb.toString());
+            outputStatus.add(sb.toString());
         }
-        return out;
+        return outputStatus;
     }
 
     /**
@@ -750,15 +762,16 @@ public class InternshipControl{
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
         }
-        if (!isCompanyRepLoggedIn()) {
+        if (!isCompanyRepLoggedIn()) { //debug only
             throw new IllegalStateException("User not logged in or not a company representative.");
         }
         Application app = appCtrl.getApplicationByNumber(applicationNumber);
-        if (app == null) {
+        if (app == null) { //debug only
             throw new IllegalArgumentException("Application not found.");
         }
         
         // Verify this application is for one of the company rep's internships
+        // this is for debug use also. Will not happen in normal flow.
         String companyRepID = authCtrl.getUserID();
         InternshipOpportunity opp = getInternshipByID(app.getInternshipID());
         if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) {
@@ -766,38 +779,20 @@ public class InternshipControl{
         }
         
         String studentID = app.getStudentID();
-        String DELIM = " | ";
-        StringBuilder sb = new StringBuilder();
-        
-        // Read student details from CSV
-        try (BufferedReader br = new BufferedReader(new FileReader("Code/Libs/Lib/student.csv"))) {
-            String line = br.readLine(); // skip header
-            while ((line = br.readLine()) != null) {
-                String[] vals = ControlUtils.splitCsvLine(line);
-                // Unescape fields
-                for (int i = 0; i < vals.length; i++) {
-                    vals[i] = ControlUtils.unescapeCsvField(vals[i]);
-                }
-                if (vals.length > 0 && vals[0].equals(studentID)) {
-                    String name = vals.length > 1 ? vals[1] : "";
-                    String email = vals.length > 2 ? vals[2] : "";
-                    String majorsRaw = vals.length > 3 ? vals[3] : "";
-                    String year = vals.length > 4 ? vals[4] : "";
-                    
-                    sb.append("studentID=").append(studentID);
-                    sb.append(DELIM).append("studentName=").append(name);
-                    sb.append(DELIM).append("studentEmail=").append(email);
-                    sb.append(DELIM).append("studentMajors=").append(majorsRaw);
-                    sb.append(DELIM).append("studentYear=").append(year);
-                    sb.append(DELIM).append("status=").append(app.getApplicationStatus() != null ? app.getApplicationStatus() : "pending");
-                    return sb.toString();
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Error reading student information: " + e.getMessage());
+        String[] studentData = userLoginDir.getStudentData(studentID);
+        if (studentData == null || studentData.length < 5) { //debug only
+            throw new IllegalArgumentException("Student information not found.");
         }
         
-        throw new IllegalArgumentException("Student information not found.");
+        String DELIM = " | ";
+        StringBuilder sb = new StringBuilder();
+        sb.append("studentID=").append(studentData[0]);
+        sb.append(DELIM).append("studentName=").append(studentData[1]);
+        sb.append(DELIM).append("studentEmail=").append(studentData[2]);
+        sb.append(DELIM).append("studentMajors=").append(studentData[3]);
+        sb.append(DELIM).append("studentYear=").append(studentData[4]);
+        sb.append(DELIM).append("status=").append(app.getApplicationStatus() != null ? app.getApplicationStatus() : "pending");
+        return sb.toString();
     }
 
     /**
@@ -818,27 +813,31 @@ public class InternshipControl{
      * @throws IllegalArgumentException if internship does not exist or user is not authorized
      */
     public String approveApplicationForInternship(String internshipID, int applicationNumber) {
-        if (authCtrl == null || !authCtrl.isLoggedIn()) {
+        if (authCtrl == null || !authCtrl.isLoggedIn()) { //debug only
             throw new IllegalStateException("User not logged in.");
         }
-        if (!isCompanyRepLoggedIn()) {
+        if (!isCompanyRepLoggedIn()) { //debug only
             throw new IllegalStateException("User not logged in or not a company representative.");
         }
-        String companyRepID = authCtrl.getUserID();
         InternshipOpportunity opp = getInternshipByID(internshipID);
-        if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) {
+        String companyRepID = authCtrl.getUserID(); //debug only
+        if (opp == null || !opp.getCompanyRepInChargeID().equals(companyRepID)) { //debug only
             throw new IllegalArgumentException("No such internship under your account or not authorized.");
         }
         // Check if internship is already full (based on students who have accepted offers)
-        if (opp.isFull()) {
+        boolean isFull = opp.isFull();
+        if (isFull) {
             throw new IllegalStateException("Cannot approve application - this internship is already full (" + 
                 opp.getAcceptedApplicationNumbers().size() + "/" + opp.getNumOfSlots() + " slots filled).");
         }
-        if (appCtrl != null) {
+        if (appCtrl != null) { //debug only, should always be non-null
             appCtrl.approveApplicationByNumber(applicationNumber);
+            // Update internship opportunity directly
+            opp.approveApplicationNumber(applicationNumber);
+            updateInternshipInDB();
             // Note: Internship won't be considered full until students actually accept their offers
             return "Approved application: " + applicationNumber;
-        } else {
+        } else { //debug only
             throw new IllegalStateException("ApplicationControl not set; cannot approve application.");
         }
     }
@@ -907,6 +906,9 @@ public class InternshipControl{
         }
         if (appCtrl != null) {
             appCtrl.rejectApplicationByNumber(applicationNumber);
+            // Update internship opportunity directly
+            opp.rejectApplicationNumber(applicationNumber);
+            updateInternshipInDB();
         } else {
             throw new IllegalStateException("ApplicationControl not set; cannot reject application.");
         }
@@ -953,23 +955,7 @@ public class InternshipControl{
         return out;
     }
     
-    /**
-     * Approves an application number for an internship.
-     * @param applicationNumber the application number
-     * @param internshipID the internship ID
-     */
-    void approveApplicationNumberForInternship(int applicationNumber, String internshipID) {
-        if (authCtrl == null || !authCtrl.isLoggedIn()) {
-            throw new IllegalStateException("User not logged in.");
-        }
-        InternshipOpportunity opp = getInternshipByID(internshipID);
-        if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
-        // Note: Don't check isFull() here because this is called after approval decision is made
-        // The full check happens in approveApplicationForInternship before calling this
-        // Remove application number from pending list (but don't add to accepted list yet)
-        opp.approveApplicationNumber(applicationNumber);
-        updateInternshipInDB();
-    }
+    
     
     /**
      * Handles when a student accepts an offer for an internship.
@@ -998,26 +984,18 @@ public class InternshipControl{
         }
     }
 
-    /**
-     * Rejects an application number for an internship.
-     * @param applicationNumber the application number
-     * @param internshipID the internship ID
-     */
-    void rejectApplicationNumberForInternship(int applicationNumber, String internshipID) {
-        InternshipOpportunity opp = getInternshipByID(internshipID);
-        if (opp == null) throw new IllegalArgumentException("Internship not found: " + internshipID);
-        opp.rejectApplicationNumber(applicationNumber);
-        updateInternshipInDB();
-    }
+    
 
     /** Convenience wrappers so a CompanyRepresentative CLI (which may not hold an ApplicationControl reference)
      * can request approve/reject actions that also update the ApplicationControl.
      */
     
     /**
+     * @deprecated Use approveApplicationForInternship which returns status message instead.
      * Approves an application as company rep.
      * @param applicationNumber the application number
      */
+    @Deprecated
     public void approveApplicationAsCompanyRep(int applicationNumber) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -1030,9 +1008,11 @@ public class InternshipControl{
     }
     
     /**
+     * @deprecated Use approveApplicationAsCompanyRep which returns status message instead.
      * Rejects an application as company rep.
      * @param applicationNumber the application number
      */
+    @Deprecated
     public void rejectApplicationAsCompanyRep(int applicationNumber) {
         if (authCtrl == null || !authCtrl.isLoggedIn()) {
             throw new IllegalStateException("User not logged in.");
@@ -1600,7 +1580,8 @@ public class InternshipControl{
     private List<InternshipOpportunity> getInternshipsByCompanyRepID(String companyRepID) {
         List<InternshipOpportunity> repsOpps = new ArrayList<>();
         for (InternshipOpportunity opp : internshipOpportunities) {
-            if (opp.getCompanyRepInChargeID().equals(companyRepID)) {
+            String companyRepInCharge = opp.getCompanyRepInChargeID();
+            if (companyRepInCharge.equals(companyRepID)) {
                 repsOpps.add(opp);
             }
         }

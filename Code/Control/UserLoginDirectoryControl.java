@@ -140,6 +140,22 @@ public class UserLoginDirectoryControl{
     }
     
     /**
+     * Retrieves student data for the given user ID.
+     * Returns raw CSV data array without creating an entity.
+     * 
+     * @param userID the student user ID
+     * @return array of student data [id, name, email, majors, year, ...] or null if not found
+     */
+    String[] getStudentData(String userID) {
+        try {
+            return loadStudent(userID);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    /**
      * Loads staff data for the given user ID.
      * @param userID the user ID
      * @return the staff data array
