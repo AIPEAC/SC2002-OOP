@@ -248,7 +248,7 @@ public class UserLoginDirectoryControl{
                 String identity = credential.getIdentity();
                 if (identity.equals("CompanyRepresentative")) {
                     String[] companyRepData = loadCompanyRep(userID);
-                    if (companyRepData != null) {
+                    if (companyRepData != null) { // this should always be true. just for debugging use
                         String status = companyRepData[4];
                         switch (status) {
                             case "approved":
@@ -258,9 +258,12 @@ public class UserLoginDirectoryControl{
                             case "rejected":
                                 return "rejected";
                             default:
+                                System.out.println("bug: Unknown company representative status '" + status + "' for userID " + userID);
                                 return null; // Or some other error status
+                                // this is just for debugging and will never happen
                         }
                     }
+                    System.out.println("bug: Company representative status not found for userID " + userID);
                 }
                 return identity;
             }
