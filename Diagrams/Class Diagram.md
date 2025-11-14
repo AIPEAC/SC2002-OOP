@@ -4,11 +4,11 @@
 
 ----
 |Class diagram|
----
+|---|
 |[Clean Class diagram](class_diagrams/clean.png)|
 |[Full Class diagram](class_diagrams/full.png)|
 
-|Class diagram To view|
----
+|Preview|
+|---|
 ![Clean Class diagram](class_diagrams/clean.png)
 ![Full Class diagram](class_diagrams/full.png)
