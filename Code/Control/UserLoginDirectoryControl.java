@@ -307,12 +307,11 @@ public class UserLoginDirectoryControl{
     }
     
     /**
-     * Creates a user object based on identity.
+     * Creates a user object based on identity and sets the logged-in user.
      * @param userID the user ID
      * @param identity the identity
-     * @return the user object
      */
-    User createUser(String userID, String identity){
+    void createUser(String userID, String identity){
         switch(identity){
             case "Student":
                 String[] studentData = loadStudent(userID);
@@ -334,7 +333,8 @@ public class UserLoginDirectoryControl{
                     majors,
                     Integer.parseInt(studentData[4]),
                     Boolean.parseBoolean(studentData[5]));
-                return student;
+                authCtrl.setLoggedin(student);
+                break;
             case "Staff":
                 String[] staffData = loadStaff(userID);
                 CareerStaff staff = new CareerStaff(staffData[0],
@@ -342,7 +342,8 @@ public class UserLoginDirectoryControl{
                     staffData[2],
                     staffData[3],
                     staffData[4]);
-                return staff;
+                authCtrl.setLoggedin(staff);
+                break;
             case "CompanyRepresentative":
                 String[] companyRepData = loadCompanyRep(userID);
                 CompanyRepresentative companyRep = new CompanyRepresentative(companyRepData[0],
@@ -352,7 +353,10 @@ public class UserLoginDirectoryControl{
                     companyRepData[4],
                     companyRepData[5],
                     companyRepData[6]);
-                return companyRep;
+                authCtrl.setLoggedin(companyRep);
+                String companyName = companyRepData[5];
+                authCtrl.setCompanyName(companyName);
+                break;
             default:
                 throw new IllegalArgumentException("bug: UserLoginDirectory.createUser(): wrong identity, possibly wrongly written into login_list.csv");
         }

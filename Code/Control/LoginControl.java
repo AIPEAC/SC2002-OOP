@@ -1,8 +1,6 @@
 package Control;
 //when registered, the password is set to "password". Remind them to change.
 
-import Entity.Users.User;
-
 /**
  * Controls login, registration, and password management functionality.
  * Handles user authentication by coordinating with AuthenticationControl and UserLoginDirectoryControl.
@@ -45,12 +43,7 @@ public class LoginControl {
         if (identity.equals("pending")) throw new IllegalStateException("Your account is pending approval. Please contact the administrator.");
         if (identity.equals("rejected")) throw new IllegalStateException("Your account has been rejected. Please contact the administrator.");
 
-        User user = userLoginDirCtrl.createUser(userID, identity);
-        authCtrl.setLoggedin(user);
-        if ("CompanyRepresentative".equals(identity) || "companyRepresentative".equals(identity)) {
-            String companyName = userLoginDirCtrl.getCompanyRepsCompany(userID);
-            authCtrl.setCompanyName(companyName);
-        }
+        userLoginDirCtrl.createUser(userID, identity);
     }
     
     /**

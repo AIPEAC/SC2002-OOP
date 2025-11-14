@@ -55,7 +55,8 @@ public class LoginCLI {
             try {
                 loginCtrl.handleLogin(userID, password);
                 JOptionPane.showMessageDialog(null, "Login successful.");
-                if (authCtrl.isLoggedIn()) {
+                boolean loggedIn=authCtrl.isLoggedIn();
+                if (loggedIn) {
                     UIHelper.showLoggedInPopup(authCtrl.getUserID(), authCtrl.getUserIdentity());
                 }
             } catch (Exception e) {
