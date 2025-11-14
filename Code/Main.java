@@ -46,6 +46,7 @@ public class Main {
             // Use a latch to wait for UI to finish
             CountDownLatch uiFinished = new CountDownLatch(1);
             boolean[] shouldRestart = {false}; // Flag to determine if we should restart
+            AbstractCLI[] cliToWaitFor = {null}; // Store reference to CLI to wait for
 
             // Launch UI login and then dispatch to role-specific UIs
             SwingUtilities.invokeLater(() -> {
@@ -68,33 +69,21 @@ public class Main {
                         case "Career Staff":
                             CareerStaffCLI staffUI = new CareerStaffCLI(appCtrl, intCtrl, reportCtrl, userCtrl, loginCtrl);
                             staffUI.show();
-                            try {
-                                staffUI.waitForWindowClose();
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-                            shouldRestart[0] = true; // Restart when window is closed
+                            cliToWaitFor[0] = staffUI; // Store reference to wait for later
+                            shouldRestart[0] = true; // Mark for restart when CLI closes
                             break;
                         case "Student":
                             StudentCLI studentUI = new StudentCLI(appCtrl, intCtrl, loginCtrl);
                             studentUI.show();
-                            try {
-                                studentUI.waitForWindowClose();
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-                            shouldRestart[0] = true; // Restart when window is closed
+                            cliToWaitFor[0] = studentUI; // Store reference to wait for later
+                            shouldRestart[0] = true; // Mark for restart when CLI closes
                             break;
                         case "CompanyRepresentative":
                         case "Company Representative":
                             CompanyRepresentativeCLI compUI = new CompanyRepresentativeCLI(intCtrl, loginCtrl);
                             compUI.show();
-                            try {
-                                compUI.waitForWindowClose();
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            }
-                            shouldRestart[0] = true; // Restart when window is closed
+                            cliToWaitFor[0] = compUI; // Store reference to wait for later
+                            shouldRestart[0] = true; // Mark for restart when CLI closes
                             break;
                         default:
                             System.out.println("Unknown identity: " + identity + ". Exiting.");
@@ -105,16 +94,25 @@ public class Main {
                     System.out.println("Login failed. Restarting with fresh login screen...");
                     shouldRestart[0] = true;
                 } finally {
-                    // Signal that UI has finished
+                    // Signal that UI has been dispatched
                     uiFinished.countDown();
                 }
             });
             
-            // Wait for the UI to complete before deciding to restart
+            // Wait for the UI to be dispatched
             try {
                 uiFinished.await();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+            }
+            
+            // Now wait for the CLI window to close (if one was shown)
+            if (cliToWaitFor[0] != null) {
+                try {
+                    cliToWaitFor[0].waitForWindowClose();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
             
             // If shouldRestart is false, exit the loop and terminate
