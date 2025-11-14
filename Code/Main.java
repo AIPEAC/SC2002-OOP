@@ -23,54 +23,61 @@ public class Main {
     /**
      * The main entry point for the application.
      * Initializes all controllers and starts the login interface.
+     * Runs in an infinite loop - when the window closes, all objects are destroyed
+     * and the application restarts from the beginning.
      * 
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
-        // Initialize all controllers through centralized initialization
-        // This prevents the frontend from directly instantiating or manipulating control components
-        ControlInitializer initCtrl = new ControlInitializer();
-        
-        // Get controller instances from the initializer
-        AuthenticationControl authCtrl = initCtrl.getAuthenticationControl();
-        LoginControl loginCtrl = initCtrl.getLoginControl();
-        InternshipControl intCtrl = initCtrl.getInternshipControl();
-        ApplicationControl appCtrl = initCtrl.getApplicationControl();
-        ReportControl reportCtrl = initCtrl.getReportControl();
-        UserControl userCtrl = initCtrl.getUserControl();
+        while (true) {
+            // Initialize all controllers through centralized initialization
+            // This prevents the frontend from directly instantiating or manipulating control components
+            ControlInitializer initCtrl = new ControlInitializer();
+            
+            // Get controller instances from the initializer
+            AuthenticationControl authCtrl = initCtrl.getAuthenticationControl();
+            LoginControl loginCtrl = initCtrl.getLoginControl();
+            InternshipControl intCtrl = initCtrl.getInternshipControl();
+            ApplicationControl appCtrl = initCtrl.getApplicationControl();
+            ReportControl reportCtrl = initCtrl.getReportControl();
+            UserControl userCtrl = initCtrl.getUserControl();
 
-        // Launch UI login and then dispatch to role-specific UIs
-        SwingUtilities.invokeLater(() -> {
-            LoginCLI loginUI = new LoginCLI(loginCtrl, authCtrl);
-            loginUI.run();
+            // Launch UI login and then dispatch to role-specific UIs
+            SwingUtilities.invokeLater(() -> {
+                LoginCLI loginUI = new LoginCLI(loginCtrl, authCtrl);
+                loginUI.run();
 
-            // Wait briefly to allow user to interact with login dialog and control to set auth state
-            try { Thread.sleep(300); } catch (InterruptedException e) { }
+                // Wait briefly to allow user to interact with login dialog and control to set auth state
+                try { Thread.sleep(300); } catch (InterruptedException e) { }
 
-            if (!authCtrl.isLoggedIn()) {
-                System.out.println("Exiting application (login failed or cancelled).");
-                return;
-            }
+                if (!authCtrl.isLoggedIn()) {
+                    System.out.println("Exiting application (login failed or cancelled).");
+                    return;
+                }
 
-            String identity = authCtrl.getUserIdentity();
-            switch (identity) {
-                case "CareerStaff":
-                case "Career Staff":
-                    CareerStaffCLI staffUI = new CareerStaffCLI(appCtrl, intCtrl, reportCtrl, userCtrl, loginCtrl);
-                    staffUI.show();
-                    break;
-                case "Student":
-                    StudentCLI studentUI = new StudentCLI(appCtrl, intCtrl, loginCtrl);
-                    studentUI.show();
-                    break;
-                case "CompanyRepresentative":
-                case "Company Representative":
-                    CompanyRepresentativeCLI compUI = new CompanyRepresentativeCLI(intCtrl, loginCtrl);
-                    compUI.show();
-                    break;
-                default:
-                    System.out.println("Unknown identity: " + identity + ". Exiting.");
-            }
-        });
+                String identity = authCtrl.getUserIdentity();
+                switch (identity) {
+                    case "CareerStaff":
+                    case "Career Staff":
+                        CareerStaffCLI staffUI = new CareerStaffCLI(appCtrl, intCtrl, reportCtrl, userCtrl, loginCtrl);
+                        staffUI.show();
+                        break;
+                    case "Student":
+                        StudentCLI studentUI = new StudentCLI(appCtrl, intCtrl, loginCtrl);
+                        studentUI.show();
+                        break;
+                    case "CompanyRepresentative":
+                    case "Company Representative":
+                        CompanyRepresentativeCLI compUI = new CompanyRepresentativeCLI(intCtrl, loginCtrl);
+                        compUI.show();
+                        break;
+                    default:
+                        System.out.println("Unknown identity: " + identity + ". Exiting.");
+                }
+            });
+            
+            // Wait for the UI to complete before restarting
+            try { Thread.sleep(1000); } catch (InterruptedException e) { }
+        }
     }
 }
