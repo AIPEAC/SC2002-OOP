@@ -45,6 +45,7 @@ public class Main {
 
             // Use a latch to wait for UI to finish
             CountDownLatch uiFinished = new CountDownLatch(1);
+            boolean[] shouldRestart = {false}; // Flag to determine if we should restart
 
             // Launch UI login and then dispatch to role-specific UIs
             SwingUtilities.invokeLater(() -> {
@@ -57,6 +58,7 @@ public class Main {
 
                     if (!authCtrl.isLoggedIn()) {
                         System.out.println("Exiting application (login failed or cancelled).");
+                        shouldRestart[0] = false;
                         return;
                     }
 
@@ -66,18 +68,22 @@ public class Main {
                         case "Career Staff":
                             CareerStaffCLI staffUI = new CareerStaffCLI(appCtrl, intCtrl, reportCtrl, userCtrl, loginCtrl);
                             staffUI.show();
+                            shouldRestart[0] = true; // Restart when window is closed
                             break;
                         case "Student":
                             StudentCLI studentUI = new StudentCLI(appCtrl, intCtrl, loginCtrl);
                             studentUI.show();
+                            shouldRestart[0] = true; // Restart when window is closed
                             break;
                         case "CompanyRepresentative":
                         case "Company Representative":
                             CompanyRepresentativeCLI compUI = new CompanyRepresentativeCLI(intCtrl, loginCtrl);
                             compUI.show();
+                            shouldRestart[0] = true; // Restart when window is closed
                             break;
                         default:
                             System.out.println("Unknown identity: " + identity + ". Exiting.");
+                            shouldRestart[0] = false;
                     }
                 } finally {
                     // Signal that UI has finished
@@ -85,11 +91,16 @@ public class Main {
                 }
             });
             
-            // Wait for the UI to complete before restarting
+            // Wait for the UI to complete before deciding to restart
             try {
                 uiFinished.await();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+            }
+            
+            // If shouldRestart is false, exit the loop and terminate
+            if (!shouldRestart[0]) {
+                break;
             }
         }
     }
