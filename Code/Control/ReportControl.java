@@ -30,9 +30,6 @@ public class ReportControl {
     
     /** Internship controller for accessing internship data */
     private InternshipControl intCtrl;
-    
-    /** Cached list of all internship opportunities */
-    private List<InternshipOpportunity> allOpplist;
 
     /**
      * Constructs a ReportControl with required dependencies.
@@ -43,8 +40,6 @@ public class ReportControl {
     ReportControl(AuthenticationControl authCtrl, InternshipControl intCtrl){
         this.authCtrl=authCtrl;
         this.intCtrl=intCtrl;
-        // Initialize after intCtrl is assigned to avoid NPE
-        this.allOpplist = (this.intCtrl == null) ? new ArrayList<>() : this.intCtrl.getAllInternshipOpportunities();
     }
     
     /**
@@ -57,6 +52,7 @@ public class ReportControl {
         if (!authCtrl.getUserIdentity().equals("CareerStaff")) throw new IllegalStateException("You do not have the permission to generate reports.");
         int reportIndex = optToSaveReport ? getNumberOfReports()+1 : 0;
         boolean filtered=false;
+        List<InternshipOpportunity> allOpplist = intCtrl.getAllInternshipOpportunities();
         Report report=new Report(reportIndex,allOpplist,filtered);
         List<String> lines = report.formatOutput();
         if (optToSaveReport) {
@@ -80,6 +76,7 @@ public class ReportControl {
         if (!authCtrl.isLoggedIn()) throw new IllegalStateException("You are not logged in.");
         if (!authCtrl.getUserIdentity().equals("CareerStaff")) throw new IllegalStateException("You do not have the permission to generate reports.");
         int reportIndex = optToSaveReport ? getNumberOfReports()+1 : 0;
+        List<InternshipOpportunity> allOpplist = intCtrl.getAllInternshipOpportunities();
         List<InternshipOpportunity> filteredList=comprehensive(allOpplist,filterIn);
         boolean filtered=true;
         Report report=new Report(reportIndex,filteredList,filtered,filterIn);
@@ -239,6 +236,7 @@ public class ReportControl {
      * @return a list of company names
      */
     public List<String> getAllCompanyNames() {
+        List<InternshipOpportunity> allOpplist = intCtrl.getAllInternshipOpportunities();
         Set<String> companies = new HashSet<>();
         for (InternshipOpportunity opp : allOpplist) {
             List<Object> details = opp.getDetailsForReport();
@@ -260,6 +258,7 @@ public class ReportControl {
      * @return a list of available majors
      */
     public List<String> getAllMajors() {
+        List<InternshipOpportunity> allOpplist = intCtrl.getAllInternshipOpportunities();
         Set<String> majors = new HashSet<>();
         for (InternshipOpportunity opp : allOpplist) {
             List<Object> details = opp.getDetailsForReport();

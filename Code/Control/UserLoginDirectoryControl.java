@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Control.Tool.ControlUtils;
+import Entity.LoginCredential;
 import Entity.Users.*;
 
 import java.util.Arrays;
@@ -38,10 +39,7 @@ import java.util.Arrays;
  * @version 2.0
  */
 public class UserLoginDirectoryControl{
-    private List<String[]> loginList;
-    private String[] StudentInfoList;
-    private String[] StaffInfoList;
-    private String[] CompanyRepInfoList;
+    private List<LoginCredential> loginList;
     private boolean haveInitialized=false;
     private AuthenticationControl authCtrl;
     
@@ -84,7 +82,15 @@ public class UserLoginDirectoryControl{
                     for (int i = 0; i < loginData.length; i++) {
                         loginData[i] = ControlUtils.unescapeCsvField(loginData[i]);
                     }
-                    loginList.add(loginData);
+                    // Normalize to 5 columns
+                    String[] normalized = new String[5];
+                    for (int i = 0; i < 5; i++) {
+                        normalized[i] = (i < loginData.length && loginData[i] != null) ? loginData[i] : "";
+                    }
+                    LoginCredential credential = new LoginCredential(
+                        normalized[0], normalized[1], normalized[2], normalized[3], normalized[4]
+                    );
+                    loginList.add(credential);
                 }
             }
         } catch (IOException e) {
@@ -95,11 +101,13 @@ public class UserLoginDirectoryControl{
     /**
      * Loads student data for the given user ID.
      * @param userID the user ID
+     * @return the student data array
      */
-    private void loadStudent(String userID){
+    private String[] loadStudent(String userID){
         String csvFile = "Code/Libs/Lib/student.csv";
         File file = new File(csvFile);
         String line = "";
+        String[] studentData = null;
 
         try {
             if (!file.exists()) {
@@ -115,11 +123,11 @@ public class UserLoginDirectoryControl{
                         StudentData[i] = ControlUtils.unescapeCsvField(StudentData[i]);
                     }
                     if (StudentData[0].equals(userID)) {
-                        StudentInfoList = StudentData;
+                        studentData = StudentData;
                         break;
                     }
                 }
-                if (StudentInfoList == null) {
+                if (studentData == null) {
                     throw new Exception("bug: UserLoginDirectoryControl.loadStudent(): Student not found. code for login is wrong.");
                 }
             }
@@ -128,16 +136,19 @@ public class UserLoginDirectoryControl{
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+        return studentData;
     }
     
     /**
      * Loads staff data for the given user ID.
      * @param userID the user ID
+     * @return the staff data array
      */
-    private void loadStaff(String userID){
+    private String[] loadStaff(String userID){
         String csvFile = "Code/Libs/Lib/staff.csv";
         File file = new File(csvFile);
         String line = "";
+        String[] staffData = null;
 
         try {
             if (!file.exists()) {
@@ -153,11 +164,11 @@ public class UserLoginDirectoryControl{
                         StaffData[i] = ControlUtils.unescapeCsvField(StaffData[i]);
                     }
                     if (StaffData[0].equals(userID)) {
-                        StaffInfoList = StaffData;
+                        staffData = StaffData;
                         break;
                     }
                 }
-                if (StaffInfoList == null) {
+                if (staffData == null) {
                     throw new Exception("bug: UserLoginDirectoryControl.loadStaff(): Staff not found. code for login is wrong.");
                 }
             }
@@ -166,16 +177,19 @@ public class UserLoginDirectoryControl{
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+        return staffData;
     }
     
     /**
      * Loads company rep data for the given user ID.
      * @param userID the user ID
+     * @return the company rep data array
      */
-    private void loadCompanyRep(String userID){
+    private String[] loadCompanyRep(String userID){
         String csvFile = "Code/Libs/Lib/company_representative.csv";
         File file = new File(csvFile);
         String line = "";
+        String[] companyRepData = null;
 
         try {
             if (!file.exists()) {
@@ -198,11 +212,11 @@ public class UserLoginDirectoryControl{
                         CompanyRepData = expanded;
                     }
                     if (CompanyRepData[0].equals(userID)) {
-                        CompanyRepInfoList = CompanyRepData;
+                        companyRepData = CompanyRepData;
                         break;
                     }
                 }
-                if (CompanyRepInfoList == null) {
+                if (companyRepData == null) {
                     throw new Exception("bug: UserLoginDirectoryControl.loadCompanyRep(): Company Representative not found. code for login is wrong.");
                 }
             }
@@ -211,6 +225,7 @@ public class UserLoginDirectoryControl{
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+        return companyRepData;
     }  
     
     /**
@@ -220,20 +235,21 @@ public class UserLoginDirectoryControl{
      * @return the identity or null
      */
     String verifyUser(String userID, String password){
-        for (String[] loginData : loginList) {
-            String identity = loginData[0];
-            if (loginData[1].equals(userID)) {
-                String salt = "";
-                if (loginData.length > 3 && loginData[3] != null) salt = loginData[3];
-                if (!loginData[2].equals(hashPassword(password, salt))) {
+        for (LoginCredential credential : loginList) {
+            String id = credential.getUserID();
+            if (id.equals(userID)) {
+                String salt = credential.getSalt() != null ? credential.getSalt() : "";
+                String passwordHash = credential.getPasswordHash();
+                String hashed= hashPassword(password, salt);
+                if (!passwordHash.equals(hashed)) {
                     // password mismatch
-                    continue;
+                    break;
                 }
+                String identity = credential.getIdentity();
                 if (identity.equals("CompanyRepresentative")) {
-                    loadCompanyRep(userID);
-                    if (CompanyRepInfoList != null) {
-                        String status = CompanyRepInfoList[4];
-                        CompanyRepInfoList = null;
+                    String[] companyRepData = loadCompanyRep(userID);
+                    if (companyRepData != null) {
+                        String status = companyRepData[4];
                         switch (status) {
                             case "approved":
                                 return identity;
@@ -296,46 +312,43 @@ public class UserLoginDirectoryControl{
     User createUser(String userID, String identity){
         switch(identity){
             case "Student":
-                loadStudent(userID);
+                String[] studentData = loadStudent(userID);
                 List<String> majors = null;
-                if (StudentInfoList[3] != null && !StudentInfoList[3].isEmpty()) {
+                if (studentData[3] != null && !studentData[3].isEmpty()) {
                     // Majors are separated by semicolons only (not spaces, as major names can contain spaces)
-                    if (StudentInfoList[3].contains(";")) {
-                        majors = Arrays.asList(StudentInfoList[3].split(";"));
+                    if (studentData[3].contains(";")) {
+                        majors = Arrays.asList(studentData[3].split(";"));
                         // Trim each major
                         majors = majors.stream().map(String::trim).filter(s -> !s.isEmpty()).collect(java.util.stream.Collectors.toList());
                     } else {
                         // Single major (no semicolon separator)
-                        majors = Arrays.asList(StudentInfoList[3].trim());
+                        majors = Arrays.asList(studentData[3].trim());
                     }
                 }
-                Student student=new Student(StudentInfoList[0],
-                    StudentInfoList[1],
-                    StudentInfoList[2],
+                Student student=new Student(studentData[0],
+                    studentData[1],
+                    studentData[2],
                     majors,
-                    Integer.parseInt(StudentInfoList[4]),
-                    Boolean.parseBoolean(StudentInfoList[5]));
-                StudentInfoList=null;
+                    Integer.parseInt(studentData[4]),
+                    Boolean.parseBoolean(studentData[5]));
                 return student;
             case "Staff":
-                loadStaff(userID);
-                CareerStaff staff = new CareerStaff(StaffInfoList[0],
-                    StaffInfoList[1],
-                    StaffInfoList[2],
-                    StaffInfoList[3],
-                    StaffInfoList[4]);
-                StaffInfoList=null;
+                String[] staffData = loadStaff(userID);
+                CareerStaff staff = new CareerStaff(staffData[0],
+                    staffData[1],
+                    staffData[2],
+                    staffData[3],
+                    staffData[4]);
                 return staff;
             case "CompanyRepresentative":
-                loadCompanyRep(userID);
-                CompanyRepresentative companyRep = new CompanyRepresentative(CompanyRepInfoList[0],
-                    CompanyRepInfoList[1],
-                    CompanyRepInfoList[2],
-                    CompanyRepInfoList[3],
-                    CompanyRepInfoList[4],
-                    CompanyRepInfoList[5],
-                    CompanyRepInfoList[6]);
-                CompanyRepInfoList=null;
+                String[] companyRepData = loadCompanyRep(userID);
+                CompanyRepresentative companyRep = new CompanyRepresentative(companyRepData[0],
+                    companyRepData[1],
+                    companyRepData[2],
+                    companyRepData[3],
+                    companyRepData[4],
+                    companyRepData[5],
+                    companyRepData[6]);
                 return companyRep;
             default:
                 throw new IllegalArgumentException("bug: UserLoginDirectory.createUser(): wrong identity, possibly wrongly written into login_list.csv");
@@ -349,9 +362,8 @@ public class UserLoginDirectoryControl{
      */
     String getCompanyRepsCompany(String userID){
         if (authCtrl.isLoggedIn()) {
-            loadCompanyRep(userID);
-            String companyName=CompanyRepInfoList[5];
-            CompanyRepInfoList=null;
+            String[] companyRepData = loadCompanyRep(userID);
+            String companyName = companyRepData[5];
             return companyName;
         }
         throw new IllegalStateException("UserLoginDirectoryControl.getCompanyRepsCompany(): no logged in user when getting a CompanyRep's company");
@@ -367,49 +379,34 @@ public class UserLoginDirectoryControl{
         if (!authCtrl.isLoggedIn()) {
             throw new IllegalStateException("UserLoginDirectoryControl.changePassword(): no logged in user when changing password");
         }
-        for (String[] loginData : loginList) {
-            if (loginData[1].equals(userID)) {
-                String newSalt = generateSalt();
-                // ensure array length to 5 (identity,userID,passwordHash,salt,status)
-                for (int i = 0; i < loginList.size(); i++) {
-                    String[] row = loginList.get(i);
-                    if (row.length > 1 && row[1].equals(userID)) {
-                        if (row.length < 5) {
-                            String[] expanded = new String[5];
-                            for (int j = 0; j < row.length; j++) expanded[j] = row[j];
-                            for (int j = row.length; j < 5; j++) expanded[j] = "";
-                            row = expanded;
-                        }
-                        row[3] = newSalt; // salt
-                        row[2] = hashPassword(newPassword, newSalt);
-                        loginList.set(i, row);
-                        break;
-                    }
-                }
+        
+        String newSalt = generateSalt();
+        for (int i = 0; i < loginList.size(); i++) {
+            LoginCredential credential = loginList.get(i);
+            if (credential.getUserID().equals(userID)) {
+                credential.setSalt(newSalt);
+                credential.setPasswordHash(hashPassword(newPassword, newSalt));
+                break;
             }
         }
 
-    String csvFile = "Code/Libs/Lib/login_list.csv";
-    File inputFile = new File(csvFile);
-    File tempFile = new File("Code/Libs/Lib/login_list.tmp");
+        String csvFile = "Code/Libs/Lib/login_list.csv";
+        File inputFile = new File(csvFile);
+        File tempFile = new File("Code/Libs/Lib/login_list.tmp");
 
         try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
              FileWriter writer = new FileWriter(tempFile)) {
 
             writer.append("identity,userID,passwordHash,salt,status\n");
-            for (String[] loginData : loginList) {
-                // normalize to 5 columns and escape each field
-                String[] out = new String[] {"", "", "", "", ""};
-                for (int k = 0; k < loginData.length && k < 5; k++) {
-                    out[k] = (loginData[k] == null) ? "" : loginData[k];
-                }
+            for (LoginCredential credential : loginList) {
+                String[] data = credential.toArray();
                 // Escape all fields when writing
                 writer.append(String.join(",",
-                    ControlUtils.escapeCsvField(out[0]),
-                    ControlUtils.escapeCsvField(out[1]),
-                    ControlUtils.escapeCsvField(out[2]),
-                    ControlUtils.escapeCsvField(out[3]),
-                    ControlUtils.escapeCsvField(out[4])));
+                    ControlUtils.escapeCsvField(data[0]),
+                    ControlUtils.escapeCsvField(data[1]),
+                    ControlUtils.escapeCsvField(data[2]),
+                    ControlUtils.escapeCsvField(data[3]),
+                    ControlUtils.escapeCsvField(data[4])));
                 writer.append("\n");
             }
 
@@ -485,8 +482,8 @@ public class UserLoginDirectoryControl{
         String assignedID = email.trim();
 
         // Check if email already exists in login list
-        for (String[] loginEntry : loginList) {
-            if (loginEntry.length > 1 && loginEntry[1].equals(assignedID)) {
+        for (LoginCredential credential : loginList) {
+            if (credential.getUserID().equals(assignedID)) {
                 throw new IllegalArgumentException("A user with this email already exists.");
             }
         }
@@ -637,22 +634,11 @@ public class UserLoginDirectoryControl{
             loadLoginListFromDB();
         }
 
-        // Update the in-memory row first
-        for (int i = 0; i < loginList.size(); i++) {
-            String[] row = loginList.get(i);
-            if (row.length >= 2
-                && "CompanyRepresentative".equals(row[0])
-                && userID.equals(row[1])) {
-                // Ensure row has at least 4 columns
-                if (row.length < 5) {
-                    String[] expanded = new String[5];
-                    for (int j = 0; j < row.length; j++) expanded[j] = row[j];
-                    for (int j = row.length; j < 5; j++) expanded[j] = "";
-                    row = expanded;
-                }
-                // store status in the 5th column (index 4)
-                row[4] = status;
-                loginList.set(i, row);
+        // Update the in-memory credential first
+        for (LoginCredential credential : loginList) {
+            if ("CompanyRepresentative".equals(credential.getIdentity())
+                && userID.equals(credential.getUserID())) {
+                credential.setStatus(status);
                 updated = true;
                 break;
             }
@@ -668,19 +654,15 @@ public class UserLoginDirectoryControl{
                 // Write header (with status column)
                 writer.append("identity,userID,passwordHash,salt,status\n");
                 // Write rows
-                for (String[] data : loginList) {
-                    // Normalize to 5 columns when writing
-                    String[] out = new String[] {"", "", "", "", ""};
-                    for (int k = 0; k < data.length && k < 5; k++) {
-                        out[k] = (data[k] == null) ? "" : data[k];
-                    }
+                for (LoginCredential credential : loginList) {
+                    String[] data = credential.toArray();
                     // Escape all fields when writing
                     writer.append(String.join(",",
-                        ControlUtils.escapeCsvField(out[0]),
-                        ControlUtils.escapeCsvField(out[1]),
-                        ControlUtils.escapeCsvField(out[2]),
-                        ControlUtils.escapeCsvField(out[3]),
-                        ControlUtils.escapeCsvField(out[4]))).append("\n");
+                        ControlUtils.escapeCsvField(data[0]),
+                        ControlUtils.escapeCsvField(data[1]),
+                        ControlUtils.escapeCsvField(data[2]),
+                        ControlUtils.escapeCsvField(data[3]),
+                        ControlUtils.escapeCsvField(data[4]))).append("\n");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
