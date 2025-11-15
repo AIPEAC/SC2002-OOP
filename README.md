@@ -7,7 +7,7 @@
   - Deryl: [UML Class diagram](https://github.com/AIPEAC/SC2002-OOP/blob/main/Diagrams/Class%20Diagram.md)
   - Hong Xun: [Testing Functionality](https://github.com/AIPEAC/SC2002-OOP/blob/main/Testcases/Testcase_Appendix_A/Test_Appendix_A.md), Enity Classes Coding in Java
   - Jeremy: Report
-  - Teja: Filtering Algorithm
+  - Teja: Provided Filtering Algorithm.
 
 ## What This Application Does
 
