@@ -112,7 +112,7 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
 
         JPanel panel = new JPanel(new BorderLayout(5,5));
         JPanel top = new JPanel(new GridLayout(0,2));
-        top.add(new JLabel("Title:")); top.add(title);
+        top.add(new JLabel("*Title:")); top.add(title);
         top.add(new JLabel("Level:")); top.add(level);
         top.add(new JLabel("Open Date (yyyy-MM-dd):")); top.add(open);
         top.add(new JLabel("Close Date (yyyy-MM-dd):")); top.add(close);

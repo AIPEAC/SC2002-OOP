@@ -252,6 +252,11 @@ public class InternshipControl{
         if (!authCtrl.getUserIdentity().equals("CompanyRepresentative")) {
             throw new IllegalArgumentException("Only Company Representatives can create internship opportunities.");
         }
+        
+        // Validate that internship title is not empty or whitespace-only
+        if (internshipTitle == null || internshipTitle.trim().isEmpty()) {
+            throw new IllegalArgumentException("Internship title cannot be empty or contain only whitespace.");
+        }
 
         // Check if company rep has already created 5 internships
         String companyRepID = authCtrl.getUserID();
@@ -340,6 +345,11 @@ public class InternshipControl{
         }
         if (!authCtrl.getUserIdentity().equals("CompanyRepresentative")) {
             throw new IllegalArgumentException("Only Company Representatives can edit internship opportunities.");
+        }
+        
+        // Validate that internship title is not empty or whitespace-only
+        if (internshipTitle == null || internshipTitle.trim().isEmpty()) {
+            throw new IllegalArgumentException("Internship title cannot be empty or contain only whitespace.");
         }
         
         String companyRepID = authCtrl.getUserID();
