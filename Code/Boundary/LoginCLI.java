@@ -76,7 +76,7 @@ public class LoginCLI {
         JTextField dept = new JTextField();
         JTextField position = new JTextField();
         JTextField email = new JTextField();
-        Object[] fields = {"Name:", name, "Company:", company, "Department:", dept, "Position:", position, "Email:", email};
+        Object[] fields = {"*Name:", name, "*Company:", company, "Department:", dept, "Position:", position, "*Email:", email};
         int res = JOptionPane.showConfirmDialog(null, fields, "Register Company Representative", JOptionPane.OK_CANCEL_OPTION);
         if (res == JOptionPane.OK_OPTION) {
             try {
