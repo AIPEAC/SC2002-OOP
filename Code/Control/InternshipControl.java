@@ -263,8 +263,10 @@ public class InternshipControl{
         // Parse dates and slots here ( handles conversions)
         Date openDate = new Date();
         Date closeDate = new Date();
+        Date today = new Date();
         int numberOfSlots = 1;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        
         if (openDateStr != null && !openDateStr.trim().isEmpty()) {
             try {
                 openDate = sdf.parse(openDateStr.trim());
@@ -279,6 +281,13 @@ public class InternshipControl{
                 closeDate = new Date();
             }
         }
+        
+        // Validate that closeDate >= openDate, otherwise default both to today
+        if (closeDate.before(openDate)) {
+            openDate = today;
+            closeDate = today;
+        }
+        
         if (numberOfSlotsStr != null && !numberOfSlotsStr.trim().isEmpty()) {
             try {
                 numberOfSlots = Integer.parseInt(numberOfSlotsStr.trim());
@@ -352,6 +361,7 @@ public class InternshipControl{
         // Parse dates and slots - use existing values as defaults
         Date openDate = opp.getOpeningDate();
         Date closeDate = opp.getCloseDate();
+        Date today = new Date();
         int numberOfSlots = opp.getNumOfSlots();
         List<String> majors = preferredMajors != null && !preferredMajors.isEmpty() ? preferredMajors : opp.getPreferredMajors();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -372,6 +382,12 @@ public class InternshipControl{
             } catch (ParseException e) {
                 throw new IllegalArgumentException("Invalid closing date format. Use yyyy-MM-dd (e.g., 2025-12-25)");
             }
+        }
+        
+        // Validate that closeDate >= openDate, otherwise default both to today
+        if (closeDate.before(openDate)) {
+            openDate = today;
+            closeDate = today;
         }
         
         // Validate slots

@@ -408,10 +408,25 @@ public class UserLoginDirectoryControl{
      * Changes the password for a user.
      * @param userID the user ID
      * @param newPassword the new password
+     * @throws IllegalArgumentException if password is less than 8 characters, more than 20 characters, or contains whitespace characters
      */
     void changePassword(String userID, String newPassword){
         if (!authCtrl.isLoggedIn()) {
             throw new IllegalStateException("UserLoginDirectoryControl.changePassword(): no logged in user when changing password");
+        }
+        
+        // Validate password: minimum 8 characters, maximum 20 characters, no whitespace
+        if (newPassword == null || newPassword.length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters long.");
+        }
+        if (newPassword.length() > 20) {
+            throw new IllegalArgumentException("Password cannot exceed 20 characters.");
+        }
+        // Check for any type of whitespace using Character.isWhitespace
+        for (char c : newPassword.toCharArray()) {
+            if (Character.isWhitespace(c)) {
+                throw new IllegalArgumentException("Password cannot contain any type of whitespace characters.");
+            }
         }
         
         String newSalt = generateSalt();
@@ -475,6 +490,27 @@ public class UserLoginDirectoryControl{
         if (name.trim().length() > 15){
             throw new IllegalArgumentException("Name cannot exceed 15 characters.");
         }
+        
+        // Validate name: no quote marks or whitespace
+        if (name.contains("\"") || name.contains("'")) {
+            throw new IllegalArgumentException("Name cannot contain quote marks (single or double quotes).");
+        }
+        for (char c : name.toCharArray()) {
+            if (Character.isWhitespace(c)) {
+                throw new IllegalArgumentException("Name cannot contain whitespace characters.");
+            }
+        }
+        
+        // Validate companyName: no quote marks or whitespace
+        if (companyName.contains("\"") || companyName.contains("'")) {
+            throw new IllegalArgumentException("Company name cannot contain quote marks (single or double quotes).");
+        }
+        for (char c : companyName.toCharArray()) {
+            if (Character.isWhitespace(c)) {
+                throw new IllegalArgumentException("Company name cannot contain whitespace characters.");
+            }
+        }
+        
         if (name.contains("\n") || companyName.contains("\n") || department.contains("\n") || postion.contains("\n")) {
             throw new IllegalArgumentException("Input fields cannot contain newline characters.");
         }
@@ -483,8 +519,8 @@ public class UserLoginDirectoryControl{
             throw new IllegalArgumentException("Email is required for company representative registration.");
         }
         // More robust email pattern: requires at least 1 char before @, at least 1 char for domain, and proper TLD
-        // Pattern: one or more alphanumeric/dots/underscores/hyphens, @, domain name, ., TLD (2-6 chars)
-        String emailPattern = "^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
+        // Pattern: one or more alphanumeric/dots/underscores/hyphens/plus, @, domain name, ., TLD (2-6 chars including numbers)
+        String emailPattern = "^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z0-9]{2,6}$";
         if (!email.trim().matches(emailPattern)) {
             throw new IllegalArgumentException("Email must follow a valid format (e.g., user@company.com)");
         }
