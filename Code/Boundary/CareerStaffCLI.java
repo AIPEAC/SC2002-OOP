@@ -70,50 +70,50 @@ public class CareerStaffCLI extends AbstractCLI {
                     }
                 }
             });
-            frame.setSize(750,650);
+            frame.setSize(1500,1300);
             frame.setLocationRelativeTo(null);
-            JPanel p = new JPanel(new GridLayout(0,1,10,10));
-            p.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            JPanel p = new JPanel(new GridLayout(0,1,20,20));
+            p.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
 
             JButton chPwd = new JButton("Change Password");
-            chPwd.setFont(new Font("Arial", Font.PLAIN, 18));
-            chPwd.setPreferredSize(new Dimension(250, 50));
+            chPwd.setFont(new Font("Arial", Font.PLAIN, 36));
+            chPwd.setPreferredSize(new Dimension(500, 100));
             chPwd.addActionListener(e -> changePassword());
             p.add(chPwd);
 
             JButton viewOpp = new JButton("View Internship Opportunities");
-            viewOpp.setFont(new Font("Arial", Font.PLAIN, 18));
-            viewOpp.setPreferredSize(new Dimension(250, 50));
+            viewOpp.setFont(new Font("Arial", Font.PLAIN, 36));
+            viewOpp.setPreferredSize(new Dimension(500, 100));
             viewOpp.addActionListener(e -> viewFilteredInternshipOpportunities());
             p.add(viewOpp);
 
             JButton viewPendingReg = new JButton("View pending registrations");
-            viewPendingReg.setFont(new Font("Arial", Font.PLAIN, 18));
-            viewPendingReg.setPreferredSize(new Dimension(250, 50));
+            viewPendingReg.setFont(new Font("Arial", Font.PLAIN, 36));
+            viewPendingReg.setPreferredSize(new Dimension(500, 100));
             viewPendingReg.addActionListener(e -> viewCompanyRepRegisterList());
             p.add(viewPendingReg);
 
             JButton viewPendingOpp = new JButton("View pending internship opportunities");
-            viewPendingOpp.setFont(new Font("Arial", Font.PLAIN, 18));
-            viewPendingOpp.setPreferredSize(new Dimension(250, 50));
+            viewPendingOpp.setFont(new Font("Arial", Font.PLAIN, 36));
+            viewPendingOpp.setPreferredSize(new Dimension(500, 100));
             viewPendingOpp.addActionListener(e -> viewPendingInternshipOpp());
             p.add(viewPendingOpp);
 
             JButton viewPendingWithdraw = new JButton("View pending withdrawal requests");
-            viewPendingWithdraw.setFont(new Font("Arial", Font.PLAIN, 18));
-            viewPendingWithdraw.setPreferredSize(new Dimension(250, 50));
+            viewPendingWithdraw.setFont(new Font("Arial", Font.PLAIN, 36));
+            viewPendingWithdraw.setPreferredSize(new Dimension(500, 100));
             viewPendingWithdraw.addActionListener(e -> viewPendingWithdrawal());
             p.add(viewPendingWithdraw);
 
             JButton genReport = new JButton("Generate reports");
-            genReport.setFont(new Font("Arial", Font.PLAIN, 18));
-            genReport.setPreferredSize(new Dimension(250, 50));
+            genReport.setFont(new Font("Arial", Font.PLAIN, 36));
+            genReport.setPreferredSize(new Dimension(500, 100));
             genReport.addActionListener(e -> generateReportChoice());
             p.add(genReport);
 
             JButton logout = new JButton("Logout");
-            logout.setFont(new Font("Arial", Font.PLAIN, 18));
-            logout.setPreferredSize(new Dimension(250, 50));
+            logout.setFont(new Font("Arial", Font.PLAIN, 36));
+            logout.setPreferredSize(new Dimension(500, 100));
             logout.addActionListener(e -> {
                 UIHelper.closeLoggedInPopup();
                 frame.dispose();

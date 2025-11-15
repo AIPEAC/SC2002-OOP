@@ -53,39 +53,39 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                     }
                 }
             });
-            frame.setSize(750,600);
+            frame.setSize(1500,1200);
             frame.setLocationRelativeTo(null);
             JPanel p = new JPanel();
-            p.setLayout(new GridLayout(0,1,10,10));
-            p.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            p.setLayout(new GridLayout(0,1,20,20));
+            p.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
 
             JButton chPwd = new JButton("Change Password");
-            chPwd.setFont(new Font("Arial", Font.PLAIN, 18));
-            chPwd.setPreferredSize(new Dimension(250, 50));
+            chPwd.setFont(new Font("Arial", Font.PLAIN, 36));
+            chPwd.setPreferredSize(new Dimension(500, 100));
             chPwd.addActionListener(e -> changePassword());
             p.add(chPwd);
 
             JButton viewOpp = new JButton("View Internship Opportunities");
-            viewOpp.setFont(new Font("Arial", Font.PLAIN, 18));
-            viewOpp.setPreferredSize(new Dimension(250, 50));
+            viewOpp.setFont(new Font("Arial", Font.PLAIN, 36));
+            viewOpp.setPreferredSize(new Dimension(500, 100));
             viewOpp.addActionListener(e -> viewFilteredInternshipOpportunities());
             p.add(viewOpp);
 
             JButton createOpp = new JButton("Create Internship Opportunity");
-            createOpp.setFont(new Font("Arial", Font.PLAIN, 18));
-            createOpp.setPreferredSize(new Dimension(250, 50));
+            createOpp.setFont(new Font("Arial", Font.PLAIN, 36));
+            createOpp.setPreferredSize(new Dimension(500, 100));
             createOpp.addActionListener(e -> createInternshipOpportunity());
             p.add(createOpp);
 
             JButton checkStatus = new JButton("Check My Internship Opportunities' Status");
-            checkStatus.setFont(new Font("Arial", Font.PLAIN, 18));
-            checkStatus.setPreferredSize(new Dimension(250, 50));
+            checkStatus.setFont(new Font("Arial", Font.PLAIN, 36));
+            checkStatus.setPreferredSize(new Dimension(500, 100));
             checkStatus.addActionListener(e -> checkMyInternshipOppStatus());
             p.add(checkStatus);
 
             JButton logout = new JButton("Logout");
-            logout.setFont(new Font("Arial", Font.PLAIN, 18));
-            logout.setPreferredSize(new Dimension(250, 50));
+            logout.setFont(new Font("Arial", Font.PLAIN, 36));
+            logout.setPreferredSize(new Dimension(500, 100));
             logout.addActionListener(e -> {
                 UIHelper.closeLoggedInPopup();
                 frame.dispose();

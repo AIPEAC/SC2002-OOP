@@ -42,10 +42,10 @@ public class UIHelper {
     public static List<String> showMultiSelectMajors(List<String> allMajors) {
         if (allMajors == null || allMajors.isEmpty()) return new ArrayList<>();
         JList<String> list = new JList<>(allMajors.toArray(new String[0]));
-        list.setFont(new Font("Arial", Font.PLAIN, 14));
+        list.setFont(new Font("Arial", Font.PLAIN, 28));
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         JScrollPane scroll = new JScrollPane(list);
-        scroll.setPreferredSize(new Dimension(450, Math.min(300, allMajors.size()*25 + 20)));
+        scroll.setPreferredSize(new Dimension(900, Math.min(600, allMajors.size()*50 + 40)));
         int res = JOptionPane.showConfirmDialog(null, scroll, "Select preferred majors (multi-select)", JOptionPane.OK_CANCEL_OPTION);
         if (res == JOptionPane.OK_OPTION) {
             return list.getSelectedValuesList();
@@ -70,18 +70,18 @@ public class UIHelper {
 
             JFrame frame = new JFrame("Logged in");
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            frame.setSize(500,200);
+            frame.setSize(1000,400);
             frame.setLocationRelativeTo(null);
             JPanel p = new JPanel();
             p.setLayout(new BorderLayout(10,10));
-            p.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+            p.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
             JLabel lbl = new JLabel("Logged in as: " + userID + " (" + identity + ")");
-            lbl.setFont(new Font("Arial", Font.PLAIN, 16));
+            lbl.setFont(new Font("Arial", Font.PLAIN, 32));
             lbl.setHorizontalAlignment(SwingConstants.CENTER);
             p.add(lbl, BorderLayout.CENTER);
             JButton close = new JButton("Close");
-            close.setFont(new Font("Arial", Font.PLAIN, 14));
-            close.setPreferredSize(new Dimension(100, 40));
+            close.setFont(new Font("Arial", Font.PLAIN, 28));
+            close.setPreferredSize(new Dimension(200, 80));
             close.addActionListener(e -> frame.dispose());
             JPanel bp = new JPanel();
             bp.add(close);

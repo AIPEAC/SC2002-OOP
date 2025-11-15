@@ -58,38 +58,38 @@ public class StudentCLI extends AbstractCLI {
                     }
                 }
             });
-            frame.setSize(700,600);
+            frame.setSize(1400,1200);
             frame.setLocationRelativeTo(null);
-            JPanel p = new JPanel(new GridLayout(0,1,10,10));
-            p.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            JPanel p = new JPanel(new GridLayout(0,1,20,20));
+            p.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
 
             JButton chPwd = new JButton("Change Password");
-            chPwd.setFont(new Font("Arial", Font.PLAIN, 18));
-            chPwd.setPreferredSize(new Dimension(250, 50));
+            chPwd.setFont(new Font("Arial", Font.PLAIN, 36));
+            chPwd.setPreferredSize(new Dimension(500, 100));
             chPwd.addActionListener(e -> changePassword());
             p.add(chPwd);
 
             JButton viewOpp = new JButton("View Internship Opportunities");
-            viewOpp.setFont(new Font("Arial", Font.PLAIN, 18));
-            viewOpp.setPreferredSize(new Dimension(250, 50));
+            viewOpp.setFont(new Font("Arial", Font.PLAIN, 36));
+            viewOpp.setPreferredSize(new Dimension(500, 100));
             viewOpp.addActionListener(e -> viewFilteredInternshipOpportunities());
             p.add(viewOpp);
 
             JButton check = new JButton("Check My Application Status");
-            check.setFont(new Font("Arial", Font.PLAIN, 18));
-            check.setPreferredSize(new Dimension(250, 50));
+            check.setFont(new Font("Arial", Font.PLAIN, 36));
+            check.setPreferredSize(new Dimension(500, 100));
             check.addActionListener(e -> checkMyApplicationStatus());
             p.add(check);
 
             JButton viewApplied = new JButton("View Internships I Applied To");
-            viewApplied.setFont(new Font("Arial", Font.PLAIN, 18));
-            viewApplied.setPreferredSize(new Dimension(250, 50));
+            viewApplied.setFont(new Font("Arial", Font.PLAIN, 36));
+            viewApplied.setPreferredSize(new Dimension(500, 100));
             viewApplied.addActionListener(e -> viewInternshipIAppliedTo());
             p.add(viewApplied);
 
             JButton logout = new JButton("Logout");
-            logout.setFont(new Font("Arial", Font.PLAIN, 18));
-            logout.setPreferredSize(new Dimension(250, 50));
+            logout.setFont(new Font("Arial", Font.PLAIN, 36));
+            logout.setPreferredSize(new Dimension(500, 100));
             logout.addActionListener(e -> {
                 UIHelper.closeLoggedInPopup();
                 frame.dispose();

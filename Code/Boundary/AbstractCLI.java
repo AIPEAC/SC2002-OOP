@@ -85,13 +85,26 @@ public abstract class AbstractCLI {
             JOptionPane.showMessageDialog(null, "Password change is not available in this context.", "Not available", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        JPanel panel = new JPanel(new GridLayout(0,1));
-        JPasswordField oldP = new JPasswordField();
-        JPasswordField newP = new JPasswordField();
-        panel.add(new JLabel("Original Password:"));
+        JPanel panel = new JPanel(new GridLayout(2,2,15,15));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        JLabel oldPLabel = new JLabel("Original Password:");
+        oldPLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        JPasswordField oldP = new JPasswordField(20);
+        oldP.setFont(new Font("Arial", Font.PLAIN, 18));
+        oldP.setPreferredSize(new Dimension(300, 45));
+        
+        JLabel newPLabel = new JLabel("New Password:");
+        newPLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        JPasswordField newP = new JPasswordField(20);
+        newP.setFont(new Font("Arial", Font.PLAIN, 18));
+        newP.setPreferredSize(new Dimension(300, 45));
+        
+        panel.add(oldPLabel);
         panel.add(oldP);
-        panel.add(new JLabel("New Password:"));
+        panel.add(newPLabel);
         panel.add(newP);
+        
         int res = JOptionPane.showConfirmDialog(null, panel, "Change Password", JOptionPane.OK_CANCEL_OPTION);
         if (res == JOptionPane.OK_OPTION) {
             try {

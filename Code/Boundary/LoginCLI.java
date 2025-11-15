@@ -5,6 +5,8 @@ import javax.swing.*;
 import Boundary.Helper.UIHelper;
 import Control.*;
 
+import java.awt.*;
+
 /**
  * Boundary class for handling login and registration user interface.
  * Provides dialogs for user authentication and company representative registration.
@@ -46,10 +48,23 @@ public class LoginCLI {
             return;
         }
 
-        JTextField userField = new JTextField();
-        JPasswordField passField = new JPasswordField();
-        Object[] loginFields = {"User ID:", userField, "Password:", passField};
-        int res = JOptionPane.showConfirmDialog(null, loginFields, "Login", JOptionPane.OK_CANCEL_OPTION);
+        JTextField userField = new JTextField(20);
+        userField.setFont(new Font("Arial", Font.PLAIN, 20));
+        userField.setPreferredSize(new Dimension(300, 50));
+        JPasswordField passField = new JPasswordField(20);
+        passField.setFont(new Font("Arial", Font.PLAIN, 20));
+        passField.setPreferredSize(new Dimension(300, 50));
+        JLabel userLabel = new JLabel("User ID:");
+        userLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        JLabel passLabel = new JLabel("Password:");
+        passLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+        JPanel panel = new JPanel(new GridLayout(2, 2, 15, 15));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panel.add(userLabel);
+        panel.add(userField);
+        panel.add(passLabel);
+        panel.add(passField);
+        int res = JOptionPane.showConfirmDialog(null, panel, "Login", JOptionPane.OK_CANCEL_OPTION);
         if (res == JOptionPane.OK_OPTION) {
             String userID = userField.getText();
             String password = new String(passField.getPassword());
@@ -71,13 +86,47 @@ public class LoginCLI {
      * Registers a new company representative.
      */
     private void registerCompanyRep() {
-        JTextField name = new JTextField();
-        JTextField company = new JTextField();
-        JTextField dept = new JTextField();
-        JTextField position = new JTextField();
-        JTextField email = new JTextField();
-        Object[] fields = {"*Name:", name, "*Company:", company, "Department:", dept, "Position:", position, "*Email:", email};
-        int res = JOptionPane.showConfirmDialog(null, fields, "Register Company Representative", JOptionPane.OK_CANCEL_OPTION);
+        JTextField name = new JTextField(30);
+        name.setFont(new Font("Arial", Font.PLAIN, 18));
+        name.setPreferredSize(new Dimension(350, 40));
+        JTextField company = new JTextField(30);
+        company.setFont(new Font("Arial", Font.PLAIN, 18));
+        company.setPreferredSize(new Dimension(350, 40));
+        JTextField dept = new JTextField(30);
+        dept.setFont(new Font("Arial", Font.PLAIN, 18));
+        dept.setPreferredSize(new Dimension(350, 40));
+        JTextField position = new JTextField(30);
+        position.setFont(new Font("Arial", Font.PLAIN, 18));
+        position.setPreferredSize(new Dimension(350, 40));
+        JTextField email = new JTextField(30);
+        email.setFont(new Font("Arial", Font.PLAIN, 18));
+        email.setPreferredSize(new Dimension(350, 40));
+        
+        JLabel nameLabel = new JLabel("*Name:");
+        nameLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        JLabel companyLabel = new JLabel("*Company:");
+        companyLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        JLabel deptLabel = new JLabel("Department:");
+        deptLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        JLabel posLabel = new JLabel("Position:");
+        posLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        JLabel emailLabel = new JLabel("*Email:");
+        emailLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        
+        JPanel panel = new JPanel(new GridLayout(5, 2, 15, 15));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panel.add(nameLabel);
+        panel.add(name);
+        panel.add(companyLabel);
+        panel.add(company);
+        panel.add(deptLabel);
+        panel.add(dept);
+        panel.add(posLabel);
+        panel.add(position);
+        panel.add(emailLabel);
+        panel.add(email);
+        
+        int res = JOptionPane.showConfirmDialog(null, panel, "Register Company Representative", JOptionPane.OK_CANCEL_OPTION);
         if (res == JOptionPane.OK_OPTION) {
             try {
                 String userID = loginCtrl.handleRegister(name.getText(), company.getText(), dept.getText(), position.getText(), email.getText());
