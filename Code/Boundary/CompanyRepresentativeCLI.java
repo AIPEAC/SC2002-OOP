@@ -53,28 +53,39 @@ public class CompanyRepresentativeCLI extends AbstractCLI {
                     }
                 }
             });
-            frame.setSize(500, 400);
+            frame.setSize(750,600);
             frame.setLocationRelativeTo(null);
             JPanel p = new JPanel();
-            p.setLayout(new GridLayout(0,1,5,5));
+            p.setLayout(new GridLayout(0,1,10,10));
+            p.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
             JButton chPwd = new JButton("Change Password");
+            chPwd.setFont(new Font("Arial", Font.PLAIN, 18));
+            chPwd.setPreferredSize(new Dimension(250, 50));
             chPwd.addActionListener(e -> changePassword());
             p.add(chPwd);
 
             JButton viewOpp = new JButton("View Internship Opportunities");
+            viewOpp.setFont(new Font("Arial", Font.PLAIN, 18));
+            viewOpp.setPreferredSize(new Dimension(250, 50));
             viewOpp.addActionListener(e -> viewFilteredInternshipOpportunities());
             p.add(viewOpp);
 
             JButton createOpp = new JButton("Create Internship Opportunity");
+            createOpp.setFont(new Font("Arial", Font.PLAIN, 18));
+            createOpp.setPreferredSize(new Dimension(250, 50));
             createOpp.addActionListener(e -> createInternshipOpportunity());
             p.add(createOpp);
 
             JButton checkStatus = new JButton("Check My Internship Opportunities' Status");
+            checkStatus.setFont(new Font("Arial", Font.PLAIN, 18));
+            checkStatus.setPreferredSize(new Dimension(250, 50));
             checkStatus.addActionListener(e -> checkMyInternshipOppStatus());
             p.add(checkStatus);
 
             JButton logout = new JButton("Logout");
+            logout.setFont(new Font("Arial", Font.PLAIN, 18));
+            logout.setPreferredSize(new Dimension(250, 50));
             logout.addActionListener(e -> {
                 UIHelper.closeLoggedInPopup();
                 frame.dispose();

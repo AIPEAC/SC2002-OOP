@@ -70,35 +70,50 @@ public class CareerStaffCLI extends AbstractCLI {
                     }
                 }
             });
-            frame.setSize(520,420);
+            frame.setSize(750,650);
             frame.setLocationRelativeTo(null);
-            JPanel p = new JPanel(new GridLayout(0,1,5,5));
+            JPanel p = new JPanel(new GridLayout(0,1,10,10));
+            p.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
             JButton chPwd = new JButton("Change Password");
+            chPwd.setFont(new Font("Arial", Font.PLAIN, 18));
+            chPwd.setPreferredSize(new Dimension(250, 50));
             chPwd.addActionListener(e -> changePassword());
             p.add(chPwd);
 
             JButton viewOpp = new JButton("View Internship Opportunities");
+            viewOpp.setFont(new Font("Arial", Font.PLAIN, 18));
+            viewOpp.setPreferredSize(new Dimension(250, 50));
             viewOpp.addActionListener(e -> viewFilteredInternshipOpportunities());
             p.add(viewOpp);
 
             JButton viewPendingReg = new JButton("View pending registrations");
+            viewPendingReg.setFont(new Font("Arial", Font.PLAIN, 18));
+            viewPendingReg.setPreferredSize(new Dimension(250, 50));
             viewPendingReg.addActionListener(e -> viewCompanyRepRegisterList());
             p.add(viewPendingReg);
 
             JButton viewPendingOpp = new JButton("View pending internship opportunities");
+            viewPendingOpp.setFont(new Font("Arial", Font.PLAIN, 18));
+            viewPendingOpp.setPreferredSize(new Dimension(250, 50));
             viewPendingOpp.addActionListener(e -> viewPendingInternshipOpp());
             p.add(viewPendingOpp);
 
             JButton viewPendingWithdraw = new JButton("View pending withdrawal requests");
+            viewPendingWithdraw.setFont(new Font("Arial", Font.PLAIN, 18));
+            viewPendingWithdraw.setPreferredSize(new Dimension(250, 50));
             viewPendingWithdraw.addActionListener(e -> viewPendingWithdrawal());
             p.add(viewPendingWithdraw);
 
             JButton genReport = new JButton("Generate reports");
+            genReport.setFont(new Font("Arial", Font.PLAIN, 18));
+            genReport.setPreferredSize(new Dimension(250, 50));
             genReport.addActionListener(e -> generateReportChoice());
             p.add(genReport);
 
             JButton logout = new JButton("Logout");
+            logout.setFont(new Font("Arial", Font.PLAIN, 18));
+            logout.setPreferredSize(new Dimension(250, 50));
             logout.addActionListener(e -> {
                 UIHelper.closeLoggedInPopup();
                 frame.dispose();
