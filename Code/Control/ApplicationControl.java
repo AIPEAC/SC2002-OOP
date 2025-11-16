@@ -627,16 +627,21 @@ public class ApplicationControl {
 		Application app = getApplicationByNumber(appNum);
 		if (app == null) throw new IllegalArgumentException("Application not found: " + appNum);
 		
-		// Check if student had accepted this offer - if so, need to update their status
+		// Check if student had accepted this offer
 		boolean hadAccepted = "yes".equalsIgnoreCase(app.getAcceptance());
 		String studentID = app.getStudentID();
 		
-		// If student had accepted this offer, update their hasAcceptedInternshipOpportunity to false
-		if (hadAccepted) {
-			updateStudentAcceptanceStatus(studentID, false);
+		// If student did NOT accept any internship, just mark this application as withdrawn
+		if (!hadAccepted) {
+			app.setApplicationWithdrawn();
+			saveApplicationsToDB();
+			return;
 		}
 		
-		// NEW: Remove ALL applications from this student to allow fresh reapplication
+		// If student had accepted this offer, update their hasAcceptedInternshipOpportunity to false
+		updateStudentAcceptanceStatus(studentID, false);
+		
+		// Remove ALL applications from this student to allow fresh reapplication
 		// First, need to load ALL applications to find all of this student's applications
 		loadAllApplicationsFromDB();
 		
