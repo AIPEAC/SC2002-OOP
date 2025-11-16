@@ -1,4 +1,4 @@
-# Class Diagram
+# Sequence Diagram
 
 **Contributor**: Allen, Hong Xun
 
