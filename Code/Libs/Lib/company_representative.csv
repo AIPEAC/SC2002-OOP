@@ -1,1 +1,6 @@
 userID,name,email,position,accountStatus,companyName,department
+"NewComp@gmail.com","NewCompRep","NewComp@gmail.com","NewPosition","approved","NewComp","NewDepartment"
+"NewComp2@gmail.com","NewCompRep2","NewComp2@gmail.com","NewPosition2","approved","NewComp2","NewDepartment2"
+"NewComp3@gmail.com","NewCompRep3","NewComp3@gmail.com","NewPosition3","approved","NewComp3","NewDepartment3"
+"comp1@a.com","rep1","comp1@a.com","","approved","comp1",""
+"comp2@a.com","rep1","comp1@a.com","","pending","comp1",""
