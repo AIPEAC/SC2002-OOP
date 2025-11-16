@@ -292,5 +292,3 @@
 | ![NewComp Internship List](Testcase20_NewCompInternList.png) | ![NewComp2 Internship List](Testcase20_NewComp2InternList.png) | ![Generated Overview Report](Testcase20_OverviewReport.png) | ![NewComp Report](Testcase20_NewCompReport.png) | ![Basic Internship Level Report](Testcase20_BasicInternLevelReport.png) | ![Info and CS Major Filtered Report](Testcase20_InfoAndCSMajorReport.png) | ![Added 2026 Internship Opportunity](Testcase20_Added2026InternOp.png) | ![2026 Internship Report](Testcase20_2026Report.png) | ![Filter Panel](Testcase20_FilterPanel.png) | ![Assorted Filters](Testcase20_Filtered.png) |
 ---
 
-## Notes
-- Add any additional observations or comments here
