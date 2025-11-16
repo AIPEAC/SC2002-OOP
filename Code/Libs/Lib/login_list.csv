@@ -10,4 +10,3 @@ identity,userID,passwordHash,salt,status
 "CompanyRepresentative","NewComp3@gmail.com","63835d05a35e641cab5a7b1c50fc1691163d03b57fc3c3554d228185ba09e167","5UkJQ9lnD-l_EWlySVCzsA","approved"
 "CompanyRepresentative","comp1@a.com","b195759a82fba685c7243b39876a42e7b1e00df9cd5a3e190055ffcea3bf0637","3SxbCbJ2w_KyCmV5MxZpbQ","approved"
 "CompanyRepresentative","comp2@a.com","ca8a72deeb04f407c3a4cb5869e102d85395055e400d93b7d605d8bab1228540","hrMYtWlcOeOyoYyxjt2aig","pending"
-
