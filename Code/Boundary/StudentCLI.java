@@ -287,13 +287,14 @@ public class StudentCLI extends AbstractCLI {
             GridBagConstraints hgb = new GridBagConstraints();
             hgb.insets = new Insets(4,6,4,6);
             hgb.gridy = 0;
-            hgb.gridx = 0; hgb.weightx = 0.1; hgb.fill = GridBagConstraints.HORIZONTAL; header.add(new JLabel("App#", SwingConstants.CENTER), hgb);
-            hgb.gridx = 1; hgb.weightx = 0.12; header.add(new JLabel("ID", SwingConstants.CENTER), hgb);
-            hgb.gridx = 2; hgb.weightx = 0.25; header.add(new JLabel("Title", SwingConstants.CENTER), hgb);
-            hgb.gridx = 3; hgb.weightx = 0.1; header.add(new JLabel("Level", SwingConstants.CENTER), hgb);
-            hgb.gridx = 4; hgb.weightx = 0.15; header.add(new JLabel("Company", SwingConstants.CENTER), hgb);
-            hgb.gridx = 5; hgb.weightx = 0.18; header.add(new JLabel("Preferred Majors", SwingConstants.CENTER), hgb);
-            hgb.gridx = 6; hgb.weightx = 0.1; header.add(new JLabel("Status", SwingConstants.CENTER), hgb);
+            hgb.gridx = 0; hgb.weightx = 0; hgb.fill = GridBagConstraints.NONE; header.add(new JLabel("Actions", SwingConstants.CENTER), hgb);
+            hgb.gridx = 1; hgb.weightx = 0.1; hgb.fill = GridBagConstraints.HORIZONTAL; header.add(new JLabel("App#", SwingConstants.CENTER), hgb);
+            hgb.gridx = 2; hgb.weightx = 0.12; header.add(new JLabel("ID", SwingConstants.CENTER), hgb);
+            hgb.gridx = 3; hgb.weightx = 0.25; header.add(new JLabel("Title", SwingConstants.CENTER), hgb);
+            hgb.gridx = 4; hgb.weightx = 0.1; header.add(new JLabel("Level", SwingConstants.CENTER), hgb);
+            hgb.gridx = 5; hgb.weightx = 0.15; header.add(new JLabel("Company", SwingConstants.CENTER), hgb);
+            hgb.gridx = 6; hgb.weightx = 0.18; header.add(new JLabel("Preferred Majors", SwingConstants.CENTER), hgb);
+            hgb.gridx = 7; hgb.weightx = 0.1; header.add(new JLabel("Status", SwingConstants.CENTER), hgb);
             header.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.GRAY));
             listPanel.add(header);
 
@@ -311,14 +312,25 @@ public class StudentCLI extends AbstractCLI {
                 GridBagConstraints r = new GridBagConstraints();
                 r.insets = new Insets(6,6,6,6);
                 r.gridy = 0;
+                // Actions column with "Details" button similar to View Internship Opportunities
+                r.gridx = 0; r.weightx = 0; r.fill = GridBagConstraints.NONE;
+                JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+                JButton details = new JButton("Details");
+                String finalId = id;
+                details.addActionListener(e -> showInternshipDetails(finalId));
+                // Disable if no ID
+                details.setEnabled(finalId != null && !finalId.isEmpty());
+                actions.add(details);
+                actions.setPreferredSize(new Dimension(220, 28));
+                row.add(actions, r);
 
-                r.gridx = 0; r.weightx = 0.1; r.fill = GridBagConstraints.HORIZONTAL; row.add(new JLabel(appNum != null ? appNum : ""), r);
-                r.gridx = 1; r.weightx = 0.12; row.add(new JLabel(id != null ? id : ""), r);
-                r.gridx = 2; r.weightx = 0.25; row.add(new JLabel(title != null ? title : ""), r);
-                r.gridx = 3; r.weightx = 0.1; row.add(new JLabel(level != null ? level : ""), r);
-                r.gridx = 4; r.weightx = 0.15; row.add(new JLabel(company != null ? company : ""), r);
-                r.gridx = 5; r.weightx = 0.18; row.add(new JLabel(majors), r);
-                r.gridx = 6; r.weightx = 0.1; row.add(new JLabel(status != null ? status : ""), r);
+                r.gridx = 1; r.weightx = 0.1; r.fill = GridBagConstraints.HORIZONTAL; row.add(new JLabel(appNum != null ? appNum : ""), r);
+                r.gridx = 2; r.weightx = 0.12; row.add(new JLabel(id != null ? id : ""), r);
+                r.gridx = 3; r.weightx = 0.25; row.add(new JLabel(title != null ? title : ""), r);
+                r.gridx = 4; r.weightx = 0.1; row.add(new JLabel(level != null ? level : ""), r);
+                r.gridx = 5; r.weightx = 0.15; row.add(new JLabel(company != null ? company : ""), r);
+                r.gridx = 6; r.weightx = 0.18; row.add(new JLabel(majors), r);
+                r.gridx = 7; r.weightx = 0.1; row.add(new JLabel(status != null ? status : ""), r);
                 row.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.LIGHT_GRAY));
                 listPanel.add(row);
             }
