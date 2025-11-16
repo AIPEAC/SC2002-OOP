@@ -11,4 +11,4 @@ internshipID,title,description,level,preferredMajors,openingDate,closeDate,statu
 "#INT00010","To Toggle Visibility False DSAI","","Basic","Data Science and Artificial Intelligence","2025-11-12","2025-11-30","approved","NewComp2","NewComp2@gmail.com","1","","","true"
 "#INT00011","Business Accepted","","Basic","Business","2025-11-12","2025-11-30","approved","NewComp3","NewComp3@gmail.com","2","","1","true"
 "#INT00012","Business Rejected","","Basic","Business","2025-11-12","2025-11-30","approved","NewComp3","NewComp3@gmail.com","1","","","true"
-"#INT00013","Business Not Accepted","","Basic","Business","2025-11-12","2025-11-30","approved","NewComp3","NewComp3@gmail.com","1","","","true"
+"#INT00013","Business Not Applied","","Basic","Business","2025-11-12","2025-11-30","approved","NewComp3","NewComp3@gmail.com","1","","","true"
