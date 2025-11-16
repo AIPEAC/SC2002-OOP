@@ -1738,33 +1738,10 @@ public class InternshipControl{
                 .collect(Collectors.toList());
         if (Opplist == null) return new ArrayList<>();
 
-        // If logged-in user is a student, filter by their major(s)
-        if (authCtrl != null && authCtrl.isLoggedIn() && "Student".equals(authCtrl.getUserIdentity())) {
-            Entity.Users.User user = authCtrl.getUser();
-            if (user instanceof Student) {
-                Student student = (Student) user;
-                List<String> studentMajors = student.getMajors();
-                if (studentMajors != null && !studentMajors.isEmpty()) {
-                    Opplist = Opplist.stream().filter(opp -> {
-                        List<String> preferredMajors = opp.getPreferredMajors();
-                        if (preferredMajors == null || preferredMajors.isEmpty()) {
-                            return true; // No preferred majors means open to all
-                        }
-                        // Check if at least one student major matches any preferred major
-                        for (String studentMajor : studentMajors) {
-                            for (String prefMajor : preferredMajors) {
-                                if (studentMajor.equalsIgnoreCase(prefMajor)) {
-                                    return true;
-                                }
-                            }
-                        }
-                        return false;
-                    }).collect(Collectors.toList());
-                }
-            }
-        }
-
+        // Apply direct lookup (ID/Title) before student-major filtering, and if present, skip major filtering
+        boolean hasDirectLookup = false;
         if (filterIn != null && !filterIn.isEmpty()) {
+            hasDirectLookup = filterIn.containsKey("internshipID") || filterIn.containsKey("internshipTitle");
             Map<String, List<String>> criteria = filterIn;
             Opplist = Opplist.stream().filter(opp -> {
                 for (Map.Entry<String, List<String>> e : criteria.entrySet()) {
@@ -1797,6 +1774,31 @@ public class InternshipControl{
                 }
                 return true;
             }).collect(Collectors.toList());
+        }
+
+        // If no direct lookup was used, and logged-in user is a student, filter by their major(s)
+        if (!hasDirectLookup && authCtrl != null && authCtrl.isLoggedIn() && "Student".equals(authCtrl.getUserIdentity())) {
+            Entity.Users.User user = authCtrl.getUser();
+            if (user instanceof Student) {
+                Student student = (Student) user;
+                List<String> studentMajors = student.getMajors();
+                if (studentMajors != null && !studentMajors.isEmpty()) {
+                    Opplist = Opplist.stream().filter(opp -> {
+                        List<String> preferredMajors = opp.getPreferredMajors();
+                        if (preferredMajors == null || preferredMajors.isEmpty()) {
+                            return true; // No preferred majors means open to all
+                        }
+                        for (String studentMajor : studentMajors) {
+                            for (String prefMajor : preferredMajors) {
+                                if (studentMajor.equalsIgnoreCase(prefMajor)) {
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    }).collect(Collectors.toList());
+                }
+            }
         }
 
         // Sorting
