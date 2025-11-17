@@ -103,9 +103,9 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
- | Internship Opportunities | Y1 Student Info View | Y3 Student DSAI View |
+ | Internship Opportunities | Y1 Student Info View | Y4 Student CE View |
  | ------------------------ | -------------------- | -------------------- |
-| ![All Internship Opportunities](Testcase6_AllIntOpp.png) | ![Y1 Student Info View](Testcase6_Y1StudentInfo.png) |![Y3 Student DSAI View](Testcase6_Y3StudentDSAI.png) |
+| ![All Internship Opportunities](Testcase6_AllIntOpp.png) | ![Y1 Student Info View](Testcase6_Y1StudentInfo.png) |![Y4 Student CE View](Testcase6_Y3StudentDSAI.png) |
 ---
 
 ### Test Case 7: Internship Application Eligibility
@@ -129,9 +129,9 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
- | Visibility Off | Student Try To View App Details |
- | -------------- | ----------------------------- |
-| ![Visibility Off](Testcase8_VisOff.png) | ![Student View App Details](Testcase8_AppDetails.png) |
+ |DSAI Student Apply for INT00010| Visibility Off | Student Try To View Internship Details |
+ |---| -------------- | ----------------------------- |
+|![Applied](Testcase8_DSAI_Apply_to_INT00010.png)| ![Visibility Off](Testcase8_VisOff.png) | ![Student View Int Details](Testcase8_AppDetails.png) |
 ---
 
 ### Test Case 9: Single Internship Placement Acceptance per Student
