@@ -1,4 +1,8 @@
 # Test Cases - Appendix A
+Contributor: Hong Xun, Allen.
+Note: 
+- If your output can be different from the test case output, since test cases are not all using the same lib as the github main branch.
+
 
 ## Test Case Summary
 
@@ -9,7 +13,7 @@
 | 3 | Incorrect Password | System should deny access and alert the user to incorrect password | User logs in successfully with a wrong password or fail to provide meaningful error message | Y |
 | 4 | Password Change Functionality | System updates password, and allows login with new credentials | System does not update the password or denies access with the new password | Y |
 | 5 | Company Representative Account Creation | A new Company Representative should only be able to log in to their account after it has been approved by a Career Center Staff | Company Representative staff can log in without any authorization | Y |
-| 6 | Internship Opportunity Visibility Based on User Profile and Toggle | Internship opportunities are visible to students based on their year of study, major, internship level eligibility, and the visibility setting | Students see internship opportunities not relevant to their profile (wrong major, wrong level for their year) or when visibility is off | Y |
+| 6 | Internship Opportunity Visibility Based on User Profile and Toggle | Internship opportunities are visible to students based on their year of study, major,  and the visibility setting. However, they can view internships that are not of their level but refrained from applying. | Students see internship opportunities not relevant to their profile (wrong major) or when visibility is off; student cannot see internships that are of their major when the internship level is not aligned; the applying button is availble for internships that are not of their levels. | Y |
 | 7 | Internship Application Eligibility | Students can only apply for internship opportunities relevant to their profile (correct major preference, appropriate level for their year of study) and when visibility is on | Students can apply for internship opportunities not relevant to their profile (wrong major preference, Basic-level students applying for Intermediate/Advanced opportunities) or when visibility is off | Y |
 | 8 | Viewing Application Status after Visibility Toggle Off | Students continue to have access to their application details regardless of internship opportunities' visibility | Application details become inaccessible once visibility is off | Y |
 | 9 | Single Internship Placement Acceptance per Student | System allows accepting one internship placement and automatically withdraws all other applications once a placement is accepted | Student can accept more than one internship placement, or other applications remain active after accepting | Y |
@@ -103,9 +107,9 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
- | Internship Opportunities | Y1 Student Info View | Y3 Student DSAI View |
+ | Internship Opportunities | Y1 Student Info View | Y4 Student CE View |
  | ------------------------ | -------------------- | -------------------- |
-| ![All Internship Opportunities](Testcase6_AllIntOpp.png) | ![Y1 Student Info View](Testcase6_Y1StudentInfo.png) |![Y3 Student DSAI View](Testcase6_Y3StudentDSAI.png) |
+| ![All Internship Opportunities](Testcase6_AllIntOpp.png) | ![Y1 Student Info View](Testcase6_Y1StudentInfo.png) |![Y4 Student CE View](Testcase6_Y3StudentDSAI.png) |
 ---
 
 ### Test Case 7: Internship Application Eligibility
@@ -129,9 +133,9 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
- | Visibility Off | Student Try To View App Details |
- | -------------- | ----------------------------- |
-| ![Visibility Off](Testcase8_VisOff.png) | ![Student View App Details](Testcase8_AppDetails.png) |
+ |DSAI Student Apply for INT00010| Visibility Off | Student Try To View Internship Details |
+ |---| -------------- | ----------------------------- |
+|![Applied](Testcase8_DSAI_Apply_to_INT00010.png)| ![Visibility Off](Testcase8_VisOff.png) | ![Student View Int Details](Testcase8_AppDetails.png) |
 ---
 
 ### Test Case 9: Single Internship Placement Acceptance per Student
@@ -142,9 +146,9 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
- | Multiple Internship Opportunity | Student Accept First | Updated Status | Student Try To Accept Second |
- | ------------------------------ | -------------------- | -------------- | --------------------------- |
-| ![Student View Multiple Internship Op](Testcase9_MultIntOp.png) | ![First Internship Op Accept](Testcase9_FirstAccept.png) | ![Updated Status](Testcase9_UpdatedStatus.png) | ![Second Internship Op Accept](Testcase9_SecondAccept.png) |
+ |Y4 CS Student appling to mutiple internships| Multiple applications get offered | Student Accept First | Updated Status | Student Try To Accept Second |
+ | --|------------------------------ | -------------------- | -------------- | --------------------------- |
+|![Y4 CS Student appling to mutiple internships](Testcase9_Y4_CS_Student_Appling_to_multiple_internships.png)| ![Student View Multiple Internship Op](Testcase9_MultIntOp.png) | ![First Internship Op Accept](Testcase9_FirstAccept.png) | ![Updated Status](Testcase9_UpdatedStatus.png) | ![Second Internship Op Accept](Testcase9_SecondAccept.png) |
 ---
 
 ### Test Case 10: Company Representative Internship Opportunity Creation
