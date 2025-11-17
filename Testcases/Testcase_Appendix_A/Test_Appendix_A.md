@@ -1,4 +1,8 @@
 # Test Cases - Appendix A
+Contributor: Hong Xun, Allen.
+Note: 
+- If your output can be different from the test case output, since test cases are not all using the same lib as the github main branch.
+
 
 ## Test Case Summary
 
@@ -142,9 +146,9 @@
 - **Pass:** Yes
 - **Screenshots:** 
 
- | Multiple Internship Opportunity | Student Accept First | Updated Status | Student Try To Accept Second |
- | ------------------------------ | -------------------- | -------------- | --------------------------- |
-| ![Student View Multiple Internship Op](Testcase9_MultIntOp.png) | ![First Internship Op Accept](Testcase9_FirstAccept.png) | ![Updated Status](Testcase9_UpdatedStatus.png) | ![Second Internship Op Accept](Testcase9_SecondAccept.png) |
+ |Y4 CS Student appling to mutiple internships| Multiple applications get offered | Student Accept First | Updated Status | Student Try To Accept Second |
+ | --|------------------------------ | -------------------- | -------------- | --------------------------- |
+|![Y4 CS Student appling to mutiple internships](Testcase9_Y4_CS_Student_Appling_to_multiple_internships.png)| ![Student View Multiple Internship Op](Testcase9_MultIntOp.png) | ![First Internship Op Accept](Testcase9_FirstAccept.png) | ![Updated Status](Testcase9_UpdatedStatus.png) | ![Second Internship Op Accept](Testcase9_SecondAccept.png) |
 ---
 
 ### Test Case 10: Company Representative Internship Opportunity Creation
