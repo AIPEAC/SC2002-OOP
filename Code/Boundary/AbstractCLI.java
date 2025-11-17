@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
-import javax.swing.ListSelectionModel;
 
 /**
  * Abstract base class for all user interface boundary classes.
@@ -138,19 +137,85 @@ public abstract class AbstractCLI {
         gbc.insets = new Insets(4,4,4,4);
         gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST;
 
-        // Preferred Majors multi-select list (loaded from control)
+        // Preferred Majors dropdown with multi-select (loaded from control)
         // For students, this filter is disabled as they can only see their major's internships
-        List<String> allMajors = new ArrayList<>();
+        final List<String> allMajors = new ArrayList<>();
         try {
-            allMajors = intCtrl.getAvailableMajors();
+            allMajors.addAll(intCtrl.getAvailableMajors());
         } catch (Exception ex) {
             // fallback to empty list if control helper call fails
         }
-        JList<String> majorList = new JList<>(allMajors.toArray(new String[0]));
-        majorList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        majorList.setVisibleRowCount(4);
-        JScrollPane majorScrollPane = new JScrollPane(majorList);
-        majorScrollPane.setPreferredSize(new Dimension(200, 80));
+        
+        // Create multi-select combobox with checkboxes
+        JComboBox<String> majorCombo = new JComboBox<>();
+        final Map<String, JCheckBox> majorCheckboxes = new HashMap<>();
+        
+        // Restore previously selected majors from filter
+        List<String> previouslySelectedMajors = new ArrayList<>();
+        if (filter != null && filter.getFilterIn() != null && filter.getFilterIn().containsKey("preferredMajors")) {
+            previouslySelectedMajors = filter.getFilterIn().get("preferredMajors");
+        }
+        
+        majorCombo.addItem("(Any)");
+        
+        for (String major : allMajors) {
+            JCheckBox cb = new JCheckBox(major);
+            // Restore previous selection
+            if (previouslySelectedMajors.contains(major)) {
+                cb.setSelected(true);
+            }
+            majorCheckboxes.put(major, cb);
+            cb.addActionListener(e -> {
+                // Update combo display
+                List<String> selected = new ArrayList<>();
+                for (Map.Entry<String, JCheckBox> entry : majorCheckboxes.entrySet()) {
+                    if (entry.getValue().isSelected()) selected.add(entry.getKey());
+                }
+                if (selected.isEmpty()) {
+                    majorCombo.setSelectedItem("(Any)");
+                } else {
+                    majorCombo.setSelectedItem(selected.size() + " selected");
+                }
+            });
+            majorCombo.addItem(major);
+        }
+        
+        // Set initial display
+        if (!previouslySelectedMajors.isEmpty()) {
+            majorCombo.setSelectedItem(previouslySelectedMajors.size() + " selected");
+        }
+        
+        majorCombo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (index == -1) {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+                if (index > 0 && index <= allMajors.size()) {
+                    String major = allMajors.get(index - 1);
+                    JCheckBox cb = majorCheckboxes.get(major);
+                    if (cb != null) {
+                        cb.setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
+                        return cb;
+                    }
+                }
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        });
+        
+        majorCombo.addItemListener(e -> {
+            if (e.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+                Object item = e.getItem();
+                if (item != null && !item.equals("(Any)")) {
+                    String major = item.toString();
+                    if (majorCheckboxes.containsKey(major)) {
+                        JCheckBox cb = majorCheckboxes.get(major);
+                        cb.setSelected(!cb.isSelected());
+                        majorCombo.hidePopup();
+                    }
+                }
+            }
+        });
         
         // Check if user is a student and disable the major filter
         boolean isStudent = false;
@@ -159,26 +224,90 @@ public abstract class AbstractCLI {
         } catch (Exception ex) { /* not a student */ }
         
         if (isStudent) {
-            majorList.setEnabled(false);
-            majorScrollPane.setToolTipText("Students can only view internships matching their major(s)");
-        } else {
-            majorScrollPane.setBorder(BorderFactory.createTitledBorder("Hold Ctrl to select multiple"));
+            majorCombo.setEnabled(false);
+            majorCombo.setToolTipText("Students can only view internships matching their major(s)");
         }
         
-        filterBlock.add(new JLabel("Preferred Majors:"), gbc);
+        filterBlock.add(new JLabel("Preferred Major:"), gbc);
         gbc.gridx = 1;
-        filterBlock.add(majorScrollPane, gbc);
+        filterBlock.add(majorCombo, gbc);
 
-        // Company names dropdown (from control helper)
+        // Company names dropdown with multi-select (from control helper)
         gbc.gridx = 0; gbc.gridy++;
-        JComboBox<String> companyCombo = new JComboBox<>();
-        companyCombo.addItem("(Any)");
+        final List<String> allCompanies = new ArrayList<>();
         try {
-            List<String> companies = intCtrl.getVisibleCompanyNames();
-            for (String c : companies) companyCombo.addItem(c);
+            allCompanies.addAll(intCtrl.getVisibleCompanyNames());
         } catch (Exception ex) {
             // ignore populate failure
         }
+        
+        JComboBox<String> companyCombo = new JComboBox<>();
+        final Map<String, JCheckBox> companyCheckboxes = new HashMap<>();
+        
+        // Restore previous company selection
+        List<String> previouslySelectedCompanies = new ArrayList<>();
+        if (filter != null && filter.getFilterIn() != null && filter.getFilterIn().containsKey("companyName")) {
+            previouslySelectedCompanies = filter.getFilterIn().get("companyName");
+        }
+        
+        companyCombo.addItem("(Any)");
+        
+        for (String company : allCompanies) {
+            JCheckBox cb = new JCheckBox(company);
+            if (previouslySelectedCompanies.contains(company)) {
+                cb.setSelected(true);
+            }
+            companyCheckboxes.put(company, cb);
+            cb.addActionListener(e -> {
+                List<String> selected = new ArrayList<>();
+                for (Map.Entry<String, JCheckBox> entry : companyCheckboxes.entrySet()) {
+                    if (entry.getValue().isSelected()) selected.add(entry.getKey());
+                }
+                if (selected.isEmpty()) {
+                    companyCombo.setSelectedItem("(Any)");
+                } else {
+                    companyCombo.setSelectedItem(selected.size() + " selected");
+                }
+            });
+            companyCombo.addItem(company);
+        }
+        
+        if (!previouslySelectedCompanies.isEmpty()) {
+            companyCombo.setSelectedItem(previouslySelectedCompanies.size() + " selected");
+        }
+        
+        companyCombo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (index == -1) {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+                if (index > 0 && index <= allCompanies.size()) {
+                    String company = allCompanies.get(index - 1);
+                    JCheckBox cb = companyCheckboxes.get(company);
+                    if (cb != null) {
+                        cb.setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
+                        return cb;
+                    }
+                }
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        });
+        
+        companyCombo.addItemListener(e -> {
+            if (e.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+                Object item = e.getItem();
+                if (item != null && !item.equals("(Any)")) {
+                    String company = item.toString();
+                    if (companyCheckboxes.containsKey(company)) {
+                        JCheckBox cb = companyCheckboxes.get(company);
+                        cb.setSelected(!cb.isSelected());
+                        companyCombo.hidePopup();
+                    }
+                }
+            }
+        });
+        
         filterBlock.add(new JLabel("Company:"), gbc);
         gbc.gridx = 1;
         filterBlock.add(companyCombo, gbc);
@@ -197,10 +326,73 @@ public abstract class AbstractCLI {
             gbc.gridy++;
             gbc.gridwidth = 1;
         }
+        final List<String> allLevels = List.of("Basic", "Intermediate", "Advanced");
+        final Map<String, JCheckBox> levelCheckboxes = new HashMap<>();
+        
+        // Restore previous level selection
+        List<String> previouslySelectedLevels = new ArrayList<>();
+        if (filter != null && filter.getFilterIn() != null && filter.getFilterIn().containsKey("internshipLevel")) {
+            previouslySelectedLevels = filter.getFilterIn().get("internshipLevel");
+        }
+        
         levelCombo.addItem("(Any)");
-        levelCombo.addItem("Basic");
-        levelCombo.addItem("Intermediate");
-        levelCombo.addItem("Advanced");
+        
+        for (String level : allLevels) {
+            JCheckBox cb = new JCheckBox(level);
+            if (previouslySelectedLevels.contains(level)) {
+                cb.setSelected(true);
+            }
+            levelCheckboxes.put(level, cb);
+            cb.addActionListener(e -> {
+                List<String> selected = new ArrayList<>();
+                for (Map.Entry<String, JCheckBox> entry : levelCheckboxes.entrySet()) {
+                    if (entry.getValue().isSelected()) selected.add(entry.getKey());
+                }
+                if (selected.isEmpty()) {
+                    levelCombo.setSelectedItem("(Any)");
+                } else {
+                    levelCombo.setSelectedItem(selected.size() + " selected");
+                }
+            });
+            levelCombo.addItem(level);
+        }
+        
+        if (!previouslySelectedLevels.isEmpty()) {
+            levelCombo.setSelectedItem(previouslySelectedLevels.size() + " selected");
+        }
+        
+        levelCombo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (index == -1) {
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+                if (index > 0 && index <= allLevels.size()) {
+                    String level = allLevels.get(index - 1);
+                    JCheckBox cb = levelCheckboxes.get(level);
+                    if (cb != null) {
+                        cb.setBackground(isSelected ? list.getSelectionBackground() : list.getBackground());
+                        return cb;
+                    }
+                }
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        });
+        
+        levelCombo.addItemListener(e -> {
+            if (e.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+                Object item = e.getItem();
+                if (item != null && !item.equals("(Any)")) {
+                    String level = item.toString();
+                    if (levelCheckboxes.containsKey(level)) {
+                        JCheckBox cb = levelCheckboxes.get(level);
+                        cb.setSelected(!cb.isSelected());
+                        levelCombo.hidePopup();
+                    }
+                }
+            }
+        });
+        
         filterBlock.add(new JLabel("Internship Level:"), gbc);
         gbc.gridx = 1;
         filterBlock.add(levelCombo, gbc);
@@ -214,6 +406,17 @@ public abstract class AbstractCLI {
         ogbc.insets = new Insets(4,4,4,4); ogbc.anchor = GridBagConstraints.WEST; ogbc.gridx=0; ogbc.gridy=0;
         JTextField idField = new JTextField(12);
         JTextField titleField = new JTextField(12);
+        // Restore previous override values
+        if (filter != null && filter.getFilterIn() != null) {
+            if (filter.getFilterIn().containsKey("internshipID")) {
+                List<String> prevId = filter.getFilterIn().get("internshipID");
+                if (!prevId.isEmpty()) idField.setText(prevId.get(0));
+            }
+            if (filter.getFilterIn().containsKey("internshipTitle")) {
+                List<String> prevTitle = filter.getFilterIn().get("internshipTitle");
+                if (!prevTitle.isEmpty()) titleField.setText(prevTitle.get(0));
+            }
+        }
         overrideBlock.add(new JLabel("Internship ID:"), ogbc);
         ogbc.gridx=1; overrideBlock.add(idField, ogbc);
         ogbc.gridx=0; ogbc.gridy++; overrideBlock.add(new JLabel("Internship Title:"), ogbc);
@@ -236,17 +439,32 @@ public abstract class AbstractCLI {
             filterIn.put("internshipTitle", List.of(titleOverride));
         } else {
             // Optional filters
-            List<String> selectedMajors = majorList.getSelectedValuesList();
-            if (selectedMajors != null && !selectedMajors.isEmpty()) {
+            List<String> selectedMajors = new ArrayList<>();
+            for (Map.Entry<String, JCheckBox> entry : majorCheckboxes.entrySet()) {
+                if (entry.getValue().isSelected()) {
+                    selectedMajors.add(entry.getKey());
+                }
+            }
+            if (!selectedMajors.isEmpty()) {
                 filterIn.put("preferredMajors", selectedMajors);
             }
-            String companySel = (String) companyCombo.getSelectedItem();
-            if (companySel != null && !companySel.equals("(Any)")) {
-                filterIn.put("companyName", List.of(companySel));
+            List<String> selectedCompanies = new ArrayList<>();
+            for (Map.Entry<String, JCheckBox> entry : companyCheckboxes.entrySet()) {
+                if (entry.getValue().isSelected()) {
+                    selectedCompanies.add(entry.getKey());
+                }
             }
-            String levelSel = (String) levelCombo.getSelectedItem();
-            if (levelSel != null && !levelSel.equals("(Any)")) {
-                filterIn.put("internshipLevel", List.of(levelSel));
+            if (!selectedCompanies.isEmpty()) {
+                filterIn.put("companyName", selectedCompanies);
+            }
+            List<String> selectedLevels = new ArrayList<>();
+            for (Map.Entry<String, JCheckBox> entry : levelCheckboxes.entrySet()) {
+                if (entry.getValue().isSelected()) {
+                    selectedLevels.add(entry.getKey());
+                }
+            }
+            if (!selectedLevels.isEmpty()) {
+                filterIn.put("internshipLevel", selectedLevels);
             }
         }
 
