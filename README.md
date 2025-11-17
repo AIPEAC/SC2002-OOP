@@ -5,7 +5,7 @@
 - **Contributor**:
   - Allen: Boundary & Control Classes Coding in Java, [UML Sequence diagram](https://github.com/AIPEAC/SC2002-OOP/blob/main/Diagrams/Sequence%20Diagram.md).
   - Deryl: [UML Class diagram](https://github.com/AIPEAC/SC2002-OOP/blob/main/Diagrams/Class%20Diagram.md).
-  - Hong Xun: [Testing Functionality](https://github.com/AIPEAC/SC2002-OOP/blob/main/Testcases/Testcase_Appendix_A/Test_Appendix_A.md), Enity Classes Coding in Java.
+  - Hong Xun: [Testing Functionality](https://github.com/AIPEAC/SC2002-OOP/blob/main/Testcases/Testcase_Appendix_A/Test_Appendix_A.md), Entity Classes Coding in Java.
   - Jeremy: Wrote Report, Utility Class Coding in Java (UIHelper.java and ControlUtils.java)
   - Teja: Provided Filtering Algorithm.
 - How to use:
