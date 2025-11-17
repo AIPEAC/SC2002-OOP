@@ -1,1 +1,6 @@
 userID,name,email,major,year,hasAcceptedInternshipOpportunity
+"U2310001A","Tan Wei Ling","tan001@e.ntu.edu.sg","Computer Science","1","false"
+"U2310002B","Ng Jia Hao","ng002@e.ntu.edu.sg","Computer Science","4","false"
+"U2310003C","Lim Yi Xuan","lim003@e.ntu.edu.sg","Computer Engineering","4","false"
+"U2310004D","Chen Mei Ling","chen004@e.ntu.edu.sg","Data Science and Artificial Intelligence","4","false"
+"U2310005E","Wong Shu Hui","wong005@e.ntu.edu.sg","Business","4","true"
