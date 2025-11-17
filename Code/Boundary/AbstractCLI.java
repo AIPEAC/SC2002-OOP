@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
+import javax.swing.ListSelectionModel;
 
 /**
  * Abstract base class for all user interface boundary classes.
@@ -137,7 +138,7 @@ public abstract class AbstractCLI {
         gbc.insets = new Insets(4,4,4,4);
         gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST;
 
-        // Preferred Majors dropdown (loaded from control)
+        // Preferred Majors multi-select list (loaded from control)
         // For students, this filter is disabled as they can only see their major's internships
         List<String> allMajors = new ArrayList<>();
         try {
@@ -145,9 +146,11 @@ public abstract class AbstractCLI {
         } catch (Exception ex) {
             // fallback to empty list if control helper call fails
         }
-        JComboBox<String> majorCombo = new JComboBox<>();
-        majorCombo.addItem("(Any)");
-        for (String m : allMajors) majorCombo.addItem(m);
+        JList<String> majorList = new JList<>(allMajors.toArray(new String[0]));
+        majorList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        majorList.setVisibleRowCount(4);
+        JScrollPane majorScrollPane = new JScrollPane(majorList);
+        majorScrollPane.setPreferredSize(new Dimension(200, 80));
         
         // Check if user is a student and disable the major filter
         boolean isStudent = false;
@@ -156,13 +159,15 @@ public abstract class AbstractCLI {
         } catch (Exception ex) { /* not a student */ }
         
         if (isStudent) {
-            majorCombo.setEnabled(false);
-            majorCombo.setToolTipText("Students can only view internships matching their major(s)");
+            majorList.setEnabled(false);
+            majorScrollPane.setToolTipText("Students can only view internships matching their major(s)");
+        } else {
+            majorScrollPane.setBorder(BorderFactory.createTitledBorder("Hold Ctrl to select multiple"));
         }
         
-        filterBlock.add(new JLabel("Preferred Major:"), gbc);
+        filterBlock.add(new JLabel("Preferred Majors:"), gbc);
         gbc.gridx = 1;
-        filterBlock.add(majorCombo, gbc);
+        filterBlock.add(majorScrollPane, gbc);
 
         // Company names dropdown (from control helper)
         gbc.gridx = 0; gbc.gridy++;
@@ -231,9 +236,9 @@ public abstract class AbstractCLI {
             filterIn.put("internshipTitle", List.of(titleOverride));
         } else {
             // Optional filters
-            String majorSel = (String) majorCombo.getSelectedItem();
-            if (majorSel != null && !majorSel.equals("(Any)")) {
-                filterIn.put("preferredMajors", List.of(majorSel));
+            List<String> selectedMajors = majorList.getSelectedValuesList();
+            if (selectedMajors != null && !selectedMajors.isEmpty()) {
+                filterIn.put("preferredMajors", selectedMajors);
             }
             String companySel = (String) companyCombo.getSelectedItem();
             if (companySel != null && !companySel.equals("(Any)")) {
