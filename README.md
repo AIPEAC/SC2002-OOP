@@ -8,7 +8,12 @@
   - Hong Xun: [Testing Functionality](https://github.com/AIPEAC/SC2002-OOP/blob/main/Testcases/Testcase_Appendix_A/Test_Appendix_A.md), Enity Classes Coding in Java.
   - Jeremy: Wrote Report.
   - Teja: Provided Filtering Algorithm.
-
+- How to use:
+  - **Download**
+    - Download Empty Database version for a fresh start of the program. [[Downlaod Link]](https://github.com/AIPEAC/SC2002-OOP/releases/download/Release-v1/Release-v1.0.zip)
+    - Download presentation version to present directly. [[Downlaod Link]](https://github.com/AIPEAC/SC2002-OOP/releases/download/Presentation_v3/Presentation-v3.zip)
+  - **Run the Program**
+    - Windows: Distract the zip file you just download, right click on `run.ps1`, and click `Run with Powershell`
 ## What This Application Does
 
 This is a desktop application built in Java that helps manage internship opportunities between students, companies, and career staff at a university. It handles the entire process from posting internships to students accepting offers.
