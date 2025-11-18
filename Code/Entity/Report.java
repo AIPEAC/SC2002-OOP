@@ -434,7 +434,7 @@ public class Report {
         double pct = (numOfInternships>0)?(count*100.0/numOfInternships):0.0;
         String pctStr = String.format("%.1f", pct);
         String bar = makeBar(count, maxForBars, width);
-        return String.format("| %s | %d | %s%% | `%s` |\n", escapeMd(label), count, pctStr, bar);
+        return String.format("| %s | %d | %s%%  %s \n", escapeMd(label), count, pctStr, bar);
     }
     /**
      * Creates a text table row.
