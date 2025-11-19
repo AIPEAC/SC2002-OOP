@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -1065,44 +1064,7 @@ public class UserLoginDirectoryControl{
         }
     }
 
-    /**
-     * Appends a CSV line to a file, ensuring the existing file ends with a newline so
-     * that the new record does not get concatenated onto the last line if that line
-     * lacked a trailing newline. This fixes registration bugs when the last line in
-     * login_list.csv or company_representative.csv was missing a newline character.
-     *
-     * @param filePath path to the CSV file
-     * @param line already constructed CSV line (WITHOUT trailing newline)
-     */
-    private void appendCsvLineEnsuringSeparation(String filePath, String line){
-        File f = new File(filePath);
-        try {
-            if (!f.exists()) {
-                f.getParentFile().mkdirs();
-                f.createNewFile();
-            }
-            boolean needExtraNewline = false;
-            if (f.length() > 0) {
-                try (RandomAccessFile raf = new RandomAccessFile(f, "r")) {
-                    raf.seek(f.length() - 1);
-                    int lastByte = raf.read();
-                    // treat both \n and \r (in case CRLF) as proper line endings
-                    if (lastByte != '\n') {
-                        // if last is '\r', still need to add '\n'; if neither, add newline
-                        needExtraNewline = true;
-                    }
-                }
-            }
-            try (FileWriter writer = new FileWriter(f, true)) {
-                if (needExtraNewline) {
-                    writer.append("\n");
-                }
-                writer.append(line).append("\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    
     
     /**
      * Loads user data from sample CSV files and initializes the database.
