@@ -1,6 +1,6 @@
 # Sequence Diagram
 
-- **Overview**: This diagram shows the actions of an CompanyRepresentative logs in, and approve/reject applications.
+- **Overview**: This diagram shows the actions of an CompanyRepresentative logs in, and approves/rejects applications.
 - **Contributor**: Allen, Hong Xun
 
 ----
