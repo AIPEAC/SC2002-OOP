@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -564,36 +565,81 @@ public class UserLoginDirectoryControl{
             }
         }
 
-        try (FileWriter writer = new FileWriter("Code/Libs/Lib/company_representative.csv", true)) {
-            // Escape fields to handle commas properly
-            writer.append(String.join(",", 
-                ControlUtils.escapeCsvField(assignedID), 
-                ControlUtils.escapeCsvField(name), 
-                ControlUtils.escapeCsvField(email), 
-                ControlUtils.escapeCsvField(postion), 
-                ControlUtils.escapeCsvField("pending"), 
-                ControlUtils.escapeCsvField(companyName), 
-                ControlUtils.escapeCsvField(department)));
-            writer.append("\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+        // Inline: Append to company_representative.csv ensuring previous line ends with newline
+        {
+            File f = new File("Code/Libs/Lib/company_representative.csv");
+            try {
+                if (!f.exists()) {
+                    f.getParentFile().mkdirs();
+                    f.createNewFile();
+                }
+                boolean needExtraNewline = false;
+                if (f.length() > 0) {
+                    try (java.io.RandomAccessFile raf = new java.io.RandomAccessFile(f, "r")) {
+                        raf.seek(f.length() - 1);
+                        int lastByte = raf.read();
+                        if (lastByte != '\n') {
+                            needExtraNewline = true;
+                        }
+                    }
+                }
+                try (FileWriter writer = new FileWriter(f, true)) {
+                    if (needExtraNewline) {
+                        writer.append("\n");
+                    }
+                    writer.append(String.join(
+                        ",",
+                        ControlUtils.escapeCsvField(assignedID),
+                        ControlUtils.escapeCsvField(name),
+                        ControlUtils.escapeCsvField(email),
+                        ControlUtils.escapeCsvField(postion),
+                        ControlUtils.escapeCsvField("pending"),
+                        ControlUtils.escapeCsvField(companyName),
+                        ControlUtils.escapeCsvField(department)));
+                    writer.append("\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
 
-        try (FileWriter writer = new FileWriter("Code/Libs/Lib/login_list.csv", true)) {
+        // Inline: Append to login_list.csv ensuring previous line ends with newline
+        {
+            File f = new File("Code/Libs/Lib/login_list.csv");
             String salt = generateSalt();
-            // store status as pending in the 5th column
-            // Escape fields to handle commas properly
-            writer.append(String.join(",", 
-                ControlUtils.escapeCsvField("CompanyRepresentative"), 
-                ControlUtils.escapeCsvField(assignedID), 
-                ControlUtils.escapeCsvField(hashPassword("password", salt)), 
-                ControlUtils.escapeCsvField(salt), 
-                ControlUtils.escapeCsvField("pending")));
-            writer.append("\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            try {
+                if (!f.exists()) {
+                    f.getParentFile().mkdirs();
+                    f.createNewFile();
+                }
+                boolean needExtraNewline = false;
+                if (f.length() > 0) {
+                    try (java.io.RandomAccessFile raf = new java.io.RandomAccessFile(f, "r")) {
+                        raf.seek(f.length() - 1);
+                        int lastByte = raf.read();
+                        if (lastByte != '\n') {
+                            needExtraNewline = true;
+                        }
+                    }
+                }
+                try (FileWriter writer = new FileWriter(f, true)) {
+                    if (needExtraNewline) {
+                        writer.append("\n");
+                    }
+                    writer.append(String.join(
+                        ",",
+                        ControlUtils.escapeCsvField("CompanyRepresentative"),
+                        ControlUtils.escapeCsvField(assignedID),
+                        ControlUtils.escapeCsvField(hashPassword("password", salt)),
+                        ControlUtils.escapeCsvField(salt),
+                        ControlUtils.escapeCsvField("pending")));
+                    writer.append("\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
 
         loadLoginListFromDB();
@@ -1014,6 +1060,45 @@ public class UserLoginDirectoryControl{
             br.close();
 
             setHaveInitialized(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Appends a CSV line to a file, ensuring the existing file ends with a newline so
+     * that the new record does not get concatenated onto the last line if that line
+     * lacked a trailing newline. This fixes registration bugs when the last line in
+     * login_list.csv or company_representative.csv was missing a newline character.
+     *
+     * @param filePath path to the CSV file
+     * @param line already constructed CSV line (WITHOUT trailing newline)
+     */
+    private void appendCsvLineEnsuringSeparation(String filePath, String line){
+        File f = new File(filePath);
+        try {
+            if (!f.exists()) {
+                f.getParentFile().mkdirs();
+                f.createNewFile();
+            }
+            boolean needExtraNewline = false;
+            if (f.length() > 0) {
+                try (RandomAccessFile raf = new RandomAccessFile(f, "r")) {
+                    raf.seek(f.length() - 1);
+                    int lastByte = raf.read();
+                    // treat both \n and \r (in case CRLF) as proper line endings
+                    if (lastByte != '\n') {
+                        // if last is '\r', still need to add '\n'; if neither, add newline
+                        needExtraNewline = true;
+                    }
+                }
+            }
+            try (FileWriter writer = new FileWriter(f, true)) {
+                if (needExtraNewline) {
+                    writer.append("\n");
+                }
+                writer.append(line).append("\n");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
