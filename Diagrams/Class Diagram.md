@@ -1,6 +1,7 @@
 # Class Diagram
 
-**Contributor**: Deryl, Allen
+- **Overview**: This class diagram shows every classes and their relationships in the project.
+- **Contributor**: Deryl, Allen
 
 ----
 |Class diagram|
